@@ -1,7 +1,8 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin'  version '0.0.9'
 }
-
 group 'org.example'
 version '1.0-SNAPSHOT'
 
@@ -17,3 +18,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+javafx {
+    version = "15"
+    modules = [  'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+}
+run{
+    standardInput = System.in
+}
+mainClassName = 'Launcher'
