@@ -1,6 +1,8 @@
 package game;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ChessUtils {
 
@@ -83,14 +85,15 @@ public class ChessUtils {
     }
 
 
-    public static String indexToAlgebraic(int index) {
+    public static String indexToAlgebraic(int index) throws IllegalArgumentException {
         if (index < 0 || index > 63) {
             throw new IllegalArgumentException("Invalid Index Range (0-63)");
         }
         return ALGEBRAIC_NOTATION[index];
     }
 
-    public static int algebraicToIndex(String algebraic) {
+    public static int algebraicToIndex(String algebraic) throws IllegalArgumentException {
+        Objects.requireNonNull(algebraic);
         if (algebraic.length() != 2) {
             throw new IllegalArgumentException("Invalid Algebraic Notation Length");
         }
@@ -101,4 +104,62 @@ public class ChessUtils {
         }
         return index;
     }
+
+    public static char pieceTypeToChar(PieceType type, boolean isWhite) throws IllegalArgumentException {
+        Objects.requireNonNull(type);
+        char piece = switch(type) {
+            case KING -> 'k';
+            case QUEEN -> 'q';
+            case ROOK -> 'r';
+            case KNIGHT -> 'n';
+            case BISHOP -> 'b';
+            case PAWN -> 'p';
+        };
+
+        return isWhite ? Character.toUpperCase(piece) : piece;
+    }
+
+    public static PieceType charToPieceType(char c) {
+        return switch (Character.toLowerCase(c)) {
+            case 'k' -> PieceType.KING;
+            case 'q' -> PieceType.QUEEN;
+            case 'r' -> PieceType.ROOK;
+            case 'n' -> PieceType.KNIGHT;
+            case 'b' -> PieceType.BISHOP;
+            case 'p' -> PieceType.PAWN;
+            default -> throw new IllegalStateException("Unexpected value: " + c);
+        };
+    }
+
+    public static Piece charToPiece(char c) {
+        return new Piece(Character.isUpperCase(c), charToPieceType(c));
+    }
+
+    public static char pieceToChar(Piece piece) {
+        Objects.requireNonNull(piece);
+
+        return pieceTypeToChar(piece.type, piece.isWhite);
+    }
+
+    // https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Long_algebraic_notation
+    public static String moveToUCI(Move move) {
+        Objects.requireNonNull(move);
+
+        return indexToAlgebraic(move.initialLocation) + indexToAlgebraic(move.finalLocation);
+    }
+
+    public static Move UCIToMove(String UCI, Piece piece) throws IllegalArgumentException {
+        Objects.requireNonNull(UCI);
+        Objects.requireNonNull(piece);
+
+        if (UCI.length() < 4) {
+            throw new IllegalArgumentException("Invalid UCI String");
+        }
+
+        int initialPosition = algebraicToIndex(UCI.substring(0, 2));
+        int finalPosition = algebraicToIndex(UCI.substring(2, 4));
+
+        return new Move(piece, initialPosition, finalPosition);
+    }
+
 }

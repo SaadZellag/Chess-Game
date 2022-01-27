@@ -2,9 +2,30 @@ package game;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BoardTest {
+
+    List<String> FENS;
+
+    {
+        // Reading a lot of sample fens
+        String path = this.getClass().getClassLoader().getResource("100_000_FENS.txt").getFile();
+        if (path == null) {
+            fail();
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            FENS = reader.lines().toList();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     void testFromFEN() {
@@ -19,6 +40,17 @@ class BoardTest {
 
         // After 2.Nf3
         assertDoesNotThrow(() -> new Board("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"));
+
+        for (String FEN : FENS) {
+            assertDoesNotThrow(() -> new Board(FEN));
+        }
+    }
+
+    @Test
+    void testPassthrough() {
+        for (String FEN : FENS) {
+            assertEquals(FEN, new Board(FEN).toFEN());
+        }
     }
 
 }

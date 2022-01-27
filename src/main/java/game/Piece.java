@@ -3,21 +3,14 @@ package game;
 import java.util.Objects;
 
 public class Piece {
-    private final boolean isWhite;
-    private final PieceType type;
+    public final boolean isWhite;
+    public final PieceType type;
 
     public Piece(boolean isWhite, PieceType type) {
         this.isWhite = isWhite;
         this.type = Objects.requireNonNull(type);
     }
 
-    public boolean isWhite() {
-        return isWhite;
-    }
-
-    public PieceType getType() {
-        return type;
-    }
 
     @Override
     public String toString() {
