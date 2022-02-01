@@ -15,7 +15,7 @@ public class StreamServerTest {
     @BeforeAll
     public static void setup() throws IOException {
         client = new Client();
-        client.startConnection("127.0.0.1", 6969);
+        client.startConnection();
     }
 
     @Test

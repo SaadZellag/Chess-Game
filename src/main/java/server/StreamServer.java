@@ -1,6 +1,5 @@
 package server;
 
-
 import game.Board;
 import java.net.*;
 import java.io.*;
