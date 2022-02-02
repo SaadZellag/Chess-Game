@@ -32,7 +32,7 @@ public class StreamServerTest {
         assertEquals("server test", msg3);
         assertEquals("Goodbye.", endMsg);
     }
-    
+
     @AfterAll
     static void tearDown() throws IOException {
         client.stopConnection();

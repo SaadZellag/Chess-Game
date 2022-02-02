@@ -17,25 +17,10 @@ public class StreamServer {
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        clientSocket = serverSocket.accept();
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-        String inputLine;
-        while ((inputLine = in.readLine()) != null) {
-            if (".".equals(inputLine)) {
-                out.println("Goodbye.");
-                break;
-            }
-            out.println(inputLine);
+        while (true) {
+            new ClientHandler(serverSocket.accept()).start();
         }
-    }
-
-    public void stop() throws IOException {
-        in.close();
-        out.close();
-        clientSocket.close();
-        serverSocket.close();
     }
 
     public static void main(String[] args) throws IOException {

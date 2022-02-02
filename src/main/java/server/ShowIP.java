@@ -24,7 +24,6 @@ public class ShowIP
             default -> throw new IllegalStateException("Unexpected value: " + os);
         }
 
-        System.out.println(ext);
         try {
             path = ShowIP.class.getClassLoader().getResource("serverResources/arp." + ext).getPath();
         } catch (NullPointerException e) {
@@ -47,9 +46,16 @@ public class ShowIP
             builder.append(line);
             builder.append(System.getProperty("line.separator"));
         }
-        for (String s : ipArray) {
-            System.out.println(s);
-        }
+
         return ipArray;
+    }
+
+    public static void main(String[] args) {
+        try {
+            List<String> a = ShowIP.getIpArray();
+            System.out.println(a);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

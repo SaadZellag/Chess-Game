@@ -28,7 +28,7 @@ public class Client {
         } else {
             host = hosts.get(0);
         }
-        clientSocket = new Socket(host, PORT);
+        clientSocket = new Socket(host, 6969);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
@@ -36,8 +36,8 @@ public class Client {
     //Get hosts listening on port 6969
     private static List<String> getHosts() throws IOException {
         List<String> hosts = new ArrayList<>();
-        for (String ip: ShowIP.getIpArray()) {
-            if (serverListening(ip, PORT)) {
+        for (String ip : ShowIP.getIpArray()) {
+            if (serverListening(ip)) {
                hosts.add(ip);
             }
         }
@@ -45,20 +45,18 @@ public class Client {
     }
 
     //Check if server is open on port 6969
-    private static boolean serverListening(String host, int port)
+    private static boolean serverListening(String host)
     {
         Socket s = null;
-        try
-        {
-            s = new Socket(host, port);
+        int t = 1000;
+        try {
+            s = new Socket();
+            s.connect(new InetSocketAddress(host, PORT), t);
             return true;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
-        finally
-        {
+        finally {
             if(s != null)
                 try {s.close();}
                 catch(Exception e){
