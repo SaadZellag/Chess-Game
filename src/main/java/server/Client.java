@@ -28,7 +28,7 @@ public class Client {
         } else {
             host = hosts.get(0);
         }
-        clientSocket = new Socket(host, 6969);
+        clientSocket = new Socket(host, PORT);
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }

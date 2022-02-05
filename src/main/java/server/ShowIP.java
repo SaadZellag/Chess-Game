@@ -37,14 +37,11 @@ public class ShowIP
         Process p = pb.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        StringBuilder builder = new StringBuilder();
         List<String> ipArray = new ArrayList<>();
 
         String line;
         while ((line = reader.readLine()) != null) {
             ipArray.add(line);
-            builder.append(line);
-            builder.append(System.getProperty("line.separator"));
         }
 
         return ipArray;
