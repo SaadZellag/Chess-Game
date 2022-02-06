@@ -1,10 +1,10 @@
 package game;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
+import engine.internal.*;
 
-public class Board {
+import java.util.*;
+
+public class Board implements Cloneable{
     private Piece[] pieces = new Piece[64];
 
     private boolean isWhiteTurn;
@@ -20,14 +20,35 @@ public class Board {
 
     private int fullMoveNumber;
 
+    public Board(String FEN) throws IllegalArgumentException {
+        this.parseFEN(FEN);
+    }
+
+    private Board(Board toCopy) {
+        this.pieces = toCopy.pieces.clone();
+        this.isWhiteTurn = toCopy.isWhiteTurn;
+        this.canWhiteCastleKingSide = toCopy.canWhiteCastleKingSide;
+        this.canWhiteCastleQueenSide = toCopy.canWhiteCastleQueenSide;
+        this.canBlackCastleKingSide = toCopy.canBlackCastleKingSide;
+        this.canBlackCastleQueenSide = toCopy.canBlackCastleQueenSide;
+        this.enPassantTargetSquare = toCopy.enPassantTargetSquare;
+        this.halfMoveClock = toCopy.halfMoveClock;
+        this.fullMoveNumber = toCopy.fullMoveNumber;
+    }
+
+    public Board clone() {
+        return new Board(this);
+    }
+
     private void parsePieces(String placements) {
+        Arrays.fill(pieces, null);
         // Removing useless /
         placements = placements.replace("/", "");
         int currentIndex = 0;
         for (char currentChar : placements.toCharArray()) {
             // If it is a number
             if (Character.isDigit(currentChar)) {
-                currentIndex += (int) (currentChar) - 48; // According to ASCII
+                currentIndex += (int) (currentChar) - '0'; // According to ASCII
                 continue;
             }
 
@@ -69,12 +90,17 @@ public class Board {
         }
     }
 
-    public Board(String FEN) throws IllegalArgumentException {
+    private void parseFEN(String FEN) {
         // Parsing the FEN following https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
         String[] parts = FEN.split(" ");
 
-        if (parts.length != 6) {
+        if (parts.length < 4) {
             throw new IllegalArgumentException("Incorrect FEN Size: " + FEN);
+        }
+
+        // Missing the components of the FEN such as half move clock
+        if (parts.length < 6) {
+            parts = new String[]{parts[0], parts[1], parts[2], parts[3], "0", "1"};
         }
 
         // Pieces
@@ -143,7 +169,8 @@ public class Board {
         FENString.append(' ');
 
         // En passant target square
-        if (this.enPassantTargetSquare >= 0) {
+        int epts = this.enPassantTargetSquare;
+        if ((epts >= 16 && epts < 24) || (epts >= 40 && epts < 48)) {
             FENString.append(ChessUtils.indexToAlgebraic(this.enPassantTargetSquare));
         } else {
             FENString.append('-');
@@ -175,18 +202,64 @@ public class Board {
 
         Optional<Piece> pieceEaten;
         Piece finalPiece = this.pieces[move.finalLocation];
+        this.pieces[move.finalLocation] = initialPiece;
+        this.pieces[move.initialLocation] = null;
         // The destination piece must not be the same type (white cannot eat white)
         if (finalPiece != null) {
             if (finalPiece.isWhite == move.piece.isWhite) {
                 throw new IllegalArgumentException("Cannot eat piece of the same color");
             }
-            this.pieces[move.finalLocation] = initialPiece;
             pieceEaten = Optional.of(finalPiece);
         } else {
             pieceEaten = Optional.empty();
         }
 
+
+        // Checking special flags
+        if (move.moveInfo != null) {
+            switch (move.moveInfo) {
+                case EN_PASSANT -> {
+                    int delta = this.isWhiteTurn ? 8 : -8;
+                    pieceEaten = Optional.of(this.pieces[move.finalLocation + delta]); // Should be a pawn
+                    this.pieces[move.finalLocation + delta] = null;
+                }
+                case KING_CASTLE -> {
+                    this.pieces[move.finalLocation - 1] = this.pieces[move.finalLocation + 1];
+                    this.pieces[move.finalLocation + 1] = null;
+                }
+                case QUEEN_CASTLE -> {
+                    this.pieces[move.finalLocation + 1] = this.pieces[move.finalLocation - 2];
+                    this.pieces[move.finalLocation - 2] = null;
+                }
+                case PROMOTION -> {
+                    this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
+                }
+            }
+
+            // Castling
+        }
+
+//        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
+
+        // Handling extra info
+        if (move.extraInfo != 0) {
+            this.canWhiteCastleKingSide = GameInfo.canWhiteCastleKingSide(move.extraInfo);
+            this.canWhiteCastleQueenSide = GameInfo.canWhiteCastleQueenSide(move.extraInfo);
+            this.canBlackCastleKingSide = GameInfo.canBlackCastleKingSide(move.extraInfo);
+            this.canBlackCastleQueenSide = GameInfo.canBlackCastleQueenSide(move.extraInfo);
+
+            this.enPassantTargetSquare = 63 - GameInfo.enPassantTargetSquare(move.extraInfo);
+
+        }
+
+
+        this.isWhiteTurn = !this.isWhiteTurn;
+
         return pieceEaten;
+    }
+
+    public List<Move> generatePossibleMoves() {
+        return ChessPassthrough.generatePossibleMoves(this.toFEN());
     }
 
     public Piece[] getPieces() {

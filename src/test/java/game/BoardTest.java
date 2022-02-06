@@ -1,5 +1,6 @@
 package game;
 
+import engine.internal.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -50,6 +51,42 @@ class BoardTest {
     void testPassthrough() {
         for (String FEN : FENS) {
             assertEquals(FEN, new Board(FEN).toFEN());
+        }
+    }
+
+    @Test
+    void testMoveGen() {
+        for (String FEN : FENS) {
+            Board board = new Board(FEN);
+            long[] bitboard = BitBoard.fromFEN(FEN);
+
+            List<Move> moves = board.generatePossibleMoves();
+            List<Integer> bitMoves = MoveGen.generateLegalMoves(bitboard);
+
+            assertEquals(bitMoves.size(), moves.size());
+        }
+    }
+
+    @Test
+    void testMovePlaying() {
+        for (String FEN : FENS) {
+            Board board = new Board(FEN);
+            long[] bitboard = BitBoard.fromFEN(FEN);
+
+            List<Move> moves = board.generatePossibleMoves();
+            List<Integer> bitMoves = MoveGen.generateLegalMoves(bitboard);
+
+
+            for (int i = 0; i < moves.size(); i++) {
+                Board boardCopy = board.clone();
+                long[] bitboardCopy = bitboard.clone();
+
+
+                boardCopy.playMove(moves.get(i));
+                BitBoard.playMove(bitboardCopy, bitMoves.get(i));
+
+                assertEquals(BitBoard.toFEN(bitboardCopy), boardCopy.toFEN());
+            }
         }
     }
 

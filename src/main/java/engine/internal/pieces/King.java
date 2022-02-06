@@ -71,8 +71,8 @@ public interface King {
             0b0000000000000000000000000000000000000000000000000000001100000010L,
     };
 
-    static long getAttack(long king) {
-        return ATTACKS[Long.numberOfTrailingZeros(king)];
+    static long getAttack(final long king) {
+        return ATTACKS[Long.numberOfLeadingZeros(king)];
     }
 
 }

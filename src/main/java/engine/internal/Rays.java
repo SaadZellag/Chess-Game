@@ -1,4 +1,4 @@
-package engine.internal.pieces;
+package engine.internal;
 
 import java.util.Random;
 import java.util.function.BiFunction;
@@ -11,7 +11,7 @@ public class Rays {
         return r.nextLong() & r.nextLong() & r.nextLong();
     }
 
-    static long blockersPermutation(int iteration, long mask) {
+    public static long blockersPermutation(int iteration, long mask) {
         long blockers = 0;
 
         while (iteration != 0) {

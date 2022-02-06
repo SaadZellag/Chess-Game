@@ -1,5 +1,7 @@
 package engine.internal.pieces;
 
+import engine.internal.Rays;
+
 public class Rook {
 
     private Rook() {}
@@ -52,6 +54,7 @@ public class Rook {
 
     }
 
+    // Casting a "ray" from the piece until it hits a blocker
     private static long calculateAttacks(int square, long blockers) {
         long result = 0;
         int rank = square / 8, file = square % 8;
@@ -71,7 +74,7 @@ public class Rook {
             result |= mask;
             if ((blockers & mask) != 0) break;
         }
-        for (int f = file+1; f >= 0; f--) {
+        for (int f = file-1; f >= 0; f--) {
             long mask = 1L << (f + rank*8); // West
             result |= mask;
             if ((blockers & mask) != 0) break;
@@ -93,9 +96,17 @@ public class Rook {
 
     }
 
-    public static long getAttack(int square, long blockers) {
-        blockers &= MASKS[square];
-        int key = (int) ((blockers * MAGIC_NUMBERS[square]) >>> (64 - BITS[square]));
-        return ATTACKS[square][key];
+    public static long getAttack(final int square, final long blockers) {
+        return ATTACKS[square][(int) (((blockers & MASKS[square]) * MAGIC_NUMBERS[square]) >>> (64 - BITS[square]))];
+    }
+
+    public static long getAttacks(long mask, final long blockers) {
+        int square;
+        long attacks = 0;
+        while ((square = Long.numberOfTrailingZeros(mask)) != 64) {
+            attacks |= getAttack(square, blockers);
+            mask &= mask-1;
+        }
+        return attacks;
     }
 }

@@ -22,4 +22,9 @@ public interface BitUtils {
     static long stringToBoard(String board) {
         return Long.parseUnsignedLong(board.replace("\n", ""), 2);
     }
+
+    static long debugBoard(String message, long board) {
+        System.out.println(message + ":\n" + boardToString(board));
+        return board;
+    }
 }

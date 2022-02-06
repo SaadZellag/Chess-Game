@@ -2,8 +2,19 @@ package engine.internal.pieces;
 
 public interface Queen {
 
-    static long getAttack(int square, long blockers) {
+    static long getAttack(final int square, final long blockers) {
         // Queen is just rook and bishop combined
-        return Rook.getAttack(square, blockers) | Bishop.getAttack(square, blockers);
+        return Bishop.getAttack(square, blockers) | Rook.getAttack(square, blockers);
     }
+
+     static long getAttacks(long mask, final long blockers) {
+        int square;
+        long attacks = 0;
+        while ((square = Long.numberOfTrailingZeros(mask)) != 64) {
+            attacks |= getAttack(square, blockers);
+            mask &= mask-1;
+        }
+        return attacks;
+    }
+
 }

@@ -1,10 +1,12 @@
 package game;
 
 public enum PieceType {
-    KING,
-    QUEEN,
-    ROOK,
-    KNIGHT,
+    PAWN,
     BISHOP,
-    PAWN
+    KNIGHT,
+    ROOK,
+    QUEEN,
+    KING;
+
+    public static final PieceType[] VALUES = values();
 }

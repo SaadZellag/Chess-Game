@@ -1,8 +1,11 @@
 package engine.internal.pieces;
 
+import engine.internal.Rays;
+
 public class Bishop {
 
-    private Bishop() {}
+    private Bishop() {
+    }
 
     public static final long[] MAGIC_NUMBERS = {
             0x1010040808004010L, 0x0810100080888610L, 0x00080084008010A0L, 0x0004041084000200L, 0x5081104041000000L, 0x0068441220084000L, 0x000482100220400CL, 0x0100440080882001L,
@@ -36,11 +39,11 @@ public class Bishop {
         for (int i = 0; i < 64; i++) {
             int rank = i / 8, file = i % 8;
             long mask = 0;
-            
-            for(int r=rank+1, f=file+1; r<=6 && f<=6; r++, f++) mask |= (1L << (f + r*8));
-            for(int r=rank+1, f=file-1; r<=6 && f>=1; r++, f--) mask |= (1L << (f + r*8));
-            for(int r=rank-1, f=file+1; r>=1 && f<=6; r--, f++) mask |= (1L << (f + r*8));
-            for(int r=rank-1, f=file-1; r>=1 && f>=1; r--, f--) mask |= (1L << (f + r*8));
+
+            for (int r = rank + 1, f = file + 1; r <= 6 && f <= 6; r++, f++) mask |= (1L << (f + r * 8));
+            for (int r = rank + 1, f = file - 1; r <= 6 && f >= 1; r++, f--) mask |= (1L << (f + r * 8));
+            for (int r = rank - 1, f = file + 1; r >= 1 && f <= 6; r--, f++) mask |= (1L << (f + r * 8));
+            for (int r = rank - 1, f = file - 1; r >= 1 && f >= 1; r--, f--) mask |= (1L << (f + r * 8));
 
             MASKS[i] = mask & ~(1L << i);
         }
@@ -52,24 +55,25 @@ public class Bishop {
 
     }
 
+    // Casting a "ray" from the piece until it hits a blocker
     private static long calculateAttacks(int square, long blockers) {
         long result = 0;
-        int rk = square/8, fl = square%8, r, f;
-        for(r = rk+1, f = fl+1; r <= 7 && f <= 7; r++, f++) {
-            result |= (1L << (f + r*8));
-            if((blockers & (1L << (f + r * 8))) != 0) break;
+        int rank = square / 8, file = square % 8, r, f;
+        for (r = rank + 1, f = file + 1; r <= 7 && f <= 7; r++, f++) { // North West
+            result |= (1L << (f + r * 8));
+            if ((blockers & (1L << (f + r * 8))) != 0) break;
         }
-        for(r = rk+1, f = fl-1; r <= 7 && f >= 0; r++, f--) {
-            result |= (1L << (f + r*8));
-            if((blockers & (1L << (f + r * 8))) != 0) break;
+        for (r = rank + 1, f = file - 1; r <= 7 && f >= 0; r++, f--) { // North East
+            result |= (1L << (f + r * 8));
+            if ((blockers & (1L << (f + r * 8))) != 0) break;
         }
-        for(r = rk-1, f = fl+1; r >= 0 && f <= 7; r--, f++) {
-            result |= (1L << (f + r*8));
-            if((blockers & (1L << (f + r * 8))) != 0) break;
+        for (r = rank - 1, f = file + 1; r >= 0 && f <= 7; r--, f++) { // South West
+            result |= (1L << (f + r * 8));
+            if ((blockers & (1L << (f + r * 8))) != 0) break;
         }
-        for(r = rk-1, f = fl-1; r >= 0 && f >= 0; r--, f--) {
-            result |= (1L << (f + r*8));
-            if((blockers & (1L << (f + r * 8))) != 0) break;
+        for (r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--) { // South East
+            result |= (1L << (f + r * 8));
+            if ((blockers & (1L << (f + r * 8))) != 0) break;
         }
         return result;
     }
@@ -87,9 +91,17 @@ public class Bishop {
 
     }
 
-    public static long getAttack(int square, long blockers) {
-        blockers &= MASKS[square];
-        int key = (int) ((blockers * MAGIC_NUMBERS[square]) >>> (64 - BITS[square]));
-        return ATTACKS[square][key];
+    public static long getAttack(final int square, final long blockers) {
+        return ATTACKS[square][(int) (((blockers & MASKS[square]) * MAGIC_NUMBERS[square]) >>> (64 - BITS[square]))];
+    }
+
+    public static long getAttacks(long mask, final long blockers) {
+        int square;
+        long attacks = 0;
+        while ((square = Long.numberOfTrailingZeros(mask)) != 64) {
+            attacks |= getAttack(square, blockers);
+            mask &= mask - 1;
+        }
+        return attacks;
     }
 }
