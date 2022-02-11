@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,6 +14,21 @@ import static org.junit.jupiter.api.Assertions.*;
 // Using https://www.chessprogramming.org/Perft_Results
 @Execution(ExecutionMode.CONCURRENT)
 class MoveGenTest {
+
+    List<String> FENS;
+
+    {
+        // Reading a lot of sample fens
+        String path = this.getClass().getClassLoader().getResource("PerftTestSample.txt").getFile();
+        if (path == null) {
+            fail();
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            FENS = reader.lines().toList();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static long perft(long[] board, int depth) {
         List<Integer> moves = MoveGen.generateLegalMoves(board);
@@ -118,5 +136,16 @@ class MoveGenTest {
         final String position6 = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10";
         assertEquals(164075551,	    perft(position6, 5));
         assertEquals(6923051137L,	perft(position6, 6));
+    }
+
+    @Test
+    void perftRandomPositions() {
+        for (String FEN : FENS) {
+            String[] parts = FEN.split("; ");
+            for (int i = 1; i < parts.length; i++) {
+                long total = perft(parts[0], i);
+                assertEquals(total, Long.parseLong(parts[i].split(" ")[1]));
+            }
+        }
     }
 }
