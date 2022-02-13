@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin'  version '0.0.9'
+    id 'org.openjfx.javafxplugin'  version '0.0.11'
 }
 group 'org.example'
 version '1.0-SNAPSHOT'
@@ -19,8 +19,8 @@ test {
     useJUnitPlatform()
 }
 javafx {
-    version = "15"
-    modules = [  'javafx.controls', 'javafx.fxml', 'javafx.media' ]
+    version = '17'
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media' ]
 }
 run{
     standardInput = System.in
