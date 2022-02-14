@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,14 +13,11 @@ public class StreamServerTest {
 
     static Client client;
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        client = new Client();
-        client.startConnection();
-    }
 
     @Test
     public void streamTest() throws IOException {
+        client = new Client();
+        client.startConnection();
         String msg1 = client.sendMessage("This");
         String msg2 = client.sendMessage("is a");
         String msg3 = client.sendMessage("server test");
