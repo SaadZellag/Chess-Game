@@ -17,6 +17,8 @@ public class BitBoard {
         return start << (7 - file);
     }
 
+    public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
     public static final long FILE_A = generateFile(0);
     public static final long FILE_B = generateFile(1);
     public static final long FILE_C = generateFile(2);
