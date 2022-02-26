@@ -1,10 +1,12 @@
 package GUI;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -16,6 +18,7 @@ public class GUI extends Application {
     private Scene startMenu;
 
     private Scene chessboard;
+    private int buttonsToggled=0;
 
 
 
@@ -23,34 +26,18 @@ public class GUI extends Application {
     public void start(Stage primaryStage) {
         //Start Menu Elements
 
-
         //Chess Board elements
-        BorderPane mainPane= new BorderPane();
-        GridPane centerPane = new GridPane();
-        mainPane.setCenter(centerPane);
-        centerPane.setAlignment(Pos.CENTER);
-        chessboard = new Scene(mainPane,800,450);
-        GridPane boardPane= new GridPane();
-        StackPane[] tilesPanes= new StackPane[64];
-        ToggleButton[] tilesButtons= new ToggleButton[64];
-        int counter =0;
-        //Create chess board
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                tilesPanes [counter]= new StackPane();
-                tilesPanes[counter].minWidthProperty().bind(primaryStage.heightProperty().divide(9));
-                tilesPanes[counter].minHeightProperty().bind(tilesPanes[counter].widthProperty());
-                tilesButtons[counter]=new ToggleButton();
-                tilesButtons[counter].minWidthProperty().bind(primaryStage.heightProperty().divide(9));
-                tilesButtons[counter].minHeightProperty().bind(tilesPanes[counter].widthProperty());
-                tilesButtons[counter].setBorder(Border.EMPTY);
-                boardPane.add(tilesPanes[counter],i,j);
-                tilesPanes [counter].getChildren().add(tilesButtons[counter]);
-                counter++;
-            }
-        }
-        centerPane.add(boardPane,0,0);
-        primaryStage.setScene(chessboard);
+
+
+        //Chessboard scene & primary stage properties
+        MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(800,450);
+
+        primaryStage.setScene(multiplayerGameScene);
+        primaryStage.setMinHeight(450);
+        primaryStage.setMinWidth(800);
+
+
+
         primaryStage.show();
 
 
