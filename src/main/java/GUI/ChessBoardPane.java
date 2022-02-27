@@ -52,7 +52,7 @@ public class ChessBoardPane extends GridPane {
     }
     public void prefSizePropertyBind (DoubleBinding binding){
         prefHeightProperty().bind(binding);
-        prefWidthProperty().bind(prefHeightProperty());
+        prefWidthProperty().bind(binding);
     }
     private void tileController(int index, ActionEvent e){
         System.out.println(index);

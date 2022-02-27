@@ -3,44 +3,53 @@ package GUI;
 import game.Move;
 import game.Piece;
 import game.PieceType;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
+import javafx.scene.text.*;
 
-public class MoveHistoryField extends StackPane {
-    Image settingsImage= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/RoundTextArea.png"));
-    ImageView imageView= new ImageView(settingsImage);
+public class MoveHistoryField extends VBox {
+    Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/RoundTextArea.png"));
+    ImageView backgroundImagePane = new ImageView(backgroundImage);
     ScrollPane scrollPane= new ScrollPane();
-    VBox vBox= new VBox();
+    Image textHeader = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/PlaceHolderText.png"));
+    ImageView textHeaderPane= new ImageView(textHeader);
+    StackPane stackPane= new StackPane();
+    VBox textHolder= new VBox();
     public MoveHistoryField(ReadOnlyDoubleProperty binding){
         prefSizePropertyBind(binding);
-        getChildren().addAll(imageView,scrollPane);
         setAlignment(Pos.CENTER);
-        scrollPane.setStyle("-fx-background:transparent;-fx-background-color:transparent");
-        scrollPane.prefViewportWidthProperty();
+        getChildren().addAll(textHeaderPane,stackPane);
+        stackPane.getChildren().addAll(backgroundImagePane,scrollPane);
+        textHolder.setPadding(new Insets(0,30,0,30));
+        scrollPane.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
 
-        scrollPane.setContent(vBox);
+
+        scrollPane.setContent(textHolder);
         for (int i = 0; i < 100; i++) {
-            vBox.getChildren().add(displayMove(new Move(new Piece(false, PieceType.PAWN),1,3)));
+            displayMove(new Move(new Piece(false, PieceType.PAWN),1,3));
         }
 
     }
-    private Text displayMove(Move move){
-        return new Text(move.piece.type.toString()+move.initialLocation+move.finalLocation);
-
+    private void displayMove(Move move){
+        Text t= new Text(move.piece.type.toString()+move.initialLocation+move.finalLocation+"♕♔♖♗♘♙♚♛♜♝♞♟");
+        t.setFont(Font.font("Verdana", FontWeight.BOLD, 13));
+        textHolder.getChildren().add(t);
     }
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
-        imageView.setPreserveRatio(true);
-        imageView.fitHeightProperty().bind(binding);
-        scrollPane.setPrefSize(11,11);
-        scrollPane.prefWidthProperty().bind(binding.divide(5));
-        scrollPane.prefHeightProperty().bind(binding.divide(5));
+        backgroundImagePane.setPreserveRatio(true);
+        backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
 
+        textHeaderPane.setPreserveRatio(true);
+        textHeaderPane.fitWidthProperty().bind(binding.divide(3*1.1));
+
+        scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
+        scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));
     }
 }

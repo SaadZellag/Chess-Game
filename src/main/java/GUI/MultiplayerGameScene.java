@@ -25,34 +25,33 @@ public class MultiplayerGameScene extends Scene {
 
         //mainPane properties
         mainPane.getChildren().add(chessBoardPane);
-        mainPane.setSpacing(20);
+//        mainPane.setSpacing(0);
         mainPane.setPadding(new Insets(20,20,20,20));
 
-        //rightPane properties
-        VBox rightPane= new VBox();
-        mainPane.getChildren().add(rightPane);
-        rightPane.setAlignment(Pos.CENTER);
-
         //moveHistory
-        MoveHistoryField moveHistory = new MoveHistoryField(chessBoardPane.heightProperty());
-        rightPane.getChildren().add(moveHistory);
+        MoveHistoryField moveHistory = new MoveHistoryField(heightProperty());
+        mainPane.getChildren().add(moveHistory);
 
-        //lowerRightPane
-        HBox lowerRightPane= new HBox();
-        lowerRightPane.setSpacing(10);
-        lowerRightPane.setAlignment(Pos.BOTTOM_RIGHT);
-        rightPane.getChildren().add(lowerRightPane);
-
+        //rightMostPane properties
+        VBox rightMostPane= new VBox();
+        mainPane.getChildren().add(rightMostPane);
+        rightMostPane.setAlignment(Pos.BOTTOM_RIGHT);
+        rightMostPane.setSpacing(10);
 
         //muteButton
         MuteButton muteButton= new MuteButton();
-        muteButton.prefSizePropertyBind(heightProperty().divide(7));
-        lowerRightPane.getChildren().add(muteButton);
+        muteButton.prefSizePropertyBind(chessBoardPane.widthProperty().divide(7));
+        rightMostPane.getChildren().add(muteButton);
 
         //settingsButton
         SettingsButton settingsButton= new SettingsButton();
-        settingsButton.prefSizePropertyBind(heightProperty().divide(7));
-        lowerRightPane.getChildren().add(settingsButton);
+        settingsButton.prefSizePropertyBind(chessBoardPane.widthProperty().divide(7));
+        rightMostPane.getChildren().add(settingsButton);
+
+
+        //bs
+        Image textHeader = new Image("https://placeholder.com/wp-content/uploads/2018/10/placeholder-1.png");
+        ImageView textHeaderPane= new ImageView(textHeader);
 
 
     }
