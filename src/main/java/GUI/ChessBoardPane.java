@@ -1,11 +1,10 @@
 package GUI;
 
-import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 public class ChessBoardPane extends GridPane {
@@ -13,13 +12,13 @@ public class ChessBoardPane extends GridPane {
     private StackPane[] tileStacks= new StackPane[64];
     private ToggleButton[] buttonTiles= new ToggleButton[64];
 
-    Image settingsImage= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    BackgroundImage bImage = new BackgroundImage(settingsImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
+    Image boardImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
+    BackgroundImage bImage = new BackgroundImage(boardImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
     Background backGround = new Background(bImage);
 
     private String toggledColor = "grey";
     private String untoggledColor = "transparent";
-    public ChessBoardPane(DoubleBinding binding){
+    public ChessBoardPane(ReadOnlyDoubleProperty binding){
         setAlignment(Pos.CENTER);
         setBackground(backGround);
         //Create chess board
@@ -50,9 +49,11 @@ public class ChessBoardPane extends GridPane {
         }
         prefSizePropertyBind(binding);
     }
-    public void prefSizePropertyBind (DoubleBinding binding){
-        prefHeightProperty().bind(binding);
-        prefWidthProperty().bind(binding);
+    public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
+        prefHeightProperty().bind(binding.divide(1.1));
+        prefWidthProperty().bind(prefHeightProperty());
+        minHeightProperty().bind(binding.divide(1.1));
+        minWidthProperty().bind(prefHeightProperty());
     }
     private void tileController(int index, ActionEvent e){
         System.out.println(index);

@@ -2,37 +2,50 @@ package GUI;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 public class MultiplayerGameScene extends Scene {
 
-    private HBox mainPane;
-
+    HBox mainPane;
+    Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Main Background.png"));
+    BackgroundImage bImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(1000, 1000, true, true, true, true));
+    Background backGround = new Background(bImage);
 
     public MultiplayerGameScene(double width, double height) {
         super(new HBox(), width, height);
         mainPane = (HBox) this.getRoot();
-        ChessBoardPane chessBoardPane = new ChessBoardPane(heightProperty().divide(1.1));
+        mainPane.setSpacing(30);
+        mainPane.setPadding(new Insets(5,20,20,20));
+        mainPane.setBackground(backGround);
 
 
-        //mainPane properties
-        mainPane.getChildren().add(chessBoardPane);
-//        mainPane.setSpacing(0);
-        mainPane.setPadding(new Insets(20,20,20,20));
+        //lefMostPane
+        VBox leftMostPane= new VBox();
+        Text upperTimer= new Text("10:00");
+        upperTimer.setFont(Font.font("Verdana", FontWeight.BOLD, FontPosture.ITALIC,17));
+        upperTimer.setFill(Color.WHITE);
+        Text lowerTimer= new Text("10:00");
+        lowerTimer.setFill(Color.WHITE);
+        lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
+        ChessBoardPane chessBoardPane = new ChessBoardPane(heightProperty());
+        leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
+        leftMostPane.setAlignment(Pos.CENTER_LEFT);
+        mainPane.getChildren().add(leftMostPane);
 
         //moveHistory
         MoveHistoryField moveHistory = new MoveHistoryField(heightProperty());
         mainPane.getChildren().add(moveHistory);
 
-        //rightMostPane properties
+        //rightMostPane
         VBox rightMostPane= new VBox();
         mainPane.getChildren().add(rightMostPane);
         rightMostPane.setAlignment(Pos.BOTTOM_RIGHT);
@@ -47,12 +60,6 @@ public class MultiplayerGameScene extends Scene {
         SettingsButton settingsButton= new SettingsButton();
         settingsButton.prefSizePropertyBind(chessBoardPane.widthProperty().divide(7));
         rightMostPane.getChildren().add(settingsButton);
-
-
-        //bs
-        Image textHeader = new Image("https://placeholder.com/wp-content/uploads/2018/10/placeholder-1.png");
-        ImageView textHeaderPane= new ImageView(textHeader);
-
 
     }
 

@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -30,15 +32,22 @@ public class GUI extends Application {
 
 
         //Chessboard scene & primary stage properties
-        MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(800,450);
+        MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(1000,500);
 
         primaryStage.setScene(multiplayerGameScene);
-        primaryStage.setMinHeight(450);
-        primaryStage.setMinWidth(800);
-
+        primaryStage.setFullScreen(true);
+        primaryStage.setMinHeight(550);
+        primaryStage.setMinWidth(1050);
+        primaryStage.setTitle("Chess");
 
 
         primaryStage.show();
+
+        multiplayerGameScene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.F11) {
+                primaryStage.setFullScreen(!primaryStage.isFullScreen());
+            }
+        });
 
 
     }
