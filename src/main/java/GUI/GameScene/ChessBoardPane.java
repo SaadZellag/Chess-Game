@@ -1,4 +1,4 @@
-package GUI;
+package GUI.GameScene;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.ActionEvent;
@@ -24,7 +24,7 @@ public class ChessBoardPane extends GridPane {
         //Create chess board
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
-                int index= i*8+j;
+                int index= i+8*j;
                 //TileStack properties
                 double ratio=9;
                 tileStacks [index]= new StackPane();

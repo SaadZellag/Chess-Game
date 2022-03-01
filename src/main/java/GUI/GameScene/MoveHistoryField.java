@@ -1,4 +1,4 @@
-package GUI;
+package GUI.GameScene;
 
 import game.Move;
 import game.Piece;
@@ -45,10 +45,10 @@ public class MoveHistoryField extends VBox {
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         backgroundImagePane.setPreserveRatio(true);
         backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
-
+//
         textHeaderPane.setPreserveRatio(true);
         textHeaderPane.fitWidthProperty().bind(binding.divide(3));
-
+//
         scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
         scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));
     }

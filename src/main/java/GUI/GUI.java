@@ -1,15 +1,11 @@
 package GUI;
 
+import GUI.GameScene.MultiplayerGameScene;
+import GUI.GameScene.SingleplayerGameScene;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -32,20 +28,31 @@ public class GUI extends Application {
 
 
         //Chessboard scene & primary stage properties
-        MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(1000,500);
+        MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(950,510);
+        SingleplayerGameScene singleplayerGameScene= new SingleplayerGameScene(950,510);
 
-        primaryStage.setScene(multiplayerGameScene);
-        primaryStage.setFullScreen(true);
-        primaryStage.setMinHeight(550);
+        Scene currentScene= singleplayerGameScene;
+        primaryStage.setScene(currentScene);
+//        primaryStage.setFullScreen(true);
+        primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
+
+        primaryStage.heightProperty().addListener(e-> {
+            if(primaryStage.getWidth()<=primaryStage.getHeight() * 16.0 / 9.0)
+                primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
+            primaryStage.setMinWidth(primaryStage.getHeight() * 16.0 / 9.0);
+        });
+
         primaryStage.setTitle("Chess");
-
-
+//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
+        primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.show();
 
-        multiplayerGameScene.setOnKeyPressed(e -> {
+        //fullscreen command
+        currentScene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F11) {
                 primaryStage.setFullScreen(!primaryStage.isFullScreen());
+                primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
 

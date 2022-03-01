@@ -1,13 +1,11 @@
-package GUI;
+package GUI.GameScene;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -19,11 +17,13 @@ public class MultiplayerGameScene extends Scene {
     Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Main Background.png"));
     BackgroundImage bImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(1000, 1000, true, true, true, true));
     Background backGround = new Background(bImage);
+    boolean whiteIsBottom=true;
 
     public MultiplayerGameScene(double width, double height) {
         super(new HBox(), width, height);
         mainPane = (HBox) this.getRoot();
-        mainPane.setSpacing(30);
+        mainPane.setSpacing(20);
+        mainPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.setPadding(new Insets(5,20,20,20));
         mainPane.setBackground(backGround);
 
@@ -52,13 +52,11 @@ public class MultiplayerGameScene extends Scene {
         rightMostPane.setSpacing(10);
 
         //muteButton
-        MuteButton muteButton= new MuteButton();
-        muteButton.prefSizePropertyBind(chessBoardPane.widthProperty().divide(7));
+        MuteButton muteButton= new MuteButton(heightProperty());
         rightMostPane.getChildren().add(muteButton);
 
         //settingsButton
-        SettingsButton settingsButton= new SettingsButton();
-        settingsButton.prefSizePropertyBind(chessBoardPane.widthProperty().divide(7));
+        SettingsButton settingsButton= new SettingsButton(heightProperty());
         rightMostPane.getChildren().add(settingsButton);
 
     }
