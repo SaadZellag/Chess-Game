@@ -3,6 +3,8 @@ package GUI.GameScene;
 import game.Move;
 import game.Piece;
 import game.PieceType;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,14 +26,15 @@ public class MoveHistoryField extends VBox {
         prefSizePropertyBind(binding);
         setAlignment(Pos.CENTER);
         getChildren().addAll(textHeaderPane,stackPane);
+
         stackPane.getChildren().addAll(backgroundImagePane,scrollPane);
         textHolder.setPadding(new Insets(0,30,0,30));
         scrollPane.setStyle("-fx-background:transparent;-fx-background-color:transparent;");
+
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-
-
         scrollPane.setContent(textHolder);
+
+        //text testing
         for (int i = 0; i < 100; i++) {
             displayMove(new Move(new Piece(false, PieceType.PAWN),1,3));
         }
@@ -45,10 +48,21 @@ public class MoveHistoryField extends VBox {
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         backgroundImagePane.setPreserveRatio(true);
         backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
-//
+
         textHeaderPane.setPreserveRatio(true);
         textHeaderPane.fitWidthProperty().bind(binding.divide(3));
-//
+
+        scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
+        scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));
+    }
+
+    public void prefSizePropertyBind (DoubleBinding binding){
+        backgroundImagePane.setPreserveRatio(true);
+        backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
+
+        textHeaderPane.setPreserveRatio(true);
+        textHeaderPane.fitWidthProperty().bind(binding.divide(3));
+
         scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
         scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));
     }

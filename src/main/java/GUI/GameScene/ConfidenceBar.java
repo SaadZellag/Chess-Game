@@ -22,7 +22,7 @@ public class ConfidenceBar extends GridPane {
     static final long REFRESH_RATE = 120;
     // Recommended 0 (non-inclusive) and 1 to determine how fast the rectangle updates
     // Can be set over 1, but it will be very slow
-    static final double GROWTH_DELAY = 0.5;
+    static final double GROWTH_DELAY = 0.3;
 
 
     ConfidenceBar(ReadOnlyDoubleProperty binding, boolean whiteIsBottom){
@@ -35,7 +35,7 @@ public class ConfidenceBar extends GridPane {
 
         top.heightProperty().bind(binding.divide(2.2));
         stackPane.setAlignment(Pos.TOP_CENTER);
-        stackPane.getChildren().addAll(bottom,top); //this order will have to depend on which player is at the top
+        stackPane.getChildren().addAll(bottom,top);
         getChildren().add(stackPane);
 
         setAlignment(Pos.CENTER);
@@ -51,7 +51,12 @@ public class ConfidenceBar extends GridPane {
         }, 0, 1000 / REFRESH_RATE);
 
 
-        setOnMouseClicked(e-> this.percentage = Math.random());
+        setOnMouseClicked(e-> {// this is for testing purposes, remove later
+            double i=Math.random();
+            this.percentage = i;
+            System.out.println(i);
+
+        });
     }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){

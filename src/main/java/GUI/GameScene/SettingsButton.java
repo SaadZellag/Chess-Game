@@ -20,6 +20,7 @@ public class SettingsButton extends Button {
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         prefWidthProperty().bind(binding.divide(7));
+//        prefWidthProperty().bind(prefHeightProperty().multiply(1000));
         prefHeightProperty().bind(binding.divide(7));
         setMinHeight(55);
         setMinWidth(55);

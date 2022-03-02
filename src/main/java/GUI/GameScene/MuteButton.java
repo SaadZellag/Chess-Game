@@ -14,7 +14,6 @@ public class MuteButton extends Button {
     public MuteButton(ReadOnlyDoubleProperty binding){
         prefSizePropertyBind(binding);
         setBackground(backGround);
-
     }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){

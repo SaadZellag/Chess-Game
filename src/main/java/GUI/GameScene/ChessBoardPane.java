@@ -9,8 +9,8 @@ import javafx.scene.layout.*;
 
 public class ChessBoardPane extends GridPane {
 
-    private StackPane[] tileStacks= new StackPane[64];
-    private ToggleButton[] buttonTiles= new ToggleButton[64];
+    StackPane[] tileStacks= new StackPane[64];
+    ToggleButton[] buttonTiles= new ToggleButton[64];
 
     Image boardImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
     BackgroundImage bImage = new BackgroundImage(boardImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
