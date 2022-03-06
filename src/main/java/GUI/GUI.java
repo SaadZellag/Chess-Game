@@ -15,31 +15,13 @@ public class GUI extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    private int buttonsToggled=0;
-
-
 
     @Override
     public void start(Stage primaryStage) {
-        GameScene currentScene;
 
-
-        //Start Menu Elements
-
-        //Chess Board elements
-
-
-        //Chessboard scene & primary stage properties
+        //Initial scene
         MultiplayerGameScene multiplayerGameScene= new MultiplayerGameScene(950,510);
-        SingleplayerGameScene singleplayerGameScene= new SingleplayerGameScene(950,510);
-
-//        currentScene= singleplayerGameScene;
         primaryStage.setScene(multiplayerGameScene);
-
-
-//        primaryStage.setFullScreen(true);
-        primaryStage.setMinHeight(591);
-        primaryStage.setMinWidth(1050);
 
         //Aspect ratio
         primaryStage.heightProperty().addListener(e-> {
@@ -47,27 +29,21 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             primaryStage.setMinWidth(primaryStage.getHeight() * 16.0 / 9.0);
         });
-
-
-        primaryStage.setTitle("Chess");
-//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
-        primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-        primaryStage.show();
-
         //BGM
         MediaPlayer BGM = new MediaPlayer(new Media(getClass().getClassLoader().getResource("GUIResources/BGM.mp3").toString()));
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
-        BGM.play();
+//        BGM.play();
         HandleSceneSwitch(primaryStage,BGM);
 
-
-
-
-
-
-
-
+//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
+//        primaryStage.setFullScreen(true);
+        primaryStage.setMinHeight(591);
+        primaryStage.setMinWidth(1050);
+        primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        primaryStage.setTitle("Chess");
+        primaryStage.show();
     }
+
     public void HandleSceneSwitch(Stage primaryStage, MediaPlayer BGM){
         GameScene currentScene=((GameScene)primaryStage.getScene());
 

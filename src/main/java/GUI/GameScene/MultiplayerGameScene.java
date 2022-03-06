@@ -5,9 +5,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -24,12 +26,6 @@ public class MultiplayerGameScene extends GameScene {
     BackgroundImage bImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(1000, 1000, true, true, true, true));
     Background backGround = new Background(bImage);
 
-    final Image PAWN= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    final Image ROOK= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    final Image KNIGHT= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    final Image BISHOP= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    final Image QUEEN= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
-    final Image KING= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
 
     boolean whiteIsBottom=true;
 
@@ -54,6 +50,7 @@ public class MultiplayerGameScene extends GameScene {
         upperTimer.setFont(Font.font("Verdana", FontWeight.BOLD, FontPosture.ITALIC,17));
         upperTimer.setFill(Color.WHITE);
         Text lowerTimer= new Text("10:00");
+        lowerTimer.setViewOrder(1);
         lowerTimer.setFill(Color.WHITE);
         lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
         ChessBoardPane chessBoardPane = new ChessBoardPane(heightProperty());
@@ -63,32 +60,22 @@ public class MultiplayerGameScene extends GameScene {
 
         //moveHistory
         mainPane.getChildren().add(moveHistory);
+        moveHistory.setViewOrder(1);
 
         //rightMostPane
         VBox rightMostPane= new VBox();
         mainPane.getChildren().add(rightMostPane);
         rightMostPane.setAlignment(Pos.BOTTOM_RIGHT);
         rightMostPane.setSpacing(10);
+        rightMostPane.setViewOrder(1);
 
         //muteButton
         rightMostPane.getChildren().add(muteButton);
-
 
         //settingsButton
         SettingsButton settingsButton= new SettingsButton(heightProperty());
         rightMostPane.getChildren().add(settingsButton);
         settingsButton.setOnAction(e->settingsMenu());
-
-
-        //Testing stuff
-        StackPane[] tileStacks= chessBoardPane.tileStacks;
-        for (StackPane tile: tileStacks) {
-            ImageView p= new ImageView(PAWN);
-            p.setPreserveRatio(true);
-            p.setMouseTransparent(true);
-            p.fitWidthProperty().bind(tile.widthProperty());
-            tile.getChildren().add(p);
-        }
 
 
 
