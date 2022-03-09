@@ -1,15 +1,13 @@
 package GUI.GameScene;
 
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -17,31 +15,22 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-public class MultiplayerGameScene extends GameScene {
+public class MultiplayerGamePane extends GamePane {
     HBox mainPane = new HBox();
-    StackPane root;
+    StackPane root = new StackPane();
     MoveHistoryField moveHistory = new MoveHistoryField(heightProperty());
-
-    Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Main Background.png"));
-    BackgroundImage bImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(1000, 1000, true, true, true, true));
-    Background backGround = new Background(bImage);
-
-
     boolean whiteIsBottom=true;
+    public ChessBoardPane chessBoardPane;
 
-    public MultiplayerGameScene(double width, double height) {
-        super(new StackPane(), width, height);
+    public MultiplayerGamePane() {
         //parent inherited buttons
         muteButton= new MuteButton(heightProperty());
         previousSceneButton = new Button("Resign");
         nextSceneButton= new Button("Quit Game");
-
-        root = (StackPane) this.getRoot();
+        getChildren().add(root);
         root.getChildren().add(mainPane);
-        mainPane.setSpacing(20);
-        mainPane.setAlignment(Pos.CENTER_LEFT);
-        mainPane.setPadding(new Insets(5,20,20,20));
-        mainPane.setBackground(backGround);
+        mainPane.setSpacing(10);
+        mainPane.setPadding(new Insets(5,20,5,20));
 
 
         //lefMostPane
@@ -53,7 +42,7 @@ public class MultiplayerGameScene extends GameScene {
         lowerTimer.setViewOrder(1);
         lowerTimer.setFill(Color.WHITE);
         lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
-        ChessBoardPane chessBoardPane = new ChessBoardPane(heightProperty());
+        chessBoardPane = new ChessBoardPane(heightProperty());
         leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
         leftMostPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.getChildren().add(leftMostPane);
@@ -127,14 +116,17 @@ public class MultiplayerGameScene extends GameScene {
         mainPane.setEffect(new GaussianBlur(30));
         root.getChildren().add(settingsMenu);
     }
-
-    @Override
-    public GameScene previousScene() {
-        return new SingleplayerGameScene(getWidth(),getHeight());
+    public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
+        minWidthProperty().bind(binding);
     }
 
     @Override
-    public GameScene nextScene() {
+    public GamePane previousMenu() {
+        return new SingleplayerGamePane();
+    }
+
+    @Override
+    public GamePane nextMenu() {
         Platform.exit();
         System.exit(0);
         return null;
