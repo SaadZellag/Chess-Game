@@ -42,7 +42,7 @@ public class MultiplayerGamePane extends GamePane {
         lowerTimer.setViewOrder(1);
         lowerTimer.setFill(Color.WHITE);
         lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
-        chessBoardPane = new ChessBoardPane(heightProperty());
+        chessBoardPane = new ChessBoardPane(heightProperty(),whiteIsBottom);
         leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
         leftMostPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.getChildren().add(leftMostPane);
