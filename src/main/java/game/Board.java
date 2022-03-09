@@ -234,11 +234,12 @@ public class Board implements Cloneable{
                 case PROMOTION -> {
                     this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
                 }
+
             }
 
             // Castling
         }
-
+        this.enPassantTargetSquare = GameInfo.enPassantTargetSquare(move.extraInfo);
 //        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
 
         // Handling extra info

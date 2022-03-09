@@ -209,8 +209,15 @@ public class ChessBoardPane extends Pane{
         System.out.println(newIndex);
         getChildren().remove(cloneView);
         buttonTiles[index].setSelected(false);
-        moves.add(new Move(idkwhattocalllthis.getPieces()[index],index,newIndex));
-        idkwhattocalllthis.playMove(moves.get(moveCounter++));
+        List<Move> possibleMoves = idkwhattocalllthis.generatePossibleMoves();
+        for (Move mv : possibleMoves) {
+            if (mv.initialLocation == index && mv.finalLocation == newIndex) {
+                moves.add(mv);
+                idkwhattocalllthis.playMove(moves.get(moveCounter++));
+
+                // TODO: Add the extra handling for en passant and promotion here
+            }
+        }
         System.out.println(idkwhattocalllthis.toFEN());
         clearPossibleMoves();
     }
