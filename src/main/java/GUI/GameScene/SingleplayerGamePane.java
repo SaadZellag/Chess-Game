@@ -1,6 +1,7 @@
 package GUI.GameScene;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
@@ -20,11 +21,9 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         moveHistory.prefSizePropertyBind(heightProperty().divide(1.1));
 
         chessBoardPane.X_DRAGGING_OFFSET=70;
+        chessBoardPane.ROTATED_X_DRAGGING_OFFSET=40;
     }
-    @Override
-    public GamePane previousMenu() {
-        return new MultiplayerGamePane();
-    }
+
 
 
 }

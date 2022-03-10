@@ -5,6 +5,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,10 +20,11 @@ public class MultiplayerGamePane extends GamePane {
     HBox mainPane = new HBox();
     StackPane root = new StackPane();
     MoveHistoryField moveHistory = new MoveHistoryField(heightProperty());
-    boolean whiteIsBottom=true;
+    boolean whiteIsBottom=false;
     public ChessBoardPane chessBoardPane;
 
     public MultiplayerGamePane() {
+
         //parent inherited buttons
         muteButton= new MuteButton(heightProperty());
         previousSceneButton = new Button("Resign");
@@ -42,7 +44,11 @@ public class MultiplayerGamePane extends GamePane {
         lowerTimer.setViewOrder(1);
         lowerTimer.setFill(Color.WHITE);
         lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
-        chessBoardPane = new ChessBoardPane(heightProperty(),whiteIsBottom);
+        chessBoardPane = new ChessBoardPane(heightProperty());
+        if (!whiteIsBottom){
+            chessBoardPane.setRotate(180);
+            chessBoardPane.rotatePieces();
+        }
         leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
         leftMostPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.getChildren().add(leftMostPane);
@@ -65,7 +71,6 @@ public class MultiplayerGamePane extends GamePane {
         SettingsButton settingsButton= new SettingsButton(heightProperty());
         rightMostPane.getChildren().add(settingsButton);
         settingsButton.setOnAction(e->settingsMenu());
-
 
 
 
@@ -115,9 +120,6 @@ public class MultiplayerGamePane extends GamePane {
         mainPane.setDisable(true);
         mainPane.setEffect(new GaussianBlur(30));
         root.getChildren().add(settingsMenu);
-    }
-    public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
-        minWidthProperty().bind(binding);
     }
 
     @Override

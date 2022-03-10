@@ -3,6 +3,7 @@ package GUI;
 import GUI.GameScene.ChessBoardPane;
 import GUI.GameScene.GamePane;
 import GUI.GameScene.MultiplayerGamePane;
+import GUI.GameScene.SingleplayerGamePane;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -35,7 +36,7 @@ public class GUI extends Application {
         StackPane root= new StackPane();
         root.setAlignment(null);
         root.setBackground(backGround);
-        GamePane initialPane= new MultiplayerGamePane();
+        GamePane initialPane= new SingleplayerGamePane();
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
         primaryStage.setScene(mainScene);
@@ -68,7 +69,6 @@ public class GUI extends Application {
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
         primaryStage.show();
-
     }
 
     public void HandleSceneSwitch(StackPane root, GamePane currentMenu,MediaPlayer BGM){

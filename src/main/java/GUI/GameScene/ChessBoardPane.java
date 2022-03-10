@@ -1,9 +1,12 @@
 package GUI.GameScene;
 
+import engine.internal.BitBoard;
 import game.Board;
 import game.Move;
+import game.Piece;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
@@ -16,18 +19,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ChessBoardPane extends Pane{
+
     Board internalBoard;
     int playedMovesCounter=0;
     int initialPositionIndex;
     List<Move> possibleMoves;
-
-    boolean whiteIsBottom;
-
     GridPane grid = new GridPane();
     ToggleButton[] buttons = new ToggleButton[64];
     boolean isDragging=false;
     int X_DRAGGING_OFFSET=50;
-    int Y_DRAGGING_OFFSET=50;
+    int Y_DRAGGING_OFFSET=70;
+    int ROTATED_X_DRAGGING_OFFSET=-20;
+    int ROTATED_Y_DRAGGING_OFFSET=0;
     ImageView cloneView;
 
     LinkedList<Move> moveHistory = new LinkedList<Move>();
@@ -41,21 +44,6 @@ public class ChessBoardPane extends Pane{
     final String TOGGLED_COLOR = "rgba(255, 0, 0, 0.49)";//red
     final String UNTOGGLED_COLOR = "transparent"/*"rgba(0, 0, 255, 0.49)"*/;//blue
 
-    final ImageView[][] PIECES= new ImageView[][]{
-            new ImageView[8],//W_PAWN
-            new ImageView[2],//W_ROOK
-            new ImageView[2],//W_KNIGHT
-            new ImageView[2],//W_BISHOP
-            new ImageView[1],//W_QUEEN
-            new ImageView[1],//W_KING
-
-            new ImageView[8],//B_PAWN
-            new ImageView[2],//B_ROOK
-            new ImageView[2],//B_KNIGHT
-            new ImageView[2],//B_BISHOP
-            new ImageView[1],//B_QUEEN
-            new ImageView[1],//B_KING
-    };
     final Image W_PAWN=new Image("https://upload.wikimedia.org/wikipedia/commons/d/de/Windows_live_square.JPG");
     final Image W_ROOK= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png"));
     final Image W_KNIGHT= new Image("https://images-na.ssl-images-amazon.com/images/I/61tC4kGj66L.jpg");
@@ -71,10 +59,9 @@ public class ChessBoardPane extends Pane{
     final Image B_KING= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board-modified.jpg"));
 
 
-    public ChessBoardPane(ReadOnlyDoubleProperty binding,boolean whiteIsBottom){
-        this.whiteIsBottom=false;
-        String fen= "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        internalBoard = new Board(fen);
+    public ChessBoardPane(ReadOnlyDoubleProperty binding){
+//        this.whiteIsBottom=true;
+        internalBoard = new Board(BitBoard.STARTING_POSITION_FEN);
         getChildren().add(grid);
         grid.setAlignment(Pos.CENTER);
         grid.setBackground(normalBackGround);
@@ -116,74 +103,29 @@ public class ChessBoardPane extends Pane{
     }
 
     private void placePieces() {
-        int i=0;
-        for (ImageView[] pieceType:PIECES) {
-            int j=0;
-            for (ImageView individualPiece:pieceType) {
-                switch (i) {
-                    case 0->{individualPiece= new ImageView(W_PAWN);
-                        buttons[(whiteIsBottom? 48:8)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 48:8)+j].setDisable(false);
-                        j++;
-                    }
-                    case 1->{individualPiece= new ImageView(W_ROOK);
-                        buttons[(whiteIsBottom? 55+i:0)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 55+i:0)+j].setDisable(false);
-                        j+=7;
-                    }
-                    case 2->{individualPiece= new ImageView(W_KNIGHT);
-                        buttons[(whiteIsBottom? 55+i:-1+i)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 55+i:-1+i)+j].setDisable(false);
-                        j+=5;
-                    }
-                    case 3->{individualPiece= new ImageView(W_BISHOP);
-                        buttons[(whiteIsBottom? 55+i:-1+i)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 55+i:-1+i)+j].setDisable(false);
-                        j+=3;
-                    }
-                    case 4->{individualPiece= new ImageView(W_QUEEN);
-                        buttons[(whiteIsBottom? 55+i:4)].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 55+i:4)].setDisable(false);
-                    }
-                    case 5->{individualPiece= new ImageView(W_KING);
-                        buttons[(whiteIsBottom? 55+i:3)].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 55+i:3)].setDisable(false);
-                    }
-                    case 6->{individualPiece= new ImageView(B_PAWN);
-                        buttons[(whiteIsBottom? 8:48)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 8:48)+j].setDisable(false);
-                        j++;
-                    }
-                    case 7->{individualPiece= new ImageView(B_ROOK);
-                        buttons[(whiteIsBottom? 0:55+i-6)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? 0:55+i-6)+j].setDisable(false);
-                        j+=7;
-                    }
-                    case 8->{individualPiece= new ImageView(B_KNIGHT);
-                        buttons[(whiteIsBottom? i-7:55+i-6)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? i-7:55+i-6)+j].setDisable(false);
-                        j+=5;
-                    }
-                    case 9->{individualPiece= new ImageView(B_BISHOP);
-                        buttons[(whiteIsBottom? i-7:55+i-6)+j].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? i-7:55+i-6)+j].setDisable(false);
-                        j+=3;
-                    }
-                    case 10->{individualPiece= new ImageView(B_QUEEN);
-                        buttons[(whiteIsBottom? i-7:60)].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? i-7:60)].setDisable(false);
-                    }
-                    case 11->{individualPiece= new ImageView(B_KING);
-                        buttons[(whiteIsBottom? i-7:59)].setGraphic(individualPiece);
-                        buttons[(whiteIsBottom? i-7:59)].setDisable(false);
-                    }
-                }
-                individualPiece.setPreserveRatio(true);
-                individualPiece.setMouseTransparent(true);
-                individualPiece.fitHeightProperty().bind(grid.widthProperty().divide(1.1*8.99));
-            }
-            i++;
+        Piece[] pieces = internalBoard.getPieces();
 
+        for (int i = 0; i < pieces.length; i++) {
+            if (pieces[i] == null) {
+                continue;
+            }
+            Piece p = pieces[i];
+            Image image = switch (p.type) {
+                case PAWN -> p.isWhite ? W_PAWN : B_PAWN;
+                case BISHOP -> p.isWhite ? W_BISHOP : B_BISHOP;
+                case KNIGHT -> p.isWhite ? W_KNIGHT : B_KNIGHT;
+                case ROOK -> p.isWhite ? W_ROOK : B_ROOK;
+                case QUEEN -> p.isWhite ? W_QUEEN : B_QUEEN;
+                case KING -> p.isWhite ? W_KING : B_KING;
+            };
+
+            ImageView individualPiece = new ImageView(image);
+            individualPiece.setPreserveRatio(true);
+            individualPiece.setMouseTransparent(true);
+            individualPiece.fitHeightProperty().bind(grid.widthProperty().divide(1.1*8.99));
+
+            buttons[i].setGraphic(individualPiece);
+            buttons[i].setDisable(false);
         }
     }
 
@@ -218,7 +160,10 @@ public class ChessBoardPane extends Pane{
                 displayPossibleMoves(index);
                 createDraggablePiece(index);
             }
-            cloneView.relocate(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
+            Point2D p=localToParent(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
+
+//            cloneView.relocate(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
+            cloneView.relocate(p.getX(),p.getY());
         }
     }
 
@@ -242,11 +187,10 @@ public class ChessBoardPane extends Pane{
     public void displayPossibleMoves (int index){
         clearSelectedTiles();
         buttons[index].setSelected(true);
-        index=whiteIsBottom?index:rotateBoardIndex(index);
         for(Move move:possibleMoves){
             if(index==move.initialLocation){
-                buttons[whiteIsBottom?move.finalLocation:rotateBoardIndex(move.finalLocation)].setDisable(false);
-                buttons[whiteIsBottom?move.finalLocation:rotateBoardIndex(move.finalLocation)].setSelected(true);
+                buttons[move.finalLocation].setDisable(false);
+                buttons[move.finalLocation].setSelected(true);
             }
 
         }
@@ -280,30 +224,35 @@ public class ChessBoardPane extends Pane{
         getChildren().remove(cloneView);
         buttons[index].setSelected(false);
 
-        if(!whiteIsBottom){
-            index=rotateBoardIndex(index);
-            newIndex=rotateBoardIndex(newIndex);
-        }
         for (Move mv : possibleMoves) {
-            if (mv.initialLocation == index && mv.finalLocation == newIndex) {
-                moveHistory.add(mv);
-                if(mv.moveInfo!=null){
-                    switch (mv.moveInfo) {
-                        case EN_PASSANT -> {
-                            int target = whiteIsBottom?internalBoard.getEnPassantTargetSquare():rotateBoardIndex(internalBoard.getEnPassantTargetSquare());
-                            int aboveOrBellow = (whiteIsBottom ? 1 : -1) * (internalBoard.isWhiteTurn() ? 8 : -8);
-                            buttons[target + aboveOrBellow].setGraphic(null);
-                        }
-                        case KING_CASTLE -> handleKingCastle(mv);
-                        case QUEEN_CASTLE -> handleQueenCaste(mv);
-                        case PROMOTION -> handlePromotion(mv);
-                    }
-                }
-                internalBoard.playMove(moveHistory.get(playedMovesCounter++));
-
-                // TODO: Add the extra handling for promotion here
-
+            if (!(mv.initialLocation == index && mv.finalLocation == newIndex)) {
+                continue;
             }
+            moveHistory.add(mv);
+
+            if(mv.moveInfo==null) {
+                internalBoard.playMove(moveHistory.get(playedMovesCounter++));
+                continue;
+            }
+
+            switch (mv.moveInfo) {
+                case EN_PASSANT -> {
+                    int target = internalBoard.getEnPassantTargetSquare();
+                    int aboveOrBellow = (internalBoard.isWhiteTurn() ? 8 : -8);
+                    System.out.println("target " + target);
+                    System.out.println("above " + aboveOrBellow);
+                    buttons[target + aboveOrBellow].setGraphic(null);
+                }
+                case KING_CASTLE -> handleKingCastle(mv);
+                case QUEEN_CASTLE -> handleQueenCaste(mv);
+                case PROMOTION -> handlePromotion(mv);
+            }
+            internalBoard.playMove(moveHistory.get(playedMovesCounter++));
+
+
+            // TODO: Add the extra handling for promotion here
+
+
         }
         possibleMoves=internalBoard.generatePossibleMoves();
         if(possibleMoves.size()==0)
@@ -324,7 +273,7 @@ public class ChessBoardPane extends Pane{
     }
 
     private void handleKingCastle(Move mv) {
-        if(whiteIsBottom){
+//        if(whiteIsBottom){
             ImageView temp;
             if(internalBoard.isWhiteTurn()){
                 temp = (ImageView) buttons[63].getGraphic();
@@ -334,22 +283,31 @@ public class ChessBoardPane extends Pane{
                 buttons[7].setGraphic(null);
             }
             buttons[mv.finalLocation-1].setGraphic(temp);
-        }else{
-            ImageView temp;
-            if(internalBoard.isWhiteTurn()){
-                temp = (ImageView) buttons[0].getGraphic();
-                buttons[0].setGraphic(null);
-            }else{
-                temp = (ImageView) buttons[56].getGraphic();
-                buttons[56].setGraphic(null);
-            }
-            buttons[rotateBoardIndex(mv.finalLocation)+1].setGraphic(temp);
+//        }else{
+//            ImageView temp;
+//            if(internalBoard.isWhiteTurn()){
+//                temp = (ImageView) buttons[0].getGraphic();
+//                buttons[0].setGraphic(null);
+//            }else{
+//                temp = (ImageView) buttons[56].getGraphic();
+//                buttons[56].setGraphic(null);
+//            }
+//            buttons[rotateBoardIndex(mv.finalLocation)+1].setGraphic(temp);
         }
-    }
 
-    private int rotateBoardIndex(int index){
-        int newY=7-index/8;
-        int newX=7-index%8;
-        return newX+newY*8;
+    public void rotatePieces() {
+        for (ToggleButton button:buttons){
+            if(button.getGraphic()!=null)
+                button.getGraphic().setRotate(180);
+        }
+        Y_DRAGGING_OFFSET=ROTATED_Y_DRAGGING_OFFSET;
+        X_DRAGGING_OFFSET=ROTATED_X_DRAGGING_OFFSET;
     }
 }
+//
+//    private int rotateBoardIndex(int index){
+//        int newY=7-index/8;
+//        int newX=7-index%8;
+//        return newX+newY*8;
+//    }
+//}
