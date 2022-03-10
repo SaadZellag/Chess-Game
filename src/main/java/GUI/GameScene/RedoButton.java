@@ -8,7 +8,7 @@ import javafx.scene.layout.*;
 import java.nio.Buffer;
 
 public class RedoButton extends Button {
-    Image redoImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
+    Image redoImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png"));
     BackgroundImage bImage = new BackgroundImage(redoImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
     Background backGround = new Background(bImage);
     public RedoButton(ReadOnlyDoubleProperty binding){

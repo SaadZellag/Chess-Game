@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
 public class UndoButton extends Button {
-    Image undoImage= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg"));
+    Image undoImage= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png"));
     BackgroundImage bImage = new BackgroundImage(undoImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
     Background backGround = new Background(bImage);
     public UndoButton(ReadOnlyDoubleProperty binding){

@@ -82,7 +82,7 @@ public class MultiplayerGamePane extends GamePane {
 
 
         Button resume = new Button("Resume");
-        ImageView resumeGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg")));
+        ImageView resumeGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
         resumeGraphic.fitHeightProperty().bind(heightProperty().divide(10));
         resumeGraphic.setPreserveRatio(true);
         resume.setGraphic(resumeGraphic);
@@ -95,7 +95,7 @@ public class MultiplayerGamePane extends GamePane {
         });
 
         //resignButton is previousSceneButton
-        ImageView resignGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg")));
+        ImageView resignGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
         resignGraphic.fitHeightProperty().bind(heightProperty().divide(10));
         resignGraphic.setPreserveRatio(true);
         previousSceneButton.setGraphic(resignGraphic);
@@ -103,7 +103,7 @@ public class MultiplayerGamePane extends GamePane {
         previousSceneButton.setBackground(null);
 
         //quitButton is nextSceneButton
-        ImageView quitGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.jpg")));
+        ImageView quitGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
         quitGraphic.fitHeightProperty().bind(heightProperty().divide(10));
         quitGraphic.setPreserveRatio(true);
         nextSceneButton.setGraphic(quitGraphic);
