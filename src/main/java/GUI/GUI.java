@@ -1,15 +1,8 @@
 package GUI;
 
-import GUI.GameScene.ChessBoardPane;
 import GUI.GameScene.GamePane;
-import GUI.GameScene.MultiplayerGamePane;
 import GUI.GameScene.SingleplayerGamePane;
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -18,12 +11,8 @@ import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class GUI extends Application {
-    Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Main Background.png"));
-    BackgroundImage bImage = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(1000, 1000, true, true, true, true));
-    Background backGround = new Background(bImage);
 
     public static void main(String[] args) {
         launch(args);
@@ -35,7 +24,7 @@ public class GUI extends Application {
         //Initial scene
         StackPane root= new StackPane();
         root.setAlignment(null);
-        root.setBackground(backGround);
+        root.setBackground(getBackgroundImage("Main Background.png",root,true));
         GamePane initialPane= new SingleplayerGamePane();
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
@@ -49,7 +38,7 @@ public class GUI extends Application {
         });
 
         //BGM
-        MediaPlayer BGM = new MediaPlayer(new Media(getClass().getClassLoader().getResource("GUIResources/BGM.mp3").toString()));
+        MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
 //        BGM.play();
         HandleSceneSwitch(root,initialPane,BGM);
@@ -69,6 +58,16 @@ public class GUI extends Application {
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
         primaryStage.show();
+    }
+    public static String getResource(String resourceName){
+        return String.valueOf(GUI.class.getClassLoader().getResource("GUIResources/"+resourceName));
+    }
+    public static Image getImage(String imageName){
+        return new Image(getResource(imageName));
+    }
+    public static Background getBackgroundImage(String imageName,Region region,boolean cover){
+        BackgroundImage bImage = new BackgroundImage(getImage(imageName), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(region.getWidth(), region.getHeight(), true, true, true, cover));
+        return new Background(bImage);
     }
 
     public void HandleSceneSwitch(StackPane root, GamePane currentMenu,MediaPlayer BGM){
@@ -93,4 +92,6 @@ public class GUI extends Application {
             HandleSceneSwitch(root,previousMenu,BGM);
         });
     }
+
 }
+

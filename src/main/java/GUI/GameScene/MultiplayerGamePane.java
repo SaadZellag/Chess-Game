@@ -1,14 +1,10 @@
 package GUI.GameScene;
 
+import game.Move;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -16,19 +12,26 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+import java.util.LinkedList;
+
+import static GUI.GUI.getBackgroundImage;
+
 public class MultiplayerGamePane extends GamePane {
     HBox mainPane = new HBox();
     StackPane root = new StackPane();
-    MoveHistoryField moveHistory = new MoveHistoryField(heightProperty());
-    boolean whiteIsBottom=false;
+
+    LinkedList<Move>moveHistoryList;
+    MoveHistoryField moveHistory;
+    boolean whiteIsBottom=true;
     public ChessBoardPane chessBoardPane;
 
     public MultiplayerGamePane() {
 
         //parent inherited buttons
-        muteButton= new MuteButton(heightProperty());
-        previousSceneButton = new Button("Resign");
-        nextSceneButton= new Button("Quit Game");
+        muteButton= new CustomButton(heightProperty().divide(11),"Board.png");
+        previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
+        nextSceneButton= new CustomButton(heightProperty().divide(10),"Board.png");
+
         getChildren().add(root);
         root.getChildren().add(mainPane);
         mainPane.setSpacing(10);
@@ -54,6 +57,8 @@ public class MultiplayerGamePane extends GamePane {
         mainPane.getChildren().add(leftMostPane);
 
         //moveHistory
+        moveHistoryList=chessBoardPane.moveHistoryList;
+        moveHistory= new MoveHistoryField(moveHistoryList,heightProperty());
         mainPane.getChildren().add(moveHistory);
         moveHistory.setViewOrder(1);
 
@@ -68,31 +73,22 @@ public class MultiplayerGamePane extends GamePane {
         rightMostPane.getChildren().add(muteButton);
 
         //settingsButton
-        SettingsButton settingsButton= new SettingsButton(heightProperty());
-        rightMostPane.getChildren().add(settingsButton);
-        settingsButton.setOnAction(e->settingsMenu());
+        CustomButton customButton = new CustomButton(heightProperty().divide(7),"Board.png");
+        rightMostPane.getChildren().add(customButton);
+        customButton.setOnAction(e->settingsMenu());
 
 
 
     }
     void settingsMenu(){
-        Image settingsImage= new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/RoundTextArea.png"));
-        BackgroundImage bImage = new BackgroundImage(settingsImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(getWidth(), getHeight(), true, true, true, false));
-        Background backGround = new Background(bImage);
 
         VBox settingsMenu= new VBox();
         settingsMenu.setAlignment(Pos.CENTER);
         settingsMenu.spacingProperty().bind(heightProperty().divide(6));
-        settingsMenu.setBackground(backGround);
+        settingsMenu.setBackground(getBackgroundImage("RoundTextArea.png",settingsMenu,false));
 
 
-        Button resume = new Button("Resume");
-        ImageView resumeGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
-        resumeGraphic.fitHeightProperty().bind(heightProperty().divide(10));
-        resumeGraphic.setPreserveRatio(true);
-        resume.setGraphic(resumeGraphic);
-        resume.prefHeightProperty().bind(heightProperty().divide(10));
-        resume.setBackground(null);
+        CustomButton resume = new CustomButton(heightProperty().divide(10),"Board.png");
         resume.setOnAction(e->{
             mainPane.setEffect(null);
             mainPane.setDisable(false);
@@ -100,20 +96,8 @@ public class MultiplayerGamePane extends GamePane {
         });
 
         //resignButton is previousSceneButton
-        ImageView resignGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
-        resignGraphic.fitHeightProperty().bind(heightProperty().divide(10));
-        resignGraphic.setPreserveRatio(true);
-        previousSceneButton.setGraphic(resignGraphic);
-        previousSceneButton.prefHeightProperty().bind(heightProperty().divide(10));
-        previousSceneButton.setBackground(null);
 
         //quitButton is nextSceneButton
-        ImageView quitGraphic=new ImageView(new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/Board.png")));
-        quitGraphic.fitHeightProperty().bind(heightProperty().divide(10));
-        quitGraphic.setPreserveRatio(true);
-        nextSceneButton.setGraphic(quitGraphic);
-        nextSceneButton.prefHeightProperty().bind(heightProperty().divide(10));
-        nextSceneButton.setBackground(null);
 
         settingsMenu.getChildren().addAll(resume,previousSceneButton,nextSceneButton);
 

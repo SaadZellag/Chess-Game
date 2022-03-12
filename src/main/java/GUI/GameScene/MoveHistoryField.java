@@ -14,15 +14,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
 
+import java.util.LinkedList;
+
+import static GUI.GUI.getImage;
+
 public class MoveHistoryField extends VBox {
-    Image backgroundImage = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/RoundTextArea.png"));
-    ImageView backgroundImagePane = new ImageView(backgroundImage);
+    ImageView backgroundImagePane = new ImageView(getImage("RoundTextArea.png"));
     ScrollPane scrollPane= new ScrollPane();
-    Image textHeader = new Image(getClass().getClassLoader().getResourceAsStream("GUIResources/PlaceHolderText.png"));
-    ImageView textHeaderPane= new ImageView(textHeader);
+    ImageView textHeaderPane= new ImageView(getImage("PlaceHolderText.png"));
     StackPane stackPane= new StackPane();
     VBox textHolder= new VBox();
-    public MoveHistoryField(ReadOnlyDoubleProperty binding){
+    public MoveHistoryField(LinkedList<Move>movesList, ReadOnlyDoubleProperty binding){
         prefSizePropertyBind(binding);
         setAlignment(Pos.CENTER);
         getChildren().addAll(textHeaderPane,stackPane);

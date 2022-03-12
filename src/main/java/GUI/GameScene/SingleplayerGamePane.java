@@ -1,12 +1,11 @@
 package GUI.GameScene;
 
 import javafx.geometry.Pos;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
-    UndoButton undoButton= new UndoButton(heightProperty());
-    RedoButton redoButton= new RedoButton(heightProperty());
+    CustomButton undoButton= new CustomButton(heightProperty().divide(15),"board.png");
+    CustomButton redoButton= new CustomButton(heightProperty().divide(15),"board.png");
     public SingleplayerGamePane() {
         mainPane.setSpacing(9);
 
@@ -20,10 +19,14 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         moveHistory.getChildren().add(undoRedoPane);
         moveHistory.prefSizePropertyBind(heightProperty().divide(1.1));
 
-        chessBoardPane.X_DRAGGING_OFFSET=70;
-        chessBoardPane.ROTATED_X_DRAGGING_OFFSET=40;
-    }
+        chessBoardPane.X_DRAGGING_OFFSET=whiteIsBottom?70:20;
 
+        undoButton.setOnAction(e->chessBoardPane.undo());
+    }
+    @Override
+    public GamePane previousMenu() {
+        return new MultiplayerGamePane();
+    }
 
 
 }
