@@ -17,20 +17,23 @@ import java.util.LinkedList;
 import static GUI.GUI.getBackgroundImage;
 
 public class MultiplayerGamePane extends GamePane {
-    HBox mainPane = new HBox();
-    StackPane root = new StackPane();
+    public HBox mainPane = new HBox();
+    private final StackPane root = new StackPane();
 
     LinkedList<Move>moveHistoryList;
-    MoveHistoryField moveHistory;
-    boolean whiteIsBottom=true;
+    public MoveHistoryField moveHistory;
+    public boolean whiteIsBottom=true;
     public ChessBoardPane chessBoardPane;
 
     public MultiplayerGamePane() {
 
         //parent inherited buttons
-        muteButton= new CustomButton(heightProperty().divide(11),"Board.png");
-        previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
-        nextSceneButton= new CustomButton(heightProperty().divide(10),"Board.png");
+        muteButton= new CustomButton(heightProperty().divide(11),heightProperty().divide(11),"Board.png");
+
+        previousSceneButton = new CustomButton(heightProperty().divide(10),heightProperty().divide(2),"PlaceHolderText.png");
+
+        nextSceneButton= new CustomButton(heightProperty().divide(10),heightProperty().divide(2),"PlaceHolderText.png");
+
 
         getChildren().add(root);
         root.getChildren().add(mainPane);
@@ -73,31 +76,25 @@ public class MultiplayerGamePane extends GamePane {
         rightMostPane.getChildren().add(muteButton);
 
         //settingsButton
-        CustomButton customButton = new CustomButton(heightProperty().divide(7),"Board.png");
-        rightMostPane.getChildren().add(customButton);
-        customButton.setOnAction(e->settingsMenu());
+        CustomButton settingsButton = new CustomButton(heightProperty().divide(7),heightProperty().divide(7),"Board.png");
+        rightMostPane.getChildren().add(settingsButton);
+        settingsButton.setOnAction(e->settingsMenu());
 
 
 
     }
     void settingsMenu(){
-
         VBox settingsMenu= new VBox();
         settingsMenu.setAlignment(Pos.CENTER);
         settingsMenu.spacingProperty().bind(heightProperty().divide(6));
         settingsMenu.setBackground(getBackgroundImage("RoundTextArea.png",settingsMenu,false));
 
-
-        CustomButton resume = new CustomButton(heightProperty().divide(10),"Board.png");
+        CustomButton resume = new CustomButton(heightProperty().divide(10),heightProperty().divide(2),"PlaceHolderText.png");
         resume.setOnAction(e->{
             mainPane.setEffect(null);
             mainPane.setDisable(false);
             root.getChildren().remove(settingsMenu);
         });
-
-        //resignButton is previousSceneButton
-
-        //quitButton is nextSceneButton
 
         settingsMenu.getChildren().addAll(resume,previousSceneButton,nextSceneButton);
 

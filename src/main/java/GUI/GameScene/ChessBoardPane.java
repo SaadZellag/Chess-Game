@@ -5,6 +5,7 @@ import game.Board;
 import game.ChessUtils;
 import game.Move;
 import game.Piece;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -15,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class ChessBoardPane extends Pane{
 
     Board internalBoard;
     int playedMovesCounter=0;
-    int initialPositionIndex;
+    int selectedPieceIndex;
 
     List<Move> possibleMoves;
 
@@ -44,8 +46,9 @@ public class ChessBoardPane extends Pane{
 
     Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
 
-    final String TOGGLED_COLOR = "rgba(255, 0, 0, 0.49)";//red
-    final String UNTOGGLED_COLOR = "transparent"/*"rgba(0, 0, 255, 0.49)"*/;//blue
+    final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";//Green
+    final String SELECTED_COLOR = "rgba(255, 0, 0, 0.5)";//red
+    final String UNSELECTED_COLOR = "transparent"/*"rgba(0, 0, 255, 0.5)"*/;
 
     final Image W_PAWN=new Image("https://upload.wikimedia.org/wikipedia/commons/d/de/Windows_live_square.JPG");
     final Image W_ROOK= getImage("Board.png");
@@ -83,20 +86,19 @@ public class ChessBoardPane extends Pane{
                 buttons[index].prefHeightProperty().bind(grid.widthProperty().divide(RATIO));
 //                buttonTiles[index].minHeightProperty().bind(board.widthProperty().divide(RATIO));
 //                buttonTiles[index].minWidthProperty().bind(board.widthProperty().divide(RATIO));
-                buttons[index].setStyle("-fx-background-color:"+UNTOGGLED_COLOR);
+                buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
                 buttons[index].setPadding(Insets.EMPTY);
-                buttons[index].setDisable(true);
 
                 grid.add(buttons[index],i,j);
                 buttons[index].setOnMouseDragged(e->tileDragged(index,e));
                 buttons[index].setOnMouseReleased(e->tileReleased(index,e));
                 buttons[index].setOnAction(e-> tileClicked(index));
-//                buttons[index].setOnDragEntered(e-> System.out.println(index));
+
                 buttons[index].selectedProperty().addListener(e->{
                     if(buttons[index].isSelected())
-                        buttons[index].setStyle("-fx-background-color:"+TOGGLED_COLOR);
+                        buttons[index].setStyle("-fx-background-color:"+ SELECTED_COLOR);
                     else
-                        buttons[index].setStyle("-fx-background-color:"+UNTOGGLED_COLOR);
+                        buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
                 });
 
             }
@@ -148,57 +150,89 @@ public class ChessBoardPane extends Pane{
 
     public void tileClicked(int index) {
         if(buttons[index].isSelected()){
-            if (buttons[index].getGraphic() != null) {
-                initialPositionIndex = index;
-                displayPossibleMoves(index);
-            } else
-//                movePiece(initialPositionIndex,index); TODO move pieces with clicking
-                System.out.println("u dumb");
+            selectedPieceIndex = index;
+            displayPossibleMoves(index);
+            return;
         }
-        else
-            clearSelectedTiles();
-//        System.out.println(initialPositionIndex);
+        if(selectedPieceIndex !=index){
+            animateMovePiece(selectedPieceIndex,index);
+            selectedPieceIndex=index;
+            return;
+        }
+        clearSelectedTiles();
 
     }
-    public void tileDragged(int index, MouseEvent e){//created copy of piece image that can be dragged around the screen
-        if (buttons[index].getGraphic()!=null){
-            if (!isDragging){
-                displayPossibleMoves(index);
-                createDraggablePiece(index);
-            }
-            Point2D p=localToParent(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
 
-//            cloneView.relocate(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
-            cloneView.relocate(p.getX(),p.getY());
+
+
+    public void tileDragged(int draggedTileIndex, MouseEvent e){
+        //start dragging piece
+        if (!isDragging&&buttons[draggedTileIndex].getGraphic()!=null){
+            selectedPieceIndex =draggedTileIndex;
+            displayPossibleMoves(draggedTileIndex);
+            createDraggablePiece(draggedTileIndex);
         }
+
+        //Allows moving piece to tile even if you drag it slightly
+        if(selectedPieceIndex!=draggedTileIndex&&buttons[draggedTileIndex].isSelected()){
+            animateMovePiece(selectedPieceIndex,draggedTileIndex);
+            return;
+        }
+        //do nothing if you drag an empty tile
+        if (buttons[draggedTileIndex].getGraphic()==null){
+            return;
+        }
+
+
+        Point2D p=localToParent(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
+        cloneView.relocate(p.getX(),p.getY());
     }
 
     public void tileReleased(int index, MouseEvent e){
-        Node releasedLocation=e.getPickResult().getIntersectedNode();
-//        System.out.println(releasedLocation);
-        isDragging=false;
-        if(buttons[index].getGraphic()!=null){
-            if (releasedLocation instanceof ToggleButton&&!releasedLocation.equals(buttons[index])&&((ToggleButton) releasedLocation).isSelected()){
-                int newIndex=GridPane.getRowIndex(releasedLocation)*8+GridPane.getColumnIndex(releasedLocation);
-                movePiece(index,newIndex);
-            }
-            else{
-                buttons[index].getGraphic().setVisible(true);
-                getChildren().remove(cloneView);
-            }
+
+        if(buttons[index].getGraphic()==null){//do nothing if you were dragging an empty tile
+            isDragging=false;
+            return;
         }
+
+        Node releasedLocation=e.getPickResult().getIntersectedNode();
+        int newIndex=selectedPieceIndex;
+
+        if (releasedLocation instanceof ToggleButton&&((ToggleButton) releasedLocation).isSelected())
+            newIndex=GridPane.getRowIndex(releasedLocation)*8+GridPane.getColumnIndex(releasedLocation);
+
+        if(selectedPieceIndex ==newIndex&&!e.isDragDetect()){//Releasing dragged piece on initial location keeps it selected
+            buttons[index].getGraphic().setVisible(true);
+            buttons[index].setSelected(true);
+            getChildren().remove(cloneView);
+            displayPossibleMoves(index);
+            isDragging=false;
+            return;
+        }
+        if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location
+            isDragging=false;
+            movePiece(index,newIndex);
+            getChildren().remove(cloneView);
+            return;
+        }
+
+        //return piece to original position
+        isDragging=false;
+        buttons[index].getGraphic().setVisible(true);
+        getChildren().remove(cloneView);
+
     }
 
 
     public void displayPossibleMoves (int index){
         clearSelectedTiles();
         buttons[index].setSelected(true);
+        buttons[index].setStyle("-fx-background-color:"+CURRENT_TILE_COLOR);
         for(Move move:possibleMoves){
             if(index==move.initialLocation){
                 buttons[move.finalLocation].setDisable(false);
                 buttons[move.finalLocation].setSelected(true);
             }
-
         }
     }
     public void clearSelectedTiles(){
@@ -223,19 +257,18 @@ public class ChessBoardPane extends Pane{
     }
     private void movePiece(int index, int newIndex) {
         playedMovesCounter++;
+
         System.out.println("after move "+playedMovesCounter);
         ImageView piece=(ImageView) buttons[index].getGraphic();
         buttons[index].setGraphic(null);
         piece.setVisible(true);
         buttons[newIndex].setGraphic(piece);
-//        System.out.println(newIndex);
         getChildren().remove(cloneView);
         buttons[index].setSelected(false);
 
         while (boardHistory.size()>playedMovesCounter){
             System.out.println("Removed "+boardHistory.remove(playedMovesCounter).toFEN());
-            System.out.println("Removed"+ChessUtils.moveToUCI(moveHistoryList.remove(playedMovesCounter-1)));
-//            System.out.println(.toString());
+            System.out.println("Removed "+ChessUtils.moveToUCI(moveHistoryList.remove(playedMovesCounter-1)));
         }
 
         boardHistory.add(internalBoard.clone());
@@ -250,7 +283,7 @@ public class ChessBoardPane extends Pane{
 
             if(mv.moveInfo==null) {
                 internalBoard.playMove(mv);
-                continue;
+                break;
             }
 
             switch (mv.moveInfo) {
@@ -267,6 +300,23 @@ public class ChessBoardPane extends Pane{
             endGame();
         System.out.println("Board after Move "+internalBoard.toFEN());
         clearSelectedTiles();
+    }
+    private void animateMovePiece(int selectedPieceIndex, int newIndex) {
+        TranslateTransition transition= new TranslateTransition();
+        createDraggablePiece(selectedPieceIndex);
+        double initialX=buttons[selectedPieceIndex].getLayoutX();
+        double initialY=buttons[selectedPieceIndex].getLayoutY();
+        cloneView.relocate(initialX,initialY);
+        transition.setNode(cloneView);
+        Point2D p=localToScene(buttons[newIndex].getLayoutX(),buttons[newIndex].getLayoutY());
+        transition.setToX(p.getX());
+        transition.setToY(p.getY());
+        transition.setDuration(Duration.seconds(0.2));
+        transition.play();
+        transition.setOnFinished(e->{System.out.println("X and Y "+cloneView.getLayoutX()+" "+cloneView.getLayoutY());
+            movePiece(selectedPieceIndex,newIndex);
+
+        });
     }
 
     private void endGame() {//todo
@@ -314,6 +364,7 @@ public class ChessBoardPane extends Pane{
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
+            clearSelectedTiles();
             System.out.println("after undo "+playedMovesCounter);
             System.out.println("after undo "+internalBoard.toFEN());
         }
