@@ -22,7 +22,7 @@ public class MultiplayerGamePane extends GamePane {
 
     LinkedList<Move>moveHistoryList;
     public MoveHistoryField moveHistory;
-    public boolean whiteIsBottom=true;
+    public boolean whiteIsBottom=false;
     public ChessBoardPane chessBoardPane;
 
     public MultiplayerGamePane() {

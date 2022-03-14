@@ -1,6 +1,7 @@
 package GUI;
 
 import GUI.GameScene.GamePane;
+import GUI.GameScene.MultiplayerGamePane;
 import GUI.GameScene.SingleplayerGamePane;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -25,7 +26,7 @@ public class GUI extends Application {
         StackPane root= new StackPane();
         root.setAlignment(null);
         root.setBackground(getBackgroundImage("Main Background.png",root,true));
-        GamePane initialPane= new SingleplayerGamePane();
+        GamePane initialPane= new MultiplayerGamePane();
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
         primaryStage.setScene(mainScene);

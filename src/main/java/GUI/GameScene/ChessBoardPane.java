@@ -8,7 +8,6 @@ import game.Piece;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -40,8 +39,12 @@ public class ChessBoardPane extends StackPane{
 
     ToggleButton[] buttons = new ToggleButton[64];
     boolean isDragging=false;
+    boolean isRotated=false;
     int X_DRAGGING_OFFSET=45;
     int Y_DRAGGING_OFFSET=70;
+
+    int X_ANIMATION_OFFSET =25;
+    int Y_ANIMATION_OFFSET =25;
     ImageView cloneView;
 
     LinkedList<Move> moveHistoryList = new LinkedList<>();
@@ -264,6 +267,8 @@ public class ChessBoardPane extends StackPane{
         cloneView.setPreserveRatio(true);
         cloneView.setMouseTransparent(true);
         cloneView.fitWidthProperty().bind(grid.heightProperty().divide(8));
+        if(isRotated)
+            cloneView.setRotate(180);
         draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
@@ -314,17 +319,29 @@ public class ChessBoardPane extends StackPane{
         System.out.println("Board after Move "+internalBoard.toFEN());
         clearSelectedTiles();
     }
-    private void animateMovePiece(int selectedPieceIndex, int newIndex) {//TODO this is completely broken
+    private void animateMovePiece(int selectedPieceIndex, int newIndex) {//TODO change offset depending on screen size, and skip animation if screen is rezised
         TranslateTransition transition= new TranslateTransition();
         createDraggablePiece(selectedPieceIndex);
         double initialX=buttons[selectedPieceIndex].getLayoutX();
         double initialY=buttons[selectedPieceIndex].getLayoutY();
-        cloneView.relocate(initialX,initialY);
+        double finalX=buttons[newIndex].getLayoutX();
+        double finalY=buttons[newIndex].getLayoutY();
         transition.setNode(cloneView);
-        Point2D p=localToScene(buttons[newIndex].getLayoutX(),buttons[newIndex].getLayoutY());
-        transition.setToX(p.getX());
-        transition.setToY(p.getY());
-        transition.setDuration(Duration.seconds(0.2));
+
+//        Point2D pInitial=localToParent(initialX+ X_ANIMATION_OFFSET,initialY);
+//        transition.setFromX(pInitial.getX());
+//        transition.setFromY(pInitial.getY());
+//
+//        Point2D pFinal=localToParent(finalX+ X_ANIMATION_OFFSET,finalY);
+//        transition.setToX(pFinal.getX());
+//        transition.setToY(pFinal.getY());
+
+        transition.setFromX(initialX+X_ANIMATION_OFFSET);
+        transition.setFromY(initialY+Y_ANIMATION_OFFSET);
+        transition.setToX(finalX+X_ANIMATION_OFFSET);
+        transition.setToY(finalY+Y_ANIMATION_OFFSET);
+
+        transition.setDuration(Duration.seconds(0.5));
         transition.play();
         transition.setOnFinished(e->{System.out.println("X and Y "+cloneView.getLayoutX()+" "+cloneView.getLayoutY());
             movePiece(selectedPieceIndex,newIndex);
@@ -367,6 +384,7 @@ public class ChessBoardPane extends StackPane{
             if(button.getGraphic()!=null)
                 button.getGraphic().setRotate(180);
         }
+        isRotated=true;
         Y_DRAGGING_OFFSET=-20;
         X_DRAGGING_OFFSET=-10;
     }
