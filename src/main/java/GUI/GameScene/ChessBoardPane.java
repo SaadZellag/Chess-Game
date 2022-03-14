@@ -7,6 +7,8 @@ import game.Move;
 import game.Piece;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -18,13 +20,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-import static GUI.GUI.getBackgroundImage;
-import static GUI.GUI.getImage;
+import static GUI.GUI.*;
 
-public class ChessBoardPane extends Pane{
+public class ChessBoardPane extends StackPane{
 
     Board internalBoard;
     int playedMovesCounter=0;
@@ -32,7 +35,9 @@ public class ChessBoardPane extends Pane{
 
     List<Move> possibleMoves;
 
-    GridPane grid = new GridPane();
+    GridPane grid;
+    Pane draggingSurface=new Pane();
+
     ToggleButton[] buttons = new ToggleButton[64];
     boolean isDragging=false;
     int X_DRAGGING_OFFSET=45;
@@ -48,7 +53,8 @@ public class ChessBoardPane extends Pane{
 
     final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";//Green
     final String SELECTED_COLOR = "rgba(255, 0, 0, 0.5)";//red
-    final String UNSELECTED_COLOR = "transparent"/*"rgba(0, 0, 255, 0.5)"*/;
+    final String UNSELECTED_COLOR = "transparent";
+//    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
     final Image W_PAWN=new Image("https://upload.wikimedia.org/wikipedia/commons/d/de/Windows_live_square.JPG");
     final Image W_ROOK= getImage("Board.png");
@@ -68,44 +74,48 @@ public class ChessBoardPane extends Pane{
     public ChessBoardPane(ReadOnlyDoubleProperty binding){
         boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
         internalBoard=boardHistory.get(playedMovesCounter);
+        draggingSurface.setMouseTransparent(true);
+        try {
+            grid= FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("GUI/Panes/BaseChessBoardPane.fxml")));
+            getChildren().addAll(grid,draggingSurface);
+            grid.setAlignment(Pos.CENTER);
+            setBackground(normalBackGround);
+//            setStyle("-fx-background-color:green");
 
-        getChildren().add(grid);
-        grid.setAlignment(Pos.CENTER);
-        grid.setBackground(normalBackGround);
-//        board.setStyle("-fx-background-color:green");
+            //Create chess board
+            for (int i=0;i<8;i++){
+                for (int j=0;j<8;j++){
 
-        //Create chess board
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                int index= i+8*j;
-                final double RATIO=8.98;
+                    int index= i+8*j;
 
-                //ButtonTile properties
-                buttons[index]=new ToggleButton();
-                buttons[index].prefWidthProperty().bind(grid.widthProperty().divide(RATIO));
-                buttons[index].prefHeightProperty().bind(grid.widthProperty().divide(RATIO));
-//                buttonTiles[index].minHeightProperty().bind(board.widthProperty().divide(RATIO));
-//                buttonTiles[index].minWidthProperty().bind(board.widthProperty().divide(RATIO));
-                buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
-                buttons[index].setPadding(Insets.EMPTY);
+                    //ButtonTile properties
+                    buttons[index]=new ToggleButton();
+                    buttons[index].setPrefHeight(Double.MAX_VALUE);
+                    buttons[index].setPrefWidth(Double.MAX_VALUE);
+                    buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
+                    buttons[index].setPadding(Insets.EMPTY);
 
-                grid.add(buttons[index],i,j);
-                buttons[index].setOnMouseDragged(e->tileDragged(index,e));
-                buttons[index].setOnMouseReleased(e->tileReleased(index,e));
-                buttons[index].setOnAction(e-> tileClicked(index));
+                    grid.add(buttons[index],i,j);
+                    buttons[index].setOnMouseDragged(e->tileDragged(index,e));
+                    buttons[index].setOnMouseReleased(e->tileReleased(index,e));
+                    buttons[index].setOnAction(e-> tileClicked(index));
 
-                buttons[index].selectedProperty().addListener(e->{
-                    if(buttons[index].isSelected())
-                        buttons[index].setStyle("-fx-background-color:"+ SELECTED_COLOR);
-                    else
-                        buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
-                });
+                    buttons[index].selectedProperty().addListener(e->{
+                        if(buttons[index].isSelected())
+                            buttons[index].setStyle("-fx-background-color:"+ SELECTED_COLOR);
+                        else
+                            buttons[index].setStyle("-fx-background-color:"+ UNSELECTED_COLOR);
+                    });
 
+                }
             }
+            placePieces();
+            possibleMoves = internalBoard.generatePossibleMoves();
+            prefSizePropertyBind(binding);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        placePieces();
-        possibleMoves = internalBoard.generatePossibleMoves();
-        prefSizePropertyBind(binding);
+
     }
 
     private void placePieces() {
@@ -130,7 +140,7 @@ public class ChessBoardPane extends Pane{
             ImageView individualPiece = new ImageView(image);
             individualPiece.setPreserveRatio(true);
             individualPiece.setMouseTransparent(true);
-            individualPiece.fitHeightProperty().bind(grid.widthProperty().divide(1.1*8.99));
+            individualPiece.fitHeightProperty().bind(grid.heightProperty().divide(8));
 
             buttons[i].setGraphic(individualPiece);
             buttons[i].setDisable(false);
@@ -138,14 +148,16 @@ public class ChessBoardPane extends Pane{
     }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
-        grid.prefHeightProperty().bind(binding.divide(1.1));
+        minHeightProperty().bind(binding.divide(1.1));//this makes the pane smaller for some reason
+        minWidthProperty().bind(binding.divide(1.1));//this makes the pane smaller for some reason
+
+        maxHeightProperty().bind(binding.divide(1.1));//this makes dragging outside of board possible
+        maxWidthProperty().bind(binding.divide(1.1));//this makes dragging outside of board possible
+
+        grid.prefHeightProperty().bind(heightProperty().multiply(0.9075));
         grid.prefWidthProperty().bind(grid.prefHeightProperty());
-        grid.minHeightProperty().bind(binding.divide(1.1));
+        grid.minHeightProperty().bind(heightProperty().multiply(0.9075));
         grid.minWidthProperty().bind(grid.prefHeightProperty());
-        minHeightProperty().bind(binding.divide(1.1));
-        minWidthProperty().bind(binding.divide(1.1));
-        maxHeightProperty().bind(binding.divide(1.1));
-        maxWidthProperty().bind(binding.divide(1.1));
     }
 
     public void tileClicked(int index) {
@@ -204,7 +216,7 @@ public class ChessBoardPane extends Pane{
         if(selectedPieceIndex ==newIndex&&!e.isDragDetect()){//Releasing dragged piece on initial location keeps it selected
             buttons[index].getGraphic().setVisible(true);
             buttons[index].setSelected(true);
-            getChildren().remove(cloneView);
+            draggingSurface.getChildren().remove(cloneView);
             displayPossibleMoves(index);
             isDragging=false;
             return;
@@ -212,14 +224,14 @@ public class ChessBoardPane extends Pane{
         if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location
             isDragging=false;
             movePiece(index,newIndex);
-            getChildren().remove(cloneView);
+            draggingSurface.getChildren().remove(cloneView);
             return;
         }
 
         //return piece to original position
         isDragging=false;
         buttons[index].getGraphic().setVisible(true);
-        getChildren().remove(cloneView);
+        draggingSurface.getChildren().remove(cloneView);
 
     }
 
@@ -251,10 +263,11 @@ public class ChessBoardPane extends Pane{
         cloneView = new ImageView(cloneImage);
         cloneView.setPreserveRatio(true);
         cloneView.setMouseTransparent(true);
-        cloneView.fitWidthProperty().bind(grid.widthProperty().divide(1.1*8.99));
-        getChildren().add(cloneView);
+        cloneView.fitWidthProperty().bind(grid.heightProperty().divide(8));
+        draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
+
     private void movePiece(int index, int newIndex) {
         playedMovesCounter++;
 
@@ -263,7 +276,7 @@ public class ChessBoardPane extends Pane{
         buttons[index].setGraphic(null);
         piece.setVisible(true);
         buttons[newIndex].setGraphic(piece);
-        getChildren().remove(cloneView);
+        draggingSurface.getChildren().remove(cloneView);
         buttons[index].setSelected(false);
 
         while (boardHistory.size()>playedMovesCounter){
@@ -301,7 +314,7 @@ public class ChessBoardPane extends Pane{
         System.out.println("Board after Move "+internalBoard.toFEN());
         clearSelectedTiles();
     }
-    private void animateMovePiece(int selectedPieceIndex, int newIndex) {
+    private void animateMovePiece(int selectedPieceIndex, int newIndex) {//TODO this is completely broken
         TranslateTransition transition= new TranslateTransition();
         createDraggablePiece(selectedPieceIndex);
         double initialX=buttons[selectedPieceIndex].getLayoutX();
@@ -321,14 +334,12 @@ public class ChessBoardPane extends Pane{
 
     private void endGame() {//todo
         System.out.println("Checkmate");
-        grid.setBackground(dangerBackGround);
+        setBackground(dangerBackGround);
     }
 
     private void handleEnPassant(){
         int target = internalBoard.getEnPassantTargetSquare();
         int aboveOrBellow = (internalBoard.isWhiteTurn() ? 8 : -8);
-//                    System.out.println("target " + target);
-//                    System.out.println("above " + aboveOrBellow);
         buttons[target + aboveOrBellow].setGraphic(null);
 
     }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="363.0" prefWidth="363.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+   <columnConstraints>
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" minWidth="10.0" percentWidth="12.5" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" percentWidth="12.5" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" percentHeight="12.5" prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS" />
+      <RowConstraints percentHeight="12.5" valignment="CENTER" vgrow="ALWAYS" />
+   </rowConstraints>
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
+</GridPane>

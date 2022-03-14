@@ -60,11 +60,12 @@ public class GUI extends Application {
         primaryStage.show();
     }
     public static String getResource(String resourceName){
-        return String.valueOf(GUI.class.getClassLoader().getResource("GUIResources/"+resourceName));
+        return String.valueOf(GUI.class.getClassLoader().getResource("GUI/"+resourceName));
     }
     public static Image getImage(String imageName){
         return new Image(getResource(imageName));
     }
+
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){
         BackgroundImage bImage = new BackgroundImage(getImage(imageName), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(region.getWidth(), region.getHeight(), true, true, true, cover));
         return new Background(bImage);
