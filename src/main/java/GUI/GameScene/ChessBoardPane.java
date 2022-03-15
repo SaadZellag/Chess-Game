@@ -14,6 +14,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -62,19 +63,19 @@ public class ChessBoardPane extends StackPane{
     final String UNSELECTED_COLOR = "transparent";
 //    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
-    final Image W_PAWN=new Image("https://upload.wikimedia.org/wikipedia/commons/d/de/Windows_live_square.JPG");
-    final Image W_ROOK= getImage("Board.png");
-    final Image W_KNIGHT= new Image("https://images-na.ssl-images-amazon.com/images/I/61tC4kGj66L.jpg");
-    final Image W_BISHOP= new Image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL-v1Riij2HwrteDcFbTqG5aD21gRrn5lHcQ&usqp=CAU");
-    final Image W_QUEEN= new Image("https://images.squarespace-cdn.com/content/5edb32112cb3cc498e15a24d/1592278746395-AEX09Z0GJDHC3AFLV7AL/Squareprint+93+Logo+final-01.png?content-type=image%2Fpng");
-    final Image W_KING= getImage("Board-modified.jpg");
+    final Image W_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
+    final Image W_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
+    final Image W_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
+    final Image W_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
+    final Image W_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
+    final Image W_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
 
-    final Image B_PAWN=new Image("https://upload.wikimedia.org/wikipedia/commons/d/de/Windows_live_square.JPG");
-    final Image B_ROOK= getImage("Board.png");
-    final Image B_KNIGHT= new Image("https://images-na.ssl-images-amazon.com/images/I/61tC4kGj66L.jpg");
-    final Image B_BISHOP= new Image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL-v1Riij2HwrteDcFbTqG5aD21gRrn5lHcQ&usqp=CAU");
-    final Image B_QUEEN= new Image("https://images.squarespace-cdn.com/content/5edb32112cb3cc498e15a24d/1592278746395-AEX09Z0GJDHC3AFLV7AL/Squareprint+93+Logo+final-01.png?content-type=image%2Fpng");
-    final Image B_KING= getImage("Board-modified.jpg");
+    final Image B_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
+    final Image B_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
+    final Image B_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
+    final Image B_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
+    final Image B_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
+    final Image B_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
 
 
     public ChessBoardPane(ReadOnlyDoubleProperty binding){
@@ -154,6 +155,9 @@ public class ChessBoardPane extends StackPane{
 
             buttons[i].setGraphic(individualPiece);
             buttons[i].setDisable(false);
+
+            if(!p.isWhite)
+              buttons[i].getGraphic().setEffect(new ColorAdjust(0,0.2,-0.8,1));
         }
     }
 
@@ -172,7 +176,6 @@ public class ChessBoardPane extends StackPane{
 
     public void tileClicked(int index) {
         if(buttons[index].isSelected()){
-            System.out.println("Tile clicked ran");
             selectedPieceIndex = index;
             displayPossibleMoves(index);
             return;
@@ -285,7 +288,7 @@ public class ChessBoardPane extends StackPane{
     private void movePiece(int index, int newIndex) {
         playedMovesCounter++;
 
-        System.out.println("after move "+playedMovesCounter);
+//        System.out.println("after move "+playedMovesCounter);
         ImageView piece=(ImageView) buttons[index].getGraphic();
         buttons[index].setGraphic(null);
         piece.setVisible(true);
@@ -294,13 +297,15 @@ public class ChessBoardPane extends StackPane{
         buttons[index].setSelected(false);
 
         while (boardHistory.size()>playedMovesCounter){
-            System.out.println("Removed "+boardHistory.remove(playedMovesCounter).toFEN());
-            System.out.println("Removed "+ChessUtils.moveToUCI(moveHistoryList.remove(playedMovesCounter-1)));
+            boardHistory.remove(playedMovesCounter).toFEN();
+//            System.out.println("Removed "+boardHistory.remove(playedMovesCounter).toFEN());
+            moveHistoryList.remove(playedMovesCounter-1);
+//            System.out.println("Removed "+ChessUtils.moveToUCI(moveHistoryList.remove(playedMovesCounter-1)));
         }
 
         boardHistory.add(internalBoard.clone());
         internalBoard=boardHistory.get(playedMovesCounter);
-        System.out.println("Board before Move "+internalBoard.toFEN());
+//        System.out.println("Board before Move "+internalBoard.toFEN());
 
         for (Move mv : possibleMoves) {
             if (!(mv.initialLocation == index && mv.finalLocation == newIndex)) {
@@ -325,7 +330,7 @@ public class ChessBoardPane extends StackPane{
         possibleMoves=internalBoard.generatePossibleMoves();
         if(possibleMoves.size()==0)
             endGame();
-        System.out.println("Board after Move "+internalBoard.toFEN());
+//        System.out.println("Board after Move "+internalBoard.toFEN());
         clearSelectedTiles();
     }
     private void animateMovePiece(int selectedPieceIndex, int newIndex) {//TODO captures are not animated for some reason
@@ -341,7 +346,9 @@ public class ChessBoardPane extends StackPane{
 
                 double deltaX=finalX-initialX;
                 double deltaY=finalY-initialY;
-                cloneView.relocate(initialX+i*deltaX/60,initialY+i*deltaY/60);
+                int finalI = i;
+                Platform.runLater(()->cloneView.relocate(initialX+ finalI *deltaX/60,initialY+ finalI *deltaY/60));
+
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
@@ -402,8 +409,8 @@ public class ChessBoardPane extends StackPane{
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
             clearSelectedTiles();
-            System.out.println("after undo "+playedMovesCounter);
-            System.out.println("after undo "+internalBoard.toFEN());
+//            System.out.println("after undo "+playedMovesCounter);
+//            System.out.println("after undo "+internalBoard.toFEN());
             if (isRotated)
                 rotatePieces();
         }
