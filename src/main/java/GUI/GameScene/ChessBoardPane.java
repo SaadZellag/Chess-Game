@@ -156,7 +156,7 @@ public class ChessBoardPane extends StackPane{
             buttons[i].setGraphic(individualPiece);
             buttons[i].setDisable(false);
 
-            if(!p.isWhite)
+            if(!p.isWhite)//TODO gotta remove this in the final version
               buttons[i].getGraphic().setEffect(new ColorAdjust(0,0.2,-0.8,1));
         }
     }
