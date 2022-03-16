@@ -4,6 +4,7 @@ import engine.internal.BitBoard;
 import game.Board;
 import game.Move;
 import game.Piece;
+import game.PieceType;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.fxml.FXMLLoader;
@@ -11,15 +12,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.stage.Window;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +25,11 @@ import java.util.*;
 import static GUI.GUI.*;
 
 public class ChessBoardPane extends StackPane{
-    Timer animationThread= new Timer(true);
+    VBox promotionMenu= new VBox();
+    CustomButton[] promotionButtons=new CustomButton[4];
+
+    Timer moveAnimationThread = new Timer(true);
+    Timer generalAnimationThread = new Timer(true);
 
     Board internalBoard;
     int playedMovesCounter=0;
@@ -122,6 +124,18 @@ public class ChessBoardPane extends StackPane{
             placePieces();
             possibleMoves = internalBoard.generatePossibleMoves();
             prefSizePropertyBind(binding);
+
+
+            for (int i=0;i<promotionButtons.length;i++){
+                promotionButtons[i]= new CustomButton(grid.heightProperty().divide(8),grid.heightProperty().divide(8));
+                promotionMenu.getChildren().add(promotionButtons[i]);
+            }
+            promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
+            promotionButtons[0].setOnAction(e->piecePromoted(PieceType.ROOK));
+            promotionButtons[1].setOnAction(e->piecePromoted(PieceType.BISHOP));
+            promotionButtons[2].setOnAction(e->piecePromoted(PieceType.QUEEN));
+            promotionButtons[3].setOnAction(e->piecePromoted(PieceType.KNIGHT));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -208,7 +222,6 @@ public class ChessBoardPane extends StackPane{
             return;
         }
 
-
         Point2D p=localToParent(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
         cloneView.relocate(p.getX(),p.getY());
     }
@@ -236,8 +249,9 @@ public class ChessBoardPane extends StackPane{
         }
         if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location when dragging
             isDragging=false;
-            movePiece(index,newIndex);
             draggingSurface.getChildren().remove(cloneView);
+            movePiece(index,newIndex);
+
             return;
         }
 
@@ -286,59 +300,59 @@ public class ChessBoardPane extends StackPane{
     private void movePiece(int index, int newIndex) {
         playedMovesCounter++;
 
-//        System.out.println("after move "+playedMovesCounter);
-        ImageView piece=(ImageView) buttons[index].getGraphic();
-        buttons[index].setGraphic(null);
-        piece.setVisible(true);
-        buttons[newIndex].setGraphic(piece);
         draggingSurface.getChildren().remove(cloneView);
         buttons[index].setSelected(false);
 
+        //Remove moves from history if you had done an undo
         while (boardHistory.size()>playedMovesCounter){
             boardHistory.remove(playedMovesCounter).toFEN();
-//            System.out.println("Removed "+boardHistory.remove(playedMovesCounter).toFEN());
             moveHistoryList.remove(playedMovesCounter-1);
-//            System.out.println("Removed "+ChessUtils.moveToUCI(moveHistoryList.remove(playedMovesCounter-1)));
         }
 
+        //Store previous board state so that you can undo
         boardHistory.add(internalBoard.clone());
         internalBoard=boardHistory.get(playedMovesCounter);
-//        System.out.println("Board before Move "+internalBoard.toFEN());
 
-        for (Move mv : possibleMoves) {
+
+        loop: for (Move mv : possibleMoves) {
             if (!(mv.initialLocation == index && mv.finalLocation == newIndex)) {
                 continue;
             }
             moveHistoryList.add(mv);
 
             if(mv.moveInfo==null) {
-                internalBoard.playMove(mv);
+                finalizeMovePlay(mv);
                 break;
             }
-
             switch (mv.moveInfo) {
-                case EN_PASSANT -> handleEnPassant();
-                case KING_CASTLE -> handleKingCastle(mv);
-                case QUEEN_CASTLE -> handleQueenCaste(mv);
-                case PROMOTION -> handlePromotion(mv);// TODO: Add the extra handling for promotion here
+                case EN_PASSANT -> {handleEnPassant(mv); break loop;}
+                case KING_CASTLE -> {handleKingCastle(mv); break loop;}
+                case QUEEN_CASTLE -> {handleQueenCaste(mv);break loop;}
+                case PROMOTION -> {handlePromotion(mv); break loop;}
             }
-            internalBoard.playMove(mv);
-
         }
+
+    }
+
+    private void finalizeMovePlay(Move mv) {//play move both internally and for user
+        isDragging=false;
+        internalBoard.playMove(mv);
+        placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
         if(possibleMoves.size()==0)
             endGame();
-//        System.out.println("Board after Move "+internalBoard.toFEN());
         clearSelectedTiles();
     }
-    private void animateMovePiece(int selectedPieceIndex, int newIndex) {//TODO captures are not animated for some reason
+
+    private void animateMovePiece(int selectedPieceIndex, int newIndex) {
+
         createDraggablePiece(selectedPieceIndex);
         grid.setMouseTransparent(true);
 
-        animationThread.schedule(new TimerTask() {
+        moveAnimationThread.schedule(new TimerTask() {
             int i=0;
 
-            final double MULTIPLIER =6;
+            final double MULTIPLIER =8;
             final double  initialX=buttons[selectedPieceIndex].getLayoutX()+X_ANIMATION_OFFSET;
             final double initialY=buttons[selectedPieceIndex].getLayoutY()+Y_ANIMATION_OFFSET;
             final double finalX=buttons[newIndex].getLayoutX()+X_ANIMATION_OFFSET;
@@ -365,36 +379,114 @@ public class ChessBoardPane extends StackPane{
         setBackground(dangerBackGround);
     }
 
-    private void handleEnPassant(){
+    private void handleEnPassant(Move mv){
         int target = internalBoard.getEnPassantTargetSquare();
         int aboveOrBellow = (internalBoard.isWhiteTurn() ? 8 : -8);
         buttons[target + aboveOrBellow].setGraphic(null);
-
+        finalizeMovePlay(mv);
     }
 
     private void handlePromotion(Move mv) {//todo
-        HBox promotionMenu= new HBox();
-        ImageView rook= new ImageView(internalBoard.isWhiteTurn()?W_ROOK:B_ROOK);
-        ImageView bishop= new ImageView(internalBoard.isWhiteTurn()?W_BISHOP:B_BISHOP);
-        ImageView queen= new ImageView(internalBoard.isWhiteTurn()?W_QUEEN:B_QUEEN);
-        ImageView knight= new ImageView(internalBoard.isWhiteTurn()?W_KNIGHT:B_KNIGHT);
-        promotionMenu.getChildren().addAll(queen,knight,rook,bishop);
+        grid.setMouseTransparent(true);
+        draggingSurface.setMouseTransparent(false);
         draggingSurface.getChildren().add(promotionMenu);
+
+//        ImageView pawn= new ImageView(internalBoard.isWhiteTurn()?W_PAWN:B_PAWN);
+
+        ImageView rook= new ImageView(internalBoard.isWhiteTurn()?W_ROOK:B_ROOK);
+        promotionButtons[0].setGraphic(rook);
+
+        ImageView bishop= new ImageView(internalBoard.isWhiteTurn()?W_BISHOP:B_BISHOP);
+        promotionButtons[1].setGraphic(bishop);
+
+        ImageView queen= new ImageView(internalBoard.isWhiteTurn()?W_QUEEN:B_QUEEN);
+        promotionButtons[2].setGraphic(queen);
+
+        ImageView knight= new ImageView(internalBoard.isWhiteTurn()?W_KNIGHT:B_KNIGHT);
+        promotionButtons[3].setGraphic(knight);
+
+        buttons[mv.finalLocation].setGraphic(null);//todo make pawn visible while menu is up
+
+
+    }
+    private void piecePromoted(PieceType pieceType) {
+        for (Move possibleMove:possibleMoves) {
+            if(possibleMove.promotionPiece==pieceType){
+                finalizeMovePlay(possibleMove);
+                break;
+            }
+        }
+        grid.setMouseTransparent(false);
+        draggingSurface.getChildren().remove(promotionMenu);
+        draggingSurface.setMouseTransparent(true);
     }
 
-    private void handleQueenCaste(Move mv) {//todo
+    private void handleQueenCaste(Move mv) {
+        buttons[mv.finalLocation].setGraphic(null);//todo make king visible while castling
+        createDraggablePiece(internalBoard.isWhiteTurn()?56:0);
+        grid.setMouseTransparent(true);
+
+        generalAnimationThread.schedule(new TimerTask() {
+            int i=0;
+            final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[56]:buttons[0];
+            final ToggleButton targetSquare=buttons[mv.finalLocation+1];
+
+            final double MULTIPLIER =10;
+            final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
+            final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
+            final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
+            final double finalY=targetSquare.getLayoutY()+Y_ANIMATION_OFFSET;
+
+            final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
+            final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
+            @Override
+            public void run() {
+                if (++i==REFRESH_RATE/ MULTIPLIER){
+                    cancel();
+                    Platform.runLater(()->{
+                        finalizeMovePlay(mv);
+                        grid.setMouseTransparent(false);
+                        draggingSurface.getChildren().remove(cloneView);
+
+                    });
+                }
+                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
+            }
+        },0,1000/REFRESH_RATE);
     }
 
     private void handleKingCastle(Move mv) {
-        ImageView temp;
-        if(internalBoard.isWhiteTurn()){
-            temp = (ImageView) buttons[63].getGraphic();
-            buttons[63].setGraphic(null);
-        }else{
-            temp = (ImageView) buttons[7].getGraphic();
-            buttons[7].setGraphic(null);
-        }
-        buttons[mv.finalLocation-1].setGraphic(temp);
+        buttons[mv.finalLocation].setGraphic(null);//todo make king visible while castling
+        createDraggablePiece(internalBoard.isWhiteTurn()?63:7);
+        grid.setMouseTransparent(true);
+
+        generalAnimationThread.schedule(new TimerTask() {
+            int i=0;
+            final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[63]:buttons[7];
+            final ToggleButton targetSquare=buttons[mv.finalLocation-1];
+
+            final double MULTIPLIER =10;
+            final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
+            final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
+            final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
+            final double finalY=targetSquare.getLayoutY()+Y_ANIMATION_OFFSET;
+
+            final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
+            final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
+            @Override
+            public void run() {
+                if (++i==REFRESH_RATE/ MULTIPLIER){
+                    cancel();
+                    Platform.runLater(()->{
+                        finalizeMovePlay(mv);
+                        grid.setMouseTransparent(false);
+                        draggingSurface.getChildren().remove(cloneView);
+
+                    });
+                }
+                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
+            }
+        },0,1000/REFRESH_RATE);
     }
 
     public void rotatePieces() {
@@ -408,12 +500,15 @@ public class ChessBoardPane extends StackPane{
     }
     public void undo(){
         if(playedMovesCounter!=0){
+            if(promotionMenu.getParent()!=null){
+                draggingSurface.getChildren().remove(promotionMenu);
+                grid.setMouseTransparent(false);
+                draggingSurface.setMouseTransparent(true);
+            }
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
             clearSelectedTiles();
-//            System.out.println("after undo "+playedMovesCounter);
-//            System.out.println("after undo "+internalBoard.toFEN());
             if (isRotated)
                 rotatePieces();
         }

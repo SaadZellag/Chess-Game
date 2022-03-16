@@ -27,7 +27,7 @@ public class GUI extends Application {
         StackPane root= new StackPane();
         root.setAlignment(null);
         root.setBackground(getBackgroundImage("Main Background.png",root,true));
-        GamePane initialPane= new MultiplayerGamePane();
+        GamePane initialPane= new SingleplayerGamePane();
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
         primaryStage.setScene(mainScene);
@@ -42,7 +42,7 @@ public class GUI extends Application {
         //BGM
         MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
-//        BGM.play();
+//        BGM.play();//todo make sure to uncomment this
         HandleSceneSwitch(root,initialPane,BGM);
 
 
@@ -53,7 +53,7 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
-//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
+//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");//todo make sure to uncomment this
 //        primaryStage.setFullScreen(true);
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
