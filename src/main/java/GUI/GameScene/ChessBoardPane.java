@@ -11,12 +11,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.util.*;
@@ -111,6 +114,7 @@ public class ChessBoardPane extends StackPane{
 
                 }
             }
+
             heightProperty().addListener(e->{//makes it so the animations stay aligned even when the window is resized
                 X_ANIMATION_OFFSET=getHeight()/22;
                 Y_ANIMATION_OFFSET=getHeight()/22;
@@ -369,6 +373,13 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void handlePromotion(Move mv) {//todo
+        HBox promotionMenu= new HBox();
+        ImageView rook= new ImageView(internalBoard.isWhiteTurn()?W_ROOK:B_ROOK);
+        ImageView bishop= new ImageView(internalBoard.isWhiteTurn()?W_BISHOP:B_BISHOP);
+        ImageView queen= new ImageView(internalBoard.isWhiteTurn()?W_QUEEN:B_QUEEN);
+        ImageView knight= new ImageView(internalBoard.isWhiteTurn()?W_KNIGHT:B_KNIGHT);
+        promotionMenu.getChildren().addAll(queen,knight,rook,bishop);
+        draggingSurface.getChildren().add(promotionMenu);
     }
 
     private void handleQueenCaste(Move mv) {//todo
