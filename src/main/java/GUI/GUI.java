@@ -14,6 +14,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
+    static public final long REFRESH_RATE = 120;
 
     public static void main(String[] args) {
         launch(args);

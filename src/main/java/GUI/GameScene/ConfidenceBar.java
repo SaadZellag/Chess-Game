@@ -11,6 +11,8 @@ import javafx.scene.shape.Rectangle;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static GUI.GUI.REFRESH_RATE;
+
 public class ConfidenceBar extends GridPane {
     StackPane  stackPane= new StackPane();
 
@@ -19,7 +21,7 @@ public class ConfidenceBar extends GridPane {
 
     double percentage = 0.5;
 
-    static final long REFRESH_RATE = 120;
+
     // Recommended 0 (non-inclusive) and 1 to determine how fast the rectangle updates
     // Can be set over 1, but it will be very slow
     static final double GROWTH_DELAY = 0.3;
@@ -45,8 +47,8 @@ public class ConfidenceBar extends GridPane {
             @Override
             public void run() {
                 double currentPercentage = top.getHeight()/bottom.getHeight();
-                double delta = (percentage - currentPercentage) / REFRESH_RATE * Math.abs(1 / GROWTH_DELAY);
-                Platform.runLater(() -> top.heightProperty().bind(bottom.heightProperty().multiply(currentPercentage+delta)));
+                double slope = (percentage - currentPercentage) / REFRESH_RATE * Math.abs(1 / GROWTH_DELAY);
+                Platform.runLater(() -> top.heightProperty().bind(bottom.heightProperty().multiply(currentPercentage+slope)));
             }
         }, 0, 1000 / REFRESH_RATE);
 

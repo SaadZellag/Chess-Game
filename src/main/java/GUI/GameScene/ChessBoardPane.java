@@ -2,10 +2,8 @@ package GUI.GameScene;
 
 import engine.internal.BitBoard;
 import game.Board;
-import game.ChessUtils;
 import game.Move;
 import game.Piece;
-import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.fxml.FXMLLoader;
@@ -19,17 +17,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static GUI.GUI.*;
 
 public class ChessBoardPane extends StackPane{
-    Thread animationThread;
+    Timer animationThread= new Timer(true);
 
     Board internalBoard;
     int playedMovesCounter=0;
@@ -43,7 +38,7 @@ public class ChessBoardPane extends StackPane{
     ToggleButton[] buttons = new ToggleButton[64];
     boolean isDragging=false;
     boolean isRotated=false;
-//    boolean isAnimating=false;
+
     int X_DRAGGING_OFFSET=45;
     int Y_DRAGGING_OFFSET=70;
 
@@ -116,7 +111,7 @@ public class ChessBoardPane extends StackPane{
 
                 }
             }
-            heightProperty().addListener(e->{
+            heightProperty().addListener(e->{//makes it so the animations stay aligned even when the window is resized
                 X_ANIMATION_OFFSET=getHeight()/22;
                 Y_ANIMATION_OFFSET=getHeight()/22;
             });
@@ -182,7 +177,7 @@ public class ChessBoardPane extends StackPane{
         }
         if(selectedPieceIndex !=index){
             animateMovePiece(selectedPieceIndex,index);
-            selectedPieceIndex=index;
+//            selectedPieceIndex=index;
             return;
         }
         clearSelectedTiles();
@@ -216,7 +211,7 @@ public class ChessBoardPane extends StackPane{
 
     public void tileReleased(int index, MouseEvent e){
 
-        if(buttons[index].getGraphic()==null){//do nothing if you were dragging an empty tile
+        if(buttons[index].getGraphic()==null||grid.isMouseTransparent()){//do nothing if you were dragging an empty tile or if animating
             isDragging=false;
             return;
         }
@@ -235,8 +230,7 @@ public class ChessBoardPane extends StackPane{
             isDragging=false;
             return;
         }
-        if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location
-
+        if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location when dragging
             isDragging=false;
             movePiece(index,newIndex);
             draggingSurface.getChildren().remove(cloneView);
@@ -337,31 +331,29 @@ public class ChessBoardPane extends StackPane{
         createDraggablePiece(selectedPieceIndex);
         grid.setMouseTransparent(true);
 
-        animationThread=new Thread(()->{
-            for(int i=0;i<60;i++){
-                double initialX=buttons[selectedPieceIndex].getLayoutX()+X_ANIMATION_OFFSET;
-                double initialY=buttons[selectedPieceIndex].getLayoutY()+Y_ANIMATION_OFFSET;
-                double finalX=buttons[newIndex].getLayoutX()+X_ANIMATION_OFFSET;
-                double finalY=buttons[newIndex].getLayoutY()+Y_ANIMATION_OFFSET;
+        animationThread.schedule(new TimerTask() {
+            int i=0;
 
-                double deltaX=finalX-initialX;
-                double deltaY=finalY-initialY;
-                int finalI = i;
-                Platform.runLater(()->cloneView.relocate(initialX+ finalI *deltaX/60,initialY+ finalI *deltaY/60));
+            final double MULTIPLIER =6;
+            final double  initialX=buttons[selectedPieceIndex].getLayoutX()+X_ANIMATION_OFFSET;
+            final double initialY=buttons[selectedPieceIndex].getLayoutY()+Y_ANIMATION_OFFSET;
+            final double finalX=buttons[newIndex].getLayoutX()+X_ANIMATION_OFFSET;
+            final double finalY=buttons[newIndex].getLayoutY()+Y_ANIMATION_OFFSET;
 
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
+            final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
+            @Override
+            public void run() {
+                if (++i==REFRESH_RATE/ MULTIPLIER){
+                    cancel();
+                    Platform.runLater(()->{
+                        movePiece(selectedPieceIndex,newIndex);
+                        grid.setMouseTransparent(false);
+                    });
                 }
+                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
             }
-            Platform.runLater(()->{
-                movePiece(selectedPieceIndex,newIndex);
-                grid.setMouseTransparent(false);});
-
-
-        });
-        animationThread.start();
+        },0,1000/REFRESH_RATE);
     }
 
     private void endGame() {//todo
