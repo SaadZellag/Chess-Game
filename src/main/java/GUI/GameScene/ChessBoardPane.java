@@ -1,16 +1,20 @@
 package GUI.GameScene;
 
 import engine.internal.BitBoard;
+import engine.internal.MoveGen;
 import game.Board;
 import game.Move;
 import game.Piece;
 import game.PieceType;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.ColorAdjust;
@@ -44,14 +48,14 @@ public class ChessBoardPane extends StackPane{
     private boolean isDragging=false;
     private boolean isRotated=false;
 
-    public int X_DRAGGING_OFFSET=45;
-    public int Y_DRAGGING_OFFSET=70;
+    public double X_DRAGGING_OFFSET=45;
+    public double Y_DRAGGING_OFFSET=70;
 
     public double X_ANIMATION_OFFSET =0;
     public double Y_ANIMATION_OFFSET =0;
     private ImageView cloneView;
 
-    public LinkedList<Move> moveHistoryList = new LinkedList<>();
+    public ObservableList<Move> moveHistoryList = FXCollections.observableArrayList();
     public LinkedList<Board> boardHistory= new LinkedList<>();
 
     private final Background normalBackGround = getBackgroundImage("Board.png",this,true);
@@ -59,7 +63,7 @@ public class ChessBoardPane extends StackPane{
     private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
 
     private final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";
-    private final String SELECTED_COLOR = "rgba(255, 29, 29, 0.5)";
+    private final String SELECTED_COLOR = "rgba(255, 29, 255, 0.5)";
     private final String UNSELECTED_COLOR = "transparent";
 //    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
@@ -120,9 +124,12 @@ public class ChessBoardPane extends StackPane{
                 }
             }
 
-            heightProperty().addListener(e->{//makes it so the animations stay aligned even when the window is resized
+            heightProperty().addListener(e->{//makes it so the animations/dragging stay aligned even when the window is resized
                 X_ANIMATION_OFFSET=getHeight()/22;
                 Y_ANIMATION_OFFSET=getHeight()/22;
+//
+                X_DRAGGING_OFFSET=getHeight()/12.2;
+                Y_DRAGGING_OFFSET=getHeight()/8;
             });
             placePieces();
             possibleMoves = internalBoard.generatePossibleMoves();
@@ -215,6 +222,7 @@ public class ChessBoardPane extends StackPane{
             selectedPieceIndex =draggedTileIndex;
             displayPossibleMoves(draggedTileIndex);
             createDraggablePiece(draggedTileIndex);
+            grid.setCursor(Cursor.NONE);
         }
 
         //Allows moving piece to tile even if you drag it slightly
@@ -232,7 +240,7 @@ public class ChessBoardPane extends StackPane{
     }
 
     public void tileReleased(int index, MouseEvent e){
-
+        grid.setCursor(Cursor.DEFAULT);
         if(buttons[index].getGraphic()==null||grid.isMouseTransparent()){//do nothing if you were dragging an empty tile or if animating
             isDragging=false;
             return;
@@ -336,13 +344,22 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
+        clearSelectedTiles();
         isDragging=false;
         internalBoard.playMove(mv);
         placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
+        isInCheck();
         if(possibleMoves.size()==0)
             endGame();
-        clearSelectedTiles();
+
+    }
+
+    private void isInCheck() {
+        if(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())))
+            setBackground(dangerBackGround);
+        else
+            setBackground(normalBackGround);
     }
 
     private void animateMovePiece(int selectedPieceIndex, int newIndex) {
@@ -377,7 +394,6 @@ public class ChessBoardPane extends StackPane{
 
     private void endGame() {//todo
         System.out.println("Checkmate");
-        setBackground(dangerBackGround);
         runOnGameOver.run();
     }
 
@@ -513,6 +529,7 @@ public class ChessBoardPane extends StackPane{
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
+            isInCheck();
             clearSelectedTiles();
         }
 
@@ -522,6 +539,7 @@ public class ChessBoardPane extends StackPane{
             internalBoard=boardHistory.get(++playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
+            isInCheck();
             clearSelectedTiles();
         }
     }

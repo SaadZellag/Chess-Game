@@ -63,8 +63,11 @@ public class ConfidenceBar extends GridPane {
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         bottom.heightProperty().bind(binding.divide(1.1));
+        bottom.widthProperty().bind(binding.divide(24));
+
         top.yProperty().bind(bottom.yProperty());
         top.heightProperty().bind(binding.divide(2.2));
+        top.widthProperty().bind(binding.divide(24));
     }
 
 }

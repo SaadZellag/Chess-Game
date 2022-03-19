@@ -2,6 +2,7 @@ package GUI.GameScene;
 
 import game.Move;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.effect.ColorAdjust;
@@ -16,8 +17,7 @@ import javafx.scene.text.Text;
 
 import java.util.LinkedList;
 
-import static GUI.GUI.getBackgroundImage;
-import static GUI.GUI.getImage;
+import static GUI.GUI.*;
 
 public class MultiplayerGamePane extends GamePane {
     public HBox mainPane = new HBox();
@@ -25,12 +25,16 @@ public class MultiplayerGamePane extends GamePane {
 
     private final StackPane root = new StackPane();
 
-    LinkedList<Move>moveHistoryList;
+    ObservableList<Move> moveHistoryList;
     public MoveHistoryField moveHistory;
     public boolean whiteIsBottom=true;
     public ChessBoardPane chessBoardPane;
     private final ImageView whiteWon= new ImageView(getImage("PlaceHolderText.png"));
     private final ImageView blackWon = new ImageView(getImage("PlaceHolderText.png"));
+    private double fontSize=19;
+    private Text upperTimer;
+    private Text lowerTimer;
+    private final VBox leftMostPane;
 
     public MultiplayerGamePane() {
         whiteWon.setEffect(new ColorAdjust(1,1,1,0));
@@ -52,20 +56,19 @@ public class MultiplayerGamePane extends GamePane {
 
 
         //lefMostPane
-        VBox leftMostPane= new VBox();
-        Text upperTimer= new Text("10:00");
-        upperTimer.setFont(Font.font("Verdana", FontWeight.BOLD, FontPosture.ITALIC,17));
-        upperTimer.setFill(Color.WHITE);
-        Text lowerTimer= new Text("10:00");
-        lowerTimer.setViewOrder(1);
-        lowerTimer.setFill(Color.WHITE);
-        lowerTimer.setFont(Font.font("Verdana", FontWeight.BOLD,FontPosture.ITALIC, 17));
+        leftMostPane= new VBox();
+        heightProperty().addListener(e->{
+            fontSize=getHeight()/30;
+            leftMostPane.getChildren().removeAll(upperTimer,lowerTimer);
+            renderTimers();
+        });
         chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame);
         if (!whiteIsBottom){
             chessBoardPane.setRotate(180);
             chessBoardPane.rotatePieces();
         }
-        leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
+        leftMostPane.getChildren().add(chessBoardPane);
+        renderTimers();
         leftMostPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.getChildren().add(leftMostPane);
 
@@ -113,6 +116,19 @@ public class MultiplayerGamePane extends GamePane {
 
 
     }
+
+    private void renderTimers() {
+        upperTimer= new Text("10:00");
+        upperTimer.setFont(Font.loadFont(getResource("standardFont.otf"),fontSize));
+        upperTimer.setFill(Color.WHITE);
+        lowerTimer= new Text("10:00");
+        lowerTimer.setViewOrder(1);
+        lowerTimer.setFill(Color.WHITE);
+        lowerTimer.setFont(Font.loadFont(getResource("standardFont.otf"),fontSize));
+        leftMostPane.getChildren().add(0,upperTimer);
+        leftMostPane.getChildren().add(2,lowerTimer);
+    }
+
     private void showSettingsMenu(){
         mainPane.setDisable(true);
         mainPane.setEffect(new GaussianBlur(30));

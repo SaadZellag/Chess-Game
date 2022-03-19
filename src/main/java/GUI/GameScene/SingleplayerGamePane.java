@@ -20,6 +20,13 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         moveHistory.prefSizePropertyBind(heightProperty().divide(1.1));
 
         chessBoardPane.X_DRAGGING_OFFSET=whiteIsBottom?70:20;
+        chessBoardPane.heightProperty().addListener(e->{//makes it so the animations/dragging stay aligned even when the window is resized
+            chessBoardPane.X_ANIMATION_OFFSET=getHeight()/22;
+            chessBoardPane.Y_ANIMATION_OFFSET=getHeight()/22;
+
+            chessBoardPane.X_DRAGGING_OFFSET=getHeight()/7.8;
+            chessBoardPane.Y_DRAGGING_OFFSET=getHeight()/8;
+        });
 
         undoButton.setOnAction(e->chessBoardPane.undo());
         redoButton.setOnAction(e->chessBoardPane.redo());

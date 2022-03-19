@@ -27,6 +27,6 @@
       <RowConstraints percentHeight="12.5" valignment="CENTER" vgrow="ALWAYS" />
    </rowConstraints>
    <cursor>
-      <Cursor fx:constant="HAND" />
+      <Cursor fx:constant="DEFAULT" />
    </cursor>
 </GridPane>
