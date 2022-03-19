@@ -22,6 +22,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         chessBoardPane.X_DRAGGING_OFFSET=whiteIsBottom?70:20;
 
         undoButton.setOnAction(e->chessBoardPane.undo());
+        redoButton.setOnAction(e->chessBoardPane.redo());
     }
     @Override
     public GamePane previousMenu() {

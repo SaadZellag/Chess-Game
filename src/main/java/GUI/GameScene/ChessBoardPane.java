@@ -25,60 +25,63 @@ import java.util.*;
 import static GUI.GUI.*;
 
 public class ChessBoardPane extends StackPane{
-    VBox promotionMenu= new VBox();
-    CustomButton[] promotionButtons=new CustomButton[4];
 
-    Timer moveAnimationThread = new Timer(true);
-    Timer generalAnimationThread = new Timer(true);
+    private final VBox promotionMenu= new VBox();
+    private final CustomButton[] promotionButtons=new CustomButton[4];
 
-    Board internalBoard;
-    int playedMovesCounter=0;
-    int selectedPieceIndex;
+    private final Timer moveAnimationThread = new Timer(true);
 
-    List<Move> possibleMoves;
+    public Board internalBoard;
+    private int playedMovesCounter=0;
+    private int selectedPieceIndex;
 
-    GridPane grid;
-    Pane draggingSurface=new Pane();
+    private List<Move> possibleMoves;
 
-    ToggleButton[] buttons = new ToggleButton[64];
-    boolean isDragging=false;
-    boolean isRotated=false;
+    private GridPane grid;
+    private final Pane draggingSurface=new Pane();
 
-    int X_DRAGGING_OFFSET=45;
-    int Y_DRAGGING_OFFSET=70;
+    private final ToggleButton[] buttons = new ToggleButton[64];
+    private boolean isDragging=false;
+    private boolean isRotated=false;
 
-    double X_ANIMATION_OFFSET =0;
-    double Y_ANIMATION_OFFSET =0;
-    ImageView cloneView;
+    public int X_DRAGGING_OFFSET=45;
+    public int Y_DRAGGING_OFFSET=70;
 
-    LinkedList<Move> moveHistoryList = new LinkedList<>();
-    LinkedList<Board>boardHistory= new LinkedList<>();
+    public double X_ANIMATION_OFFSET =0;
+    public double Y_ANIMATION_OFFSET =0;
+    private ImageView cloneView;
 
-    Background normalBackGround = getBackgroundImage("Board.png",this,true);
+    public LinkedList<Move> moveHistoryList = new LinkedList<>();
+    public LinkedList<Board> boardHistory= new LinkedList<>();
 
-    Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
+    private final Background normalBackGround = getBackgroundImage("Board.png",this,true);
 
-    final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";//Green
-    final String SELECTED_COLOR = "rgba(255, 0, 0, 0.5)";//red
-    final String UNSELECTED_COLOR = "transparent";
+    private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
+
+    private final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";
+    private final String SELECTED_COLOR = "rgba(255, 29, 29, 0.5)";
+    private final String UNSELECTED_COLOR = "transparent";
 //    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
-    final Image W_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
-    final Image W_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
-    final Image W_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
-    final Image W_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
-    final Image W_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
-    final Image W_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
+    private final Image W_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
+    private final Image W_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
+    private final Image W_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
+    private final Image W_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
+    private final Image W_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
+    private final Image W_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
 
-    final Image B_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
-    final Image B_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
-    final Image B_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
-    final Image B_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
-    final Image B_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
-    final Image B_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
+    private final Image B_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
+    private final Image B_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
+    private final Image B_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
+    private final Image B_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
+    private final Image B_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
+    private final Image B_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
 
+    private final Runnable runOnGameOver;
 
-    public ChessBoardPane(ReadOnlyDoubleProperty binding){
+    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver){
+        this.runOnGameOver=runOnGameOver;
+
         boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
         internalBoard=boardHistory.get(playedMovesCounter);
         draggingSurface.setMouseTransparent(true);
@@ -131,10 +134,7 @@ public class ChessBoardPane extends StackPane{
                 promotionMenu.getChildren().add(promotionButtons[i]);
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
-            promotionButtons[0].setOnAction(e->piecePromoted(PieceType.ROOK));
-            promotionButtons[1].setOnAction(e->piecePromoted(PieceType.BISHOP));
-            promotionButtons[2].setOnAction(e->piecePromoted(PieceType.QUEEN));
-            promotionButtons[3].setOnAction(e->piecePromoted(PieceType.KNIGHT));
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -162,9 +162,7 @@ public class ChessBoardPane extends StackPane{
             };
 
             ImageView individualPiece = new ImageView(image);
-            individualPiece.setPreserveRatio(true);
-            individualPiece.setMouseTransparent(true);
-            individualPiece.fitHeightProperty().bind(grid.heightProperty().divide(8));
+            formatPieceImageView(individualPiece);
 
             buttons[i].setGraphic(individualPiece);
             buttons[i].setDisable(false);
@@ -172,6 +170,13 @@ public class ChessBoardPane extends StackPane{
             if(!p.isWhite)//TODO gotta remove this in the final version
               buttons[i].getGraphic().setEffect(new ColorAdjust(0,0.2,-0.8,1));
         }
+    }
+    private void formatPieceImageView(ImageView pieceImageView) {
+        pieceImageView.setPreserveRatio(true);
+        pieceImageView.setMouseTransparent(true);
+        pieceImageView.fitWidthProperty().bind(grid.heightProperty().divide(8));
+        if(isRotated)
+            pieceImageView.setRotate(180);
     }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
@@ -255,7 +260,7 @@ public class ChessBoardPane extends StackPane{
             return;
         }
 
-        //return piece to original position
+        //return piece to original position if there was no move done
         isDragging=false;
         buttons[index].getGraphic().setVisible(true);
         draggingSurface.getChildren().remove(cloneView);
@@ -288,11 +293,7 @@ public class ChessBoardPane extends StackPane{
         buttons[index].getGraphic().setVisible(false);
         Image cloneImage= ((ImageView) buttons[index].getGraphic()).getImage();
         cloneView = new ImageView(cloneImage);
-        cloneView.setPreserveRatio(true);
-        cloneView.setMouseTransparent(true);
-        cloneView.fitWidthProperty().bind(grid.heightProperty().divide(8));
-        if(isRotated)
-            cloneView.setRotate(180);
+        formatPieceImageView(cloneView);
         draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
@@ -303,7 +304,7 @@ public class ChessBoardPane extends StackPane{
         draggingSurface.getChildren().remove(cloneView);
         buttons[index].setSelected(false);
 
-        //Remove moves from history if you had done an undo
+        //Remove moves from history if you had undone
         while (boardHistory.size()>playedMovesCounter){
             boardHistory.remove(playedMovesCounter).toFEN();
             moveHistoryList.remove(playedMovesCounter-1);
@@ -325,7 +326,7 @@ public class ChessBoardPane extends StackPane{
                 break;
             }
             switch (mv.moveInfo) {
-                case EN_PASSANT -> {handleEnPassant(mv); break loop;}
+                case EN_PASSANT -> {finalizeMovePlay(mv); break loop;}
                 case KING_CASTLE -> {handleKingCastle(mv); break loop;}
                 case QUEEN_CASTLE -> {handleQueenCaste(mv);break loop;}
                 case PROMOTION -> {handlePromotion(mv); break loop;}
@@ -377,21 +378,13 @@ public class ChessBoardPane extends StackPane{
     private void endGame() {//todo
         System.out.println("Checkmate");
         setBackground(dangerBackGround);
+        runOnGameOver.run();
     }
 
-    private void handleEnPassant(Move mv){
-        int target = internalBoard.getEnPassantTargetSquare();
-        int aboveOrBellow = (internalBoard.isWhiteTurn() ? 8 : -8);
-        buttons[target + aboveOrBellow].setGraphic(null);
-        finalizeMovePlay(mv);
-    }
-
-    private void handlePromotion(Move mv) {//todo
+    private void handlePromotion(Move mv) {
         grid.setMouseTransparent(true);
         draggingSurface.setMouseTransparent(false);
         draggingSurface.getChildren().add(promotionMenu);
-
-//        ImageView pawn= new ImageView(internalBoard.isWhiteTurn()?W_PAWN:B_PAWN);
 
         ImageView rook= new ImageView(internalBoard.isWhiteTurn()?W_ROOK:B_ROOK);
         promotionButtons[0].setGraphic(rook);
@@ -405,13 +398,28 @@ public class ChessBoardPane extends StackPane{
         ImageView knight= new ImageView(internalBoard.isWhiteTurn()?W_KNIGHT:B_KNIGHT);
         promotionButtons[3].setGraphic(knight);
 
-        buttons[mv.finalLocation].setGraphic(null);//todo make pawn visible while menu is up
+        ImageView pawn= new ImageView(internalBoard.isWhiteTurn()?W_PAWN:B_PAWN);
+        formatPieceImageView(pawn);
+        buttons[mv.finalLocation].setGraphic(pawn);
+
+        if(isRotated)
+            for (CustomButton promotionButton:promotionButtons)
+                promotionButton.getGraphic().setRotate(180);
+
+
+        promotionButtons[0].setOnAction(e->piecePromoted(mv,PieceType.ROOK));
+        promotionButtons[1].setOnAction(e->piecePromoted(mv,PieceType.BISHOP));
+        promotionButtons[2].setOnAction(e->piecePromoted(mv,PieceType.QUEEN));
+        promotionButtons[3].setOnAction(e->piecePromoted(mv,PieceType.KNIGHT));
 
 
     }
-    private void piecePromoted(PieceType pieceType) {
+
+
+
+    private void piecePromoted(Move mv,PieceType pieceType) {
         for (Move possibleMove:possibleMoves) {
-            if(possibleMove.promotionPiece==pieceType){
+            if(possibleMove.promotionPiece==pieceType&&possibleMove.finalLocation==mv.finalLocation){
                 finalizeMovePlay(possibleMove);
                 break;
             }
@@ -422,16 +430,16 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void handleQueenCaste(Move mv) {
-        buttons[mv.finalLocation].setGraphic(null);//todo make king visible while castling
+        buttons[mv.finalLocation].setGraphic(cloneView);
         createDraggablePiece(internalBoard.isWhiteTurn()?56:0);
         grid.setMouseTransparent(true);
 
-        generalAnimationThread.schedule(new TimerTask() {
+        moveAnimationThread.schedule(new TimerTask() {
             int i=0;
             final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[56]:buttons[0];
             final ToggleButton targetSquare=buttons[mv.finalLocation+1];
 
-            final double MULTIPLIER =10;
+            final double MULTIPLIER =6;
             final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
             final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
             final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
@@ -456,16 +464,16 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void handleKingCastle(Move mv) {
-        buttons[mv.finalLocation].setGraphic(null);//todo make king visible while castling
+        buttons[mv.finalLocation].setGraphic(cloneView);
         createDraggablePiece(internalBoard.isWhiteTurn()?63:7);
         grid.setMouseTransparent(true);
 
-        generalAnimationThread.schedule(new TimerTask() {
+        moveAnimationThread.schedule(new TimerTask() {
             int i=0;
             final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[63]:buttons[7];
             final ToggleButton targetSquare=buttons[mv.finalLocation-1];
 
-            final double MULTIPLIER =10;
+            final double MULTIPLIER =6;
             final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
             final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
             final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
@@ -500,18 +508,21 @@ public class ChessBoardPane extends StackPane{
     }
     public void undo(){
         if(playedMovesCounter!=0){
-            if(promotionMenu.getParent()!=null){
-                draggingSurface.getChildren().remove(promotionMenu);
-                grid.setMouseTransparent(false);
-                draggingSurface.setMouseTransparent(true);
-            }
+            if(promotionMenu.getParent()!=null)
+                return;
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
             clearSelectedTiles();
-            if (isRotated)
-                rotatePieces();
         }
 
+    }
+    public void redo() {
+        if(boardHistory.size()-1>playedMovesCounter){
+            internalBoard=boardHistory.get(++playedMovesCounter);
+            possibleMoves=internalBoard.generatePossibleMoves();
+            placePieces();
+            clearSelectedTiles();
+        }
     }
 }

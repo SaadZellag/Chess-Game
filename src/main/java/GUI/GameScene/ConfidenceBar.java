@@ -50,10 +50,10 @@ public class ConfidenceBar extends GridPane {
                 double slope = (percentage - currentPercentage) / REFRESH_RATE * Math.abs(1 / GROWTH_DELAY);
                 Platform.runLater(() -> top.heightProperty().bind(bottom.heightProperty().multiply(currentPercentage+slope)));
             }
-        }, 0, 1000 / REFRESH_RATE);
+        }, 4000, 1000 / REFRESH_RATE);
 
 
-        setOnMouseClicked(e-> {// this is for testing purposes, remove later
+        setOnMouseClicked(e-> {// Todo this is for testing purposes, remove later
             double i=Math.random();
             this.percentage = i;
             System.out.println(i);

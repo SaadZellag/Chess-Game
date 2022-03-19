@@ -1,7 +1,6 @@
 package GUI;
 
 import GUI.GameScene.GamePane;
-import GUI.GameScene.MultiplayerGamePane;
 import GUI.GameScene.SingleplayerGamePane;
 import javafx.application.Application;
 import javafx.scene.Scene;
