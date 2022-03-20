@@ -4,12 +4,16 @@ import GUI.GameScene.GamePane;
 import GUI.GameScene.SingleplayerGamePane;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -65,6 +69,12 @@ public class GUI extends Application {
     }
     public static Image getImage(String imageName){
         return new Image(getResource(imageName));
+    }
+    public static DropShadow glowEffect(Color c1, Color c2){
+        DropShadow firstShadow = new DropShadow( 1,2, 2, c1);
+        DropShadow secondShadow = new DropShadow( 2, -2, -2, c2);
+        secondShadow.setInput(firstShadow);
+        return secondShadow;
     }
 
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){

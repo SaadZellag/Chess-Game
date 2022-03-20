@@ -34,6 +34,7 @@ public class MultiplayerGamePane extends GamePane {
     private double fontSize=19;
     private Text upperTimer;
     private Text lowerTimer;
+    private final VBox rightMostPane;
     private final VBox leftMostPane;
 
     public MultiplayerGamePane() {
@@ -79,7 +80,7 @@ public class MultiplayerGamePane extends GamePane {
         moveHistory.setViewOrder(1);
 
         //rightMostPane
-        VBox rightMostPane= new VBox();
+        rightMostPane= new VBox();
         mainPane.getChildren().add(rightMostPane);
         rightMostPane.setAlignment(Pos.BOTTOM_RIGHT);
         rightMostPane.setSpacing(10);
@@ -119,12 +120,16 @@ public class MultiplayerGamePane extends GamePane {
 
     private void renderTimers() {
         upperTimer= new Text("10:00");
-        upperTimer.setFont(Font.loadFont(getResource("standardFont.otf"),fontSize));
-        upperTimer.setFill(Color.WHITE);
+        upperTimer.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize));
+        upperTimer.setFill(Color.color(0.24, 0.24, 0.24));
+        upperTimer.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+
         lowerTimer= new Text("10:00");
         lowerTimer.setViewOrder(1);
-        lowerTimer.setFill(Color.WHITE);
-        lowerTimer.setFont(Font.loadFont(getResource("standardFont.otf"),fontSize));
+        lowerTimer.setFill(Color.color(0.24, 0.24, 0.24));
+        lowerTimer.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize));
+        lowerTimer.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+
         leftMostPane.getChildren().add(0,upperTimer);
         leftMostPane.getChildren().add(2,lowerTimer);
     }
@@ -149,7 +154,8 @@ public class MultiplayerGamePane extends GamePane {
                 heightProperty().divide(2),
                 "PlaceHolderText.png"
         ));
-        showSettingsMenu();
+        mainPane.getChildren().removeAll(moveHistory,rightMostPane);
+        mainPane.getChildren().add(settingsMenu);
 
     }
 

@@ -19,17 +19,17 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 
 import java.util.LinkedList;
 
-import static GUI.GUI.getImage;
-import static GUI.GUI.getResource;
+import static GUI.GUI.*;
 
 public class MoveHistoryField extends VBox {
     private final ImageView backgroundImagePane = new ImageView(getImage("RoundTextArea.png"));
     private final ScrollPane scrollPane= new ScrollPane();
-    private final ImageView textHeaderPane= new ImageView(getImage("PlaceHolderText.png"));
+    private final Text textHeader= new Text("MOVE HISTORY");
     private final StackPane stackPane= new StackPane();
     private final VBox textHolder= new VBox();
     private double fontSize=20;
@@ -38,7 +38,7 @@ public class MoveHistoryField extends VBox {
         this.movesList=movesList;
         prefSizePropertyBind(binding);
         setAlignment(Pos.CENTER);
-        getChildren().addAll(textHeaderPane,stackPane);
+        getChildren().addAll(textHeader,stackPane);
 
         stackPane.getChildren().addAll(backgroundImagePane,scrollPane);
         textHolder.setAlignment(Pos.CENTER);
@@ -57,9 +57,14 @@ public class MoveHistoryField extends VBox {
             }
         });
 
+        textHeader.setFill(Color.color(0.24, 0.24, 0.24));
+        textHeader.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize*1.3));
+        textHeader.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+
         widthProperty().addListener(e->{
             fontSize=getWidth()/16.7;
             textHolder.getChildren().clear();
+            textHeader.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize*1.3));
             for (Move mv:movesList) {
                 displayMove(mv);
             }
@@ -73,27 +78,18 @@ public class MoveHistoryField extends VBox {
 
     }
     private void displayMove(Move move){
-        String pieceMoved="";
 
-        if(move.piece.isWhite){
-            switch (move.piece.type){
-                case QUEEN ->pieceMoved="♕";
-                case KING ->pieceMoved="♔";
-                case ROOK ->pieceMoved="♖";
-                case BISHOP ->pieceMoved="♗";
-                case KNIGHT ->pieceMoved="♘";
-                case PAWN ->pieceMoved="♙";
-            }
-        }else{
-            switch (move.piece.type){
-                case PAWN ->pieceMoved="♟";
-                case KING ->pieceMoved="♚";
-                case QUEEN ->pieceMoved="♛";
-                case ROOK ->pieceMoved="♜";
-                case BISHOP ->pieceMoved="♝";
-                case KNIGHT ->pieceMoved="♞";
-            }
-        }
+        boolean isWhite=move.piece.isWhite;
+
+        String pieceMoved=switch (move.piece.type){
+            case QUEEN ->isWhite?"♕":"♛";
+            case KING ->isWhite?"♔":"♚";
+            case ROOK ->isWhite?"♖":"♜";
+            case BISHOP ->isWhite?"♗":"♝";
+            case KNIGHT ->isWhite?"♘":"♞";
+            case PAWN ->isWhite?"♙":"♟";
+        };
+
 
         Text piece= new Text(pieceMoved);
         piece.setFont(Font.font("", FontWeight.BOLD, fontSize));
@@ -101,14 +97,15 @@ public class MoveHistoryField extends VBox {
         UCI.setFont(Font.loadFont(getResource("pixelatedFont.otf"),fontSize));
         TextFlow textFlow = new TextFlow();
         textFlow.getChildren().addAll(piece,UCI);
+        textFlow.setEffect(glowEffect(Color.CYAN,Color.GREEN));
         textHolder.getChildren().add(textFlow);
     }
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         backgroundImagePane.setPreserveRatio(true);
         backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
-
-        textHeaderPane.setPreserveRatio(true);
-        textHeaderPane.fitWidthProperty().bind(binding.divide(3));
+//
+//        textHeaderPane.setPreserveRatio(true);
+//        textHeaderPane.fitWidthProperty().bind(binding.divide(3));
 
         scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
         scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));
@@ -119,8 +116,8 @@ public class MoveHistoryField extends VBox {
         backgroundImagePane.setPreserveRatio(true);
         backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));
 
-        textHeaderPane.setPreserveRatio(true);
-        textHeaderPane.fitWidthProperty().bind(binding.divide(3));
+//        textHeaderPane.setPreserveRatio(true);
+//        textHeaderPane.fitWidthProperty().bind(binding.divide(3));
 
         scrollPane.maxHeightProperty().bind(binding.divide(1.145*1.1));
         scrollPane.maxWidthProperty().bind(binding.divide(1.637*1.1));

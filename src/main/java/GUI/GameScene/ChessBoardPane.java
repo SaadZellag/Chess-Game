@@ -1,5 +1,6 @@
 package GUI.GameScene;
 
+import com.sun.scenario.effect.InvertMask;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Board;
@@ -17,14 +18,15 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-
 import java.io.IOException;
 import java.util.*;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.paint.Color;
 
 import static GUI.GUI.*;
 
@@ -67,19 +69,19 @@ public class ChessBoardPane extends StackPane{
     private final String UNSELECTED_COLOR = "transparent";
 //    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
-    private final Image W_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
-    private final Image W_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
-    private final Image W_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
-    private final Image W_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
-    private final Image W_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
-    private final Image W_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
+    private final Image W_PAWN=getImage("Pieces/W_Pawn.png");
+    private final Image W_ROOK=getImage("Pieces/W_Rook.png");
+    private final Image W_KNIGHT=getImage("Pieces/W_Knight.png");
+    private final Image W_BISHOP=getImage("Pieces/W_Bishop.png");
+    private final Image W_QUEEN=getImage("Pieces/W_Queen.png");
+    private final Image W_KING=getImage("Pieces/W_King.png");
 
-    private final Image B_PAWN=new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-50_14db7352-cb40-484f-bcaf-ec13fdeba785_1200x1200.png?v=1535644667");
-    private final Image B_ROOK= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-22_fd93f1cb-c583-41a8-8ec8-d4fe10814a42_1024x.png?v=1535651942");
-    private final Image B_KNIGHT= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/2017_Mega_Chess_Need_to_Clip-55_749bbdd5-8df4-41f1-b663-2a9f5b81fab7_1200x1200.png?v=1535652156");
-    private final Image B_BISHOP= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-46_033c4a97-c8e1-4e86-bbc7-c9b0b306e5fd_1200x1200.png?v=1535645303");
-    private final Image B_QUEEN= new Image("https://cdn.shopify.com/s/files/1/2209/1479/products/additional_megachess-18_1200x1200.png?v=1535655093");
-    private final Image B_KING= new Image("https://cdn.shopify.com/s/files/1/2209/1363/products/additional_megachess-44_33afb3f4-7bfe-4438-a46a-46b5d1b35078.png?v=1535649501");
+    private final Image B_PAWN=getImage("Pieces/B_Pawn.png");
+    private final Image B_ROOK=getImage("Pieces/B_Rook.png");
+    private final Image B_KNIGHT=getImage("Pieces/B_Knight.png");
+    private final Image B_BISHOP=getImage("Pieces/B_Bishop.png");
+    private final Image B_QUEEN=getImage("Pieces/B_Queen.png");
+    private final Image B_KING=getImage("Pieces/B_King.png");
 
     private final Runnable runOnGameOver;
 
@@ -169,21 +171,23 @@ public class ChessBoardPane extends StackPane{
             };
 
             ImageView individualPiece = new ImageView(image);
-            formatPieceImageView(individualPiece);
+            formatPieceImageView(p.isWhite,individualPiece);
 
             buttons[i].setGraphic(individualPiece);
             buttons[i].setDisable(false);
 
-            if(!p.isWhite)//TODO gotta remove this in the final version
-              buttons[i].getGraphic().setEffect(new ColorAdjust(0,0.2,-0.8,1));
         }
     }
-    private void formatPieceImageView(ImageView pieceImageView) {
+    private void formatPieceImageView(boolean isWhite,ImageView pieceImageView) {
         pieceImageView.setPreserveRatio(true);
         pieceImageView.setMouseTransparent(true);
-        pieceImageView.fitWidthProperty().bind(grid.heightProperty().divide(8));
+        pieceImageView.fitWidthProperty().bind(grid.heightProperty().divide(9));
         if(isRotated)
             pieceImageView.setRotate(180);
+        if(isWhite)
+            pieceImageView.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+        else
+            pieceImageView.setEffect(glowEffect(Color.RED,Color.GOLD));
     }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
@@ -301,7 +305,7 @@ public class ChessBoardPane extends StackPane{
         buttons[index].getGraphic().setVisible(false);
         Image cloneImage= ((ImageView) buttons[index].getGraphic()).getImage();
         cloneView = new ImageView(cloneImage);
-        formatPieceImageView(cloneView);
+        formatPieceImageView(internalBoard.getPieces()[index].isWhite,cloneView);
         draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
@@ -415,12 +419,11 @@ public class ChessBoardPane extends StackPane{
         promotionButtons[3].setGraphic(knight);
 
         ImageView pawn= new ImageView(internalBoard.isWhiteTurn()?W_PAWN:B_PAWN);
-        formatPieceImageView(pawn);
+        formatPieceImageView(internalBoard.isWhiteTurn(),pawn);
         buttons[mv.finalLocation].setGraphic(pawn);
 
-        if(isRotated)
-            for (CustomButton promotionButton:promotionButtons)
-                promotionButton.getGraphic().setRotate(180);
+        for (CustomButton promotionButton:promotionButtons)
+            formatPieceImageView(internalBoard.isWhiteTurn(),(ImageView) promotionButton.getGraphic());
 
 
         promotionButtons[0].setOnAction(e->piecePromoted(mv,PieceType.ROOK));
