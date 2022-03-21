@@ -3,6 +3,7 @@ package GUI;
 import GUI.GameScene.GamePane;
 import GUI.GameScene.SingleplayerGamePane;
 import javafx.application.Application;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
@@ -14,6 +15,8 @@ import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -63,6 +66,7 @@ public class GUI extends Application {
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
         primaryStage.show();
+
     }
     public static String getResource(String resourceName){
         return String.valueOf(GUI.class.getClassLoader().getResource("GUI/"+resourceName));
@@ -75,6 +79,12 @@ public class GUI extends Application {
         DropShadow secondShadow = new DropShadow( 2, -2, -2, c2);
         secondShadow.setInput(firstShadow);
         return secondShadow;
+    }
+    public static void formatStandardText(Text text, ReadOnlyDoubleProperty propertyToListen, double fontScale, Color fill,DropShadow idleGlowEffect){
+        text.setFill(fill);
+        text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale));
+        propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
+        text.setEffect(idleGlowEffect);
     }
 
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){

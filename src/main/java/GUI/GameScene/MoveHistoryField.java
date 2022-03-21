@@ -89,14 +89,29 @@ public class MoveHistoryField extends VBox {
             case KNIGHT ->isWhite?"♘":"♞";
             case PAWN ->isWhite?"♙":"♟";
         };
+        String promotion="";
+        if(move.promotionPiece!=null)
+            promotion=switch (move.promotionPiece){
+                case QUEEN ->isWhite?"->♕":"->♛";
+                case KING ->isWhite?"->♔":"->♚";
+                case ROOK ->isWhite?"->♖":"->♜";
+                case BISHOP ->isWhite?"->♗":"->♝";
+                case KNIGHT ->isWhite?"->♘":"->♞";
+                case PAWN ->isWhite?"->♙":"->♟";
+            };
 
 
         Text piece= new Text(pieceMoved);
         piece.setFont(Font.font("", FontWeight.BOLD, fontSize));
+
         Text UCI= new Text(ChessUtils.moveToUCI(move));
         UCI.setFont(Font.loadFont(getResource("pixelatedFont.otf"),fontSize));
+
+        Text promotionPiece= new Text(promotion);
+        promotionPiece.setFont(Font.font("", FontWeight.BOLD, fontSize));
+
         TextFlow textFlow = new TextFlow();
-        textFlow.getChildren().addAll(piece,UCI);
+        textFlow.getChildren().addAll(piece,UCI,promotionPiece);
         textFlow.setEffect(glowEffect(Color.CYAN,Color.GREEN));
         textHolder.getChildren().add(textFlow);
     }

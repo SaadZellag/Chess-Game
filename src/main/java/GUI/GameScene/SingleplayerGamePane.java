@@ -4,8 +4,8 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
-    CustomButton undoButton= new CustomButton(heightProperty().divide(13),heightProperty().divide(13),"UndoArrow.png");
-    CustomButton redoButton= new CustomButton(heightProperty().divide(13),heightProperty().divide(13),"RedoArrow.png");
+    ImageCustomButton undoButton= new ImageCustomButton(heightProperty().divide(13),"UndoArrow.png");
+    ImageCustomButton redoButton= new ImageCustomButton(heightProperty().divide(13),"RedoArrow.png");
     public SingleplayerGamePane() {
         mainPane.setSpacing(9);
 

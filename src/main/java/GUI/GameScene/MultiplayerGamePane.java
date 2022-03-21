@@ -5,17 +5,14 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-
-import java.util.LinkedList;
 
 import static GUI.GUI.*;
 
@@ -29,8 +26,8 @@ public class MultiplayerGamePane extends GamePane {
     public MoveHistoryField moveHistory;
     public boolean whiteIsBottom=true;
     public ChessBoardPane chessBoardPane;
-    private final ImageView whiteWon= new ImageView(getImage("PlaceHolderText.png"));
-    private final ImageView blackWon = new ImageView(getImage("PlaceHolderText.png"));
+    private final Text whiteWon= new Text("WHITE WON");
+    private final Text blackWon = new Text("BLACK WON");
     private double fontSize=19;
     private Text upperTimer;
     private Text lowerTimer;
@@ -43,11 +40,15 @@ public class MultiplayerGamePane extends GamePane {
 
 
         //parent inherited buttons
-        muteButton= new CustomButton(heightProperty().divide(11),heightProperty().divide(11),"Board.png");
+        muteButton= new ImageCustomButton(heightProperty().divide(11),"Board.png");
 
-        previousSceneButton = new CustomButton(heightProperty().divide(10),heightProperty().divide(2),"PlaceHolderText.png");
+        previousSceneButton = new TextCustomButton(heightProperty(),"MAIN MENU",15,Color.GREY);
+        previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        nextSceneButton= new CustomButton(heightProperty().divide(10),heightProperty().divide(2),"PlaceHolderText.png");
+        nextSceneButton= new TextCustomButton(heightProperty(),"QUIT GAME",15,Color.GREY);
+        nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
 
         getChildren().add(root);
@@ -58,18 +59,21 @@ public class MultiplayerGamePane extends GamePane {
 
         //lefMostPane
         leftMostPane= new VBox();
-        heightProperty().addListener(e->{
-            fontSize=getHeight()/30;
-            leftMostPane.getChildren().removeAll(upperTimer,lowerTimer);
-            renderTimers();
-        });
+
+
         chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame);
         if (!whiteIsBottom){
             chessBoardPane.setRotate(180);
             chessBoardPane.rotatePieces();
         }
-        leftMostPane.getChildren().add(chessBoardPane);
-        renderTimers();
+        upperTimer= new Text("10:00");
+        formatStandardText(upperTimer,heightProperty(),30,Color.color(0.24, 0.24, 0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        lowerTimer= new Text("10:00");
+        formatStandardText(lowerTimer,heightProperty(),30,Color.color(0.24, 0.24, 0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        lowerTimer.setViewOrder(1);
+
+        leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
+
         leftMostPane.setAlignment(Pos.CENTER_LEFT);
         mainPane.getChildren().add(leftMostPane);
 
@@ -90,17 +94,16 @@ public class MultiplayerGamePane extends GamePane {
         rightMostPane.getChildren().add(muteButton);
 
         //settingsButton
-        CustomButton settingsButton = new CustomButton(heightProperty().divide(7),heightProperty().divide(7),"Board.png");
+        ImageCustomButton settingsButton = new ImageCustomButton(heightProperty().divide(7),"Board.png");
         rightMostPane.getChildren().add(settingsButton);
         settingsButton.setOnAction(e-> showSettingsMenu());
 
 
 
-        CustomButton resume = new CustomButton(
-                heightProperty().divide(10),
-                heightProperty().divide(2),
-                "PlaceHolderText.png"
-        );
+        TextCustomButton resume= new TextCustomButton(heightProperty(),"RESUME",15,Color.GREY);
+        resume.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        resume.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+
         resume.setOnAction(e->{//remove settings menu
             mainPane.setEffect(null);
             mainPane.setDisable(false);
@@ -118,22 +121,6 @@ public class MultiplayerGamePane extends GamePane {
 
     }
 
-    private void renderTimers() {
-        upperTimer= new Text("10:00");
-        upperTimer.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize));
-        upperTimer.setFill(Color.color(0.24, 0.24, 0.24));
-        upperTimer.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
-
-        lowerTimer= new Text("10:00");
-        lowerTimer.setViewOrder(1);
-        lowerTimer.setFill(Color.color(0.24, 0.24, 0.24));
-        lowerTimer.setFont(Font.loadFont(getResource("standardFont.ttf"),fontSize));
-        lowerTimer.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
-
-        leftMostPane.getChildren().add(0,upperTimer);
-        leftMostPane.getChildren().add(2,lowerTimer);
-    }
-
     private void showSettingsMenu(){
         mainPane.setDisable(true);
         mainPane.setEffect(new GaussianBlur(30));
@@ -141,17 +128,17 @@ public class MultiplayerGamePane extends GamePane {
     }
 
     private void endGame(){//todo give option to ask for a rematch
-        ImageView checkmate= chessBoardPane.internalBoard.isWhiteTurn()?blackWon:whiteWon;
-        checkmate.setPreserveRatio(true);
-        checkmate.fitWidthProperty().bind(heightProperty().divide(3));
+        Text checkmate= chessBoardPane.internalBoard.isWhiteTurn()?blackWon:whiteWon;
+        formatStandardText(checkmate,heightProperty(),15,Color.GREY,glowEffect(Color.RED,Color.GOLD));
+//        checkmate.setPreserveRatio(true);
+//        checkmate.fitWidthProperty().bind(heightProperty().divide(3));
         settingsMenu.getChildren().remove(0);//removes resume button
         settingsMenu.getChildren().add(0,checkmate);
 
         settingsMenu.spacingProperty().bind(heightProperty().divide(8));
 
-        settingsMenu.getChildren().add(1,new CustomButton(
+        settingsMenu.getChildren().add(1,new ImageCustomButton(
                 heightProperty().divide(10),
-                heightProperty().divide(2),
                 "PlaceHolderText.png"
         ));
         mainPane.getChildren().removeAll(moveHistory,rightMostPane);

@@ -7,13 +7,11 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import static GUI.GUI.getImage;
 
-public class CustomButton extends Button {
+public class ImageCustomButton extends Button {
     private ImageView graphic;
     private final DoubleBinding Y_BINDING;
-    private final DoubleBinding X_BINDING;
 
-    public CustomButton(DoubleBinding Y_BINDING, DoubleBinding X_BINDING, String backgroundImage){
-        this.X_BINDING = X_BINDING;
+    public ImageCustomButton(DoubleBinding Y_BINDING, String backgroundImage){
         this.Y_BINDING = Y_BINDING;
         graphic=new ImageView(getImage(backgroundImage));
         setGraphic(graphic);
@@ -22,8 +20,7 @@ public class CustomButton extends Button {
         setOnMouseEntered(e->setEffect(new ColorAdjust(0,0.2,-0.2,0)));
         setOnMouseExited(e->setEffect(new ColorAdjust(0,0,0,0)));
     }
-    public CustomButton(DoubleBinding Y_BINDING, DoubleBinding X_BINDING){
-        this.X_BINDING = X_BINDING;
+    public ImageCustomButton(DoubleBinding Y_BINDING){
         this.Y_BINDING = Y_BINDING;
         setBackground(null);
         setPadding(new Insets(10,10,10,10));
@@ -34,14 +31,12 @@ public class CustomButton extends Button {
     public void setGraphic(ImageView graphic) {
         this.graphic = graphic;
         super.setGraphic(graphic);
-        prefSizePropertyBind(Y_BINDING, X_BINDING);
+        prefSizePropertyBind(Y_BINDING);
     }
 
-    public void prefSizePropertyBind (DoubleBinding Ybinding, DoubleBinding Xbinding){
+    public void prefSizePropertyBind (DoubleBinding Ybinding){
         graphic.setPreserveRatio(true);
         graphic.fitHeightProperty().bind(Ybinding);
-        graphic.fitWidthProperty().bind(Xbinding);
-//        prefWidthProperty().bind(binding);
         prefHeightProperty().bind(Ybinding);
     }
 }
