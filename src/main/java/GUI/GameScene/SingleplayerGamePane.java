@@ -2,11 +2,21 @@ package GUI.GameScene;
 
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
-    ImageCustomButton undoButton= new ImageCustomButton(heightProperty().divide(13),"UndoArrow.png");
-    ImageCustomButton redoButton= new ImageCustomButton(heightProperty().divide(13),"RedoArrow.png");
-    public SingleplayerGamePane() {
+    boolean whiteIsBottom;
+
+    public SingleplayerGamePane(boolean whiteIsBottom) {
+        super(whiteIsBottom,true);
+        this.whiteIsBottom=whiteIsBottom;
+        CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
+        undoButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        undoButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+
+        CustomButton redoButton= new CustomButton(heightProperty().divide(13),"RedoArrow.png");
+        redoButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        redoButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
         mainPane.setSpacing(9);
 
         ConfidenceBar confidenceBar= new ConfidenceBar(heightProperty(),whiteIsBottom);
@@ -19,21 +29,13 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         moveHistory.getChildren().add(undoRedoPane);
         moveHistory.prefSizePropertyBind(heightProperty().divide(1.1));
 
-        chessBoardPane.X_DRAGGING_OFFSET=whiteIsBottom?70:20;
-        chessBoardPane.heightProperty().addListener(e->{//makes it so the animations/dragging stay aligned even when the window is resized
-            chessBoardPane.X_ANIMATION_OFFSET=getHeight()/22;
-            chessBoardPane.Y_ANIMATION_OFFSET=getHeight()/22;
-
-            chessBoardPane.X_DRAGGING_OFFSET=getHeight()/7.8;
-            chessBoardPane.Y_DRAGGING_OFFSET=getHeight()/8;
-        });
 
         undoButton.setOnAction(e->chessBoardPane.undo());
         redoButton.setOnAction(e->chessBoardPane.redo());
     }
     @Override
     public GamePane previousMenu() {
-        return new MultiplayerGamePane();
+        return new MultiplayerGamePane(whiteIsBottom,false);
     }
 
 

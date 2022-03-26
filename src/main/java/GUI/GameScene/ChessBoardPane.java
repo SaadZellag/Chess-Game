@@ -31,7 +31,7 @@ import static GUI.GUI.*;
 public class ChessBoardPane extends StackPane{
 
     private final VBox promotionMenu= new VBox();
-    private final ImageCustomButton[] promotionButtons=new ImageCustomButton[4];
+    private final CustomButton[] promotionButtons=new CustomButton[4];
 
     private final Timer moveAnimationThread = new Timer(true);
 
@@ -46,23 +46,15 @@ public class ChessBoardPane extends StackPane{
 
     private final ToggleButton[] buttons = new ToggleButton[64];
     private boolean isDragging=false;
-    private boolean isRotated=false;
+    private boolean whiteIsBottom =true;
 
-    public double X_DRAGGING_OFFSET=45;
-    public double Y_DRAGGING_OFFSET=70;
-
-    public double X_ANIMATION_OFFSET =0;
-    public double Y_ANIMATION_OFFSET =0;
     private ImageView cloneView;
 
     public ObservableList<Move> moveHistoryList = FXCollections.observableArrayList();
     public LinkedList<Board> boardHistory= new LinkedList<>();
 
-    private final Background normalBackGround = getBackgroundImage("Board.png",this,true);
-
     private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
 
-    private final String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";
     private final String SELECTED_COLOR = "rgba(255, 29, 255, 0.5)";
     private final String UNSELECTED_COLOR = "transparent";
 //    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
@@ -72,18 +64,21 @@ public class ChessBoardPane extends StackPane{
     private final Image W_KNIGHT=getImage("Pieces/W_Knight.png");
     private final Image W_BISHOP=getImage("Pieces/W_Bishop.png");
     private final Image W_QUEEN=getImage("Pieces/W_Queen.png");
-    private Image W_KING=getImage("Pieces/W_King.png");
+    private final Image W_KING=getImage("Pieces/W_King.png");
 
     private final Image B_PAWN=getImage("Pieces/B_Pawn.png");
     private final Image B_ROOK=getImage("Pieces/B_Rook.png");
     private final Image B_KNIGHT=getImage("Pieces/B_Knight.png");
     private final Image B_BISHOP=getImage("Pieces/B_Bishop.png");
     private final Image B_QUEEN=getImage("Pieces/B_Queen.png");
-    private Image B_KING=getImage("Pieces/B_King.png");
+    private final Image B_KING=getImage("Pieces/B_King.png");
 
     private final Runnable runOnGameOver;
 
-    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver){
+    private final boolean isLocalGame;
+
+    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver,boolean isLocalGame){
+        this.isLocalGame=isLocalGame;
         this.runOnGameOver=runOnGameOver;
 
         boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
@@ -93,8 +88,8 @@ public class ChessBoardPane extends StackPane{
             grid= FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("GUI/Panes/BaseChessBoardPane.fxml")));
             getChildren().addAll(grid,draggingSurface);
             grid.setAlignment(Pos.CENTER);
+            Background normalBackGround = getBackgroundImage("Board.png", this, true);
             setBackground(normalBackGround);
-//            setStyle("-fx-background-color:green");
 
             //Create chess board
             for (int i=0;i<8;i++){
@@ -124,20 +119,13 @@ public class ChessBoardPane extends StackPane{
                 }
             }
 
-            heightProperty().addListener(e->{//makes it so the animations/dragging stay aligned even when the window is resized
-                X_ANIMATION_OFFSET=getHeight()/22;
-                Y_ANIMATION_OFFSET=getHeight()/22;
-//
-                X_DRAGGING_OFFSET=getHeight()/12.2;
-                Y_DRAGGING_OFFSET=getHeight()/8;
-            });
             placePieces();
             possibleMoves = internalBoard.generatePossibleMoves();
             prefSizePropertyBind(binding);
 
 
             for (int i=0;i<promotionButtons.length;i++){
-                promotionButtons[i]= new ImageCustomButton(grid.heightProperty().divide(8));
+                promotionButtons[i]= new CustomButton(grid.heightProperty().divide(8));
                 promotionMenu.getChildren().add(promotionButtons[i]);
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
@@ -181,14 +169,12 @@ public class ChessBoardPane extends StackPane{
         pieceImageView.setPreserveRatio(true);
         pieceImageView.setMouseTransparent(true);
         pieceImageView.fitWidthProperty().bind(grid.heightProperty().divide(9));
-        if(isRotated)
+        if(!whiteIsBottom)
             pieceImageView.setRotate(180);
         if(isWhite)
             pieceImageView.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
         else
-//            pieceImageView.setEffect(glowEffect(Color.PURPLE,Color.GOLD));
-//            pieceImageView.setEffect(glowEffect(Color.BLACK,  Color.color(1.0f-0.2, 0.84313726f-0.2, 0.0f)));
-            pieceImageView.setEffect(glowEffect(Color.MAGENTA,Color.PALEGOLDENROD));
+            pieceImageView.setEffect(glowEffect(Color.RED,Color.GOLD));
         isInCheck();
     }
 
@@ -214,7 +200,6 @@ public class ChessBoardPane extends StackPane{
         }
         if(selectedPieceIndex !=index){
             animateMovePiece(selectedPieceIndex,index);
-//            selectedPieceIndex=index;
             return;
         }
         clearSelectedTiles();
@@ -224,25 +209,28 @@ public class ChessBoardPane extends StackPane{
 
 
     public void tileDragged(int draggedTileIndex, MouseEvent e){
-        //start dragging piece
-        if (!isDragging&&buttons[draggedTileIndex].getGraphic()!=null){
-            selectedPieceIndex =draggedTileIndex;
-            displayPossibleMoves(draggedTileIndex);
-            createDraggablePiece(draggedTileIndex);
-            grid.setCursor(Cursor.NONE);
-        }
-
         //Allows moving piece to tile even if you drag it slightly
         if(selectedPieceIndex!=draggedTileIndex&&buttons[draggedTileIndex].isSelected()&&!isDragging){
             animateMovePiece(selectedPieceIndex,draggedTileIndex);
             return;
         }
+
+        //start dragging piece
+        if (!isDragging&&buttons[draggedTileIndex].getGraphic()!=null){
+            selectedPieceIndex =draggedTileIndex;
+            displayPossibleMoves(draggedTileIndex);
+            createDraggablePiece(draggedTileIndex);
+            grid.setCursor(Cursor.CLOSED_HAND);
+        }
+
+
         //do nothing if you drag an empty tile
         if (buttons[draggedTileIndex].getGraphic()==null){
             return;
         }
 
-        Point2D p=localToParent(e.getSceneX()-X_DRAGGING_OFFSET,e.getSceneY()-Y_DRAGGING_OFFSET);
+        double offset=cloneView.getFitWidth()/2*(whiteIsBottom ?-1:1);
+        Point2D p=sceneToLocal(e.getSceneX()+offset,e.getSceneY()+offset);
         cloneView.relocate(p.getX(),p.getY());
     }
 
@@ -259,7 +247,7 @@ public class ChessBoardPane extends StackPane{
         if (releasedLocation instanceof ToggleButton&&((ToggleButton) releasedLocation).isSelected())
             newIndex=GridPane.getRowIndex(releasedLocation)*8+GridPane.getColumnIndex(releasedLocation);
 
-        if(selectedPieceIndex ==newIndex&&!e.isDragDetect()){//Releasing dragged piece on initial location keeps it selected
+        if(selectedPieceIndex ==newIndex&&isDragging){ //return piece to original position if there was no move done
             buttons[index].getGraphic().setVisible(true);
             buttons[index].setSelected(true);
             draggingSurface.getChildren().remove(cloneView);
@@ -267,26 +255,21 @@ public class ChessBoardPane extends StackPane{
             isDragging=false;
             return;
         }
-        if(isDragging&&selectedPieceIndex !=newIndex){//move piece to new location when dragging
+        if(isDragging){//move piece to new location when dragging
             isDragging=false;
             draggingSurface.getChildren().remove(cloneView);
             movePiece(index,newIndex);
-
-            return;
         }
-
-        //return piece to original position if there was no move done
-        isDragging=false;
-        buttons[index].getGraphic().setVisible(true);
-        draggingSurface.getChildren().remove(cloneView);
-
     }
 
 
     public void displayPossibleMoves (int index){
         clearSelectedTiles();
         buttons[index].setSelected(true);
-        buttons[index].setStyle("-fx-background-color:"+CURRENT_TILE_COLOR);
+        String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";
+        buttons[index].setStyle("-fx-background-color:"+ CURRENT_TILE_COLOR);
+        if(!isLocalGame&&internalBoard.isWhiteTurn()!= whiteIsBottom)
+            return;
         for(Move move:possibleMoves){
             if(index==move.initialLocation){
                 buttons[move.finalLocation].setDisable(false);
@@ -358,25 +341,23 @@ public class ChessBoardPane extends StackPane{
         placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
         if(possibleMoves.size()==0)
-            endGame();
+            endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));
 
     }
 
     private void isInCheck() {
         Piece[]pieces =internalBoard.getPieces();
 
-        if(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN()))) {
+        if(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN()))) {//Highlight king that is in check
             for(int i=0;i<pieces.length;i++){
                 if(buttons[i].getGraphic()==null||pieces[i]==null)
                     continue;
                 if(pieces[i].type==PieceType.KING&&pieces[i].isWhite==internalBoard.isWhiteTurn()){
-                    buttons[i].getGraphic().setEffect(glowEffect(Color.RED,Color.PALEGOLDENROD));;
+                    buttons[i].getGraphic().setEffect(glowEffect(Color.RED,Color.color(0,0,0,0.5)));
                     break;
                 }
             }
         }
-
-
     }
 
     private void animateMovePiece(int selectedPieceIndex, int newIndex) {
@@ -386,12 +367,13 @@ public class ChessBoardPane extends StackPane{
 
         moveAnimationThread.schedule(new TimerTask() {
             int i=0;
+            final double OFFSET =cloneView.getFitWidth()/2;
 
             final double MULTIPLIER =8;
-            final double  initialX=buttons[selectedPieceIndex].getLayoutX()+X_ANIMATION_OFFSET;
-            final double initialY=buttons[selectedPieceIndex].getLayoutY()+Y_ANIMATION_OFFSET;
-            final double finalX=buttons[newIndex].getLayoutX()+X_ANIMATION_OFFSET;
-            final double finalY=buttons[newIndex].getLayoutY()+Y_ANIMATION_OFFSET;
+            final double  initialX=buttons[selectedPieceIndex].getLayoutX()+ OFFSET;
+            final double initialY=buttons[selectedPieceIndex].getLayoutY()+ OFFSET;
+            final double finalX=buttons[newIndex].getLayoutX()+ OFFSET;
+            final double finalY=buttons[newIndex].getLayoutY()+ OFFSET;
 
             final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
@@ -409,16 +391,18 @@ public class ChessBoardPane extends StackPane{
         },0,1000/REFRESH_RATE);
     }
 
-    private void endGame() {//todo
-        System.out.println("Checkmate");
+    public void endGame(boolean isCheckmate) {
         setBackground(dangerBackGround);
-        Piece[]pieces =internalBoard.getPieces();
-        for(int i=0;i<pieces.length;i++){
-            if(pieces[i]==null)
-                continue;
-            if(pieces[i].type==PieceType.KING&&pieces[i].isWhite==internalBoard.isWhiteTurn()){
-                buttons[i].setRotate(buttons[i].getRotate()+90);
-                break;
+
+        if(isCheckmate){
+            Piece[] pieces = internalBoard.getPieces();
+            for (int i = 0; i < pieces.length; i++) {
+                if (pieces[i] == null)
+                    continue;
+                if (pieces[i].type == PieceType.KING && pieces[i].isWhite == internalBoard.isWhiteTurn()) {
+                    buttons[i].setRotate(buttons[i].getRotate() + 90);
+                    break;
+                }
             }
         }
 
@@ -446,7 +430,7 @@ public class ChessBoardPane extends StackPane{
         formatPieceImageView(internalBoard.isWhiteTurn(),pawn);
         buttons[mv.finalLocation].setGraphic(pawn);
 
-        for (ImageCustomButton promotionButton:promotionButtons)
+        for (CustomButton promotionButton:promotionButtons)
             formatPieceImageView(internalBoard.isWhiteTurn(),(ImageView) promotionButton.getGraphic());
 
 
@@ -454,11 +438,7 @@ public class ChessBoardPane extends StackPane{
         promotionButtons[1].setOnAction(e->piecePromoted(mv,PieceType.BISHOP));
         promotionButtons[2].setOnAction(e->piecePromoted(mv,PieceType.QUEEN));
         promotionButtons[3].setOnAction(e->piecePromoted(mv,PieceType.KNIGHT));
-
-
     }
-
-
 
     private void piecePromoted(Move mv,PieceType pieceType) {
         for (Move possibleMove:possibleMoves) {
@@ -481,12 +461,13 @@ public class ChessBoardPane extends StackPane{
             int i=0;
             final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[56]:buttons[0];
             final ToggleButton targetSquare=buttons[mv.finalLocation+1];
+            final double OFFSET =cloneView.getFitWidth()/2;
 
             final double MULTIPLIER =6;
-            final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
-            final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
-            final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
-            final double finalY=targetSquare.getLayoutY()+Y_ANIMATION_OFFSET;
+            final double  initialX=targetTower.getLayoutX()+OFFSET;
+            final double initialY=targetTower.getLayoutY()+OFFSET;
+            final double finalX=targetSquare.getLayoutX()+OFFSET;
+            final double finalY=targetSquare.getLayoutY()+OFFSET;
 
             final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
@@ -515,12 +496,13 @@ public class ChessBoardPane extends StackPane{
             int i=0;
             final ToggleButton targetTower= internalBoard.isWhiteTurn()?buttons[63]:buttons[7];
             final ToggleButton targetSquare=buttons[mv.finalLocation-1];
+            final double OFFSET =cloneView.getFitWidth()/2;
 
             final double MULTIPLIER =6;
-            final double  initialX=targetTower.getLayoutX()+X_ANIMATION_OFFSET;
-            final double initialY=targetTower.getLayoutY()+Y_ANIMATION_OFFSET;
-            final double finalX=targetSquare.getLayoutX()+X_ANIMATION_OFFSET;
-            final double finalY=targetSquare.getLayoutY()+Y_ANIMATION_OFFSET;
+            final double  initialX=targetTower.getLayoutX()+OFFSET;
+            final double initialY=targetTower.getLayoutY()+OFFSET;
+            final double finalX=targetSquare.getLayoutX()+OFFSET;
+            final double finalY=targetSquare.getLayoutY()+OFFSET;
 
             final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
@@ -545,9 +527,7 @@ public class ChessBoardPane extends StackPane{
             if(button.getGraphic()!=null)
                 button.getGraphic().setRotate(180);
         }
-        isRotated=true;
-        Y_DRAGGING_OFFSET=-20;
-        X_DRAGGING_OFFSET=-10;
+        whiteIsBottom =false;
     }
     public void undo(){
         if(playedMovesCounter!=0){

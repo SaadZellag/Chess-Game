@@ -1,52 +1,53 @@
 package GUI.GameScene;
 
+import engine.internal.BitBoard;
+import engine.internal.MoveGen;
 import game.Move;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
 
 public class MultiplayerGamePane extends GamePane {
     public HBox mainPane = new HBox();
-    public VBox settingsMenu;
+    public VBox pauseMenu;
 
     private final StackPane root = new StackPane();
 
     ObservableList<Move> moveHistoryList;
     public MoveHistoryField moveHistory;
-    public boolean whiteIsBottom=true;
+    public boolean whiteIsBottom;
     public ChessBoardPane chessBoardPane;
-    private final Text whiteWon= new Text("WHITE WON");
-    private final Text blackWon = new Text("BLACK WON");
-    private double fontSize=19;
-    private Text upperTimer;
-    private Text lowerTimer;
+
     private final VBox rightMostPane;
-    private final VBox leftMostPane;
 
-    public MultiplayerGamePane() {
-        whiteWon.setEffect(new ColorAdjust(1,1,1,0));
-        blackWon.setEffect(new ColorAdjust(1,1,0,1));//todo remove this in final version
+    final long[] whiteRemainingTime = {TimeUnit.MINUTES.toMillis(10)};
+    final long[] blackRemainingTime= {TimeUnit.MINUTES.toMillis(10)};
 
+    private final Timer clockTimer= new Timer();
+    public MultiplayerGamePane(boolean whiteIsBottom,boolean isLocalGame) {
+        this.whiteIsBottom=whiteIsBottom;
 
         //parent inherited buttons
-        muteButton= new ImageCustomButton(heightProperty().divide(11),"Board.png");
+        muteButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        muteButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        previousSceneButton = new TextCustomButton(heightProperty(),"MAIN MENU",15,Color.GREY);
+        previousSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15,Color.color(0.24, 0.24, 0.24));
         previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        nextSceneButton= new TextCustomButton(heightProperty(),"QUIT GAME",15,Color.GREY);
+        nextSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15,Color.color(0.24, 0.24, 0.24));
         nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
@@ -58,19 +59,19 @@ public class MultiplayerGamePane extends GamePane {
 
 
         //lefMostPane
-        leftMostPane= new VBox();
+        VBox leftMostPane = new VBox();
 
-
-        chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame);
+        chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame,isLocalGame);
         if (!whiteIsBottom){
             chessBoardPane.setRotate(180);
             chessBoardPane.rotatePieces();
         }
-        upperTimer= new Text("10:00");
+        Text upperTimer= new Text("10:00");
         formatStandardText(upperTimer,heightProperty(),30,Color.color(0.24, 0.24, 0.24),glowEffect(Color.CYAN,Color.MAGENTA));
-        lowerTimer= new Text("10:00");
+        Text lowerTimer= new Text("10:00");
         formatStandardText(lowerTimer,heightProperty(),30,Color.color(0.24, 0.24, 0.24),glowEffect(Color.CYAN,Color.MAGENTA));
         lowerTimer.setViewOrder(1);
+        startTimers(upperTimer,lowerTimer);
 
         leftMostPane.getChildren().addAll(upperTimer,chessBoardPane,lowerTimer);
 
@@ -93,62 +94,104 @@ public class MultiplayerGamePane extends GamePane {
         //muteButton
         rightMostPane.getChildren().add(muteButton);
 
-        //settingsButton
-        ImageCustomButton settingsButton = new ImageCustomButton(heightProperty().divide(7),"Board.png");
-        rightMostPane.getChildren().add(settingsButton);
-        settingsButton.setOnAction(e-> showSettingsMenu());
+        //pauseMenuButton
+        CustomButton pauseMenuButton = new CustomButton(heightProperty().divide(7),"MenuIcon.png");
+        pauseMenuButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        pauseMenuButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        rightMostPane.getChildren().add(pauseMenuButton);
+        pauseMenuButton.setOnAction(e-> showPauseMenu());
 
 
 
-        TextCustomButton resume= new TextCustomButton(heightProperty(),"RESUME",15,Color.GREY);
+        CustomButton resume= new CustomButton(heightProperty(),"RESUME",15,Color.color(0.24, 0.24, 0.24));
         resume.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         resume.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        resume.setOnAction(e->{//remove settings menu
+        resume.setOnAction(e->{//remove pauseMenu
             mainPane.setEffect(null);
             mainPane.setDisable(false);
-            root.getChildren().remove(settingsMenu);
+            root.getChildren().remove(pauseMenu);
         });
 
-        //settings menu
-        settingsMenu= new VBox();
-        settingsMenu.setAlignment(Pos.CENTER);
-        settingsMenu.spacingProperty().bind(heightProperty().divide(6));
-        settingsMenu.setBackground(getBackgroundImage("RoundTextArea.png",settingsMenu,false));
-        settingsMenu.getChildren().addAll(resume,previousSceneButton,nextSceneButton);
+        //pauseMenu
+        pauseMenu = new VBox();
+        pauseMenu.setAlignment(Pos.CENTER);
+        pauseMenu.spacingProperty().bind(heightProperty().divide(6));
+        pauseMenu.setBackground(getBackgroundImage("RoundTextArea.png", pauseMenu,false));
 
-
+        pauseMenu.getChildren().addAll(resume,previousSceneButton,nextSceneButton);
+        pauseMenu.minWidthProperty().bind(chessBoardPane.heightProperty().multiply(0.9));
 
     }
 
-    private void showSettingsMenu(){
+    private void startTimers(Text upperTimer,Text lowerTimer) {
+        Date startTime= new Date();
+
+        clockTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
+                    whiteRemainingTime[0]-=1000;
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(whiteRemainingTime[0]);
+                    long millis =whiteRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    Platform.runLater(()->lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
+                }else{
+                    blackRemainingTime[0]-=1000;
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(blackRemainingTime[0]);
+                    long millis =blackRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    Platform.runLater(()->upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
+                }
+                if(blackRemainingTime[0]==0||whiteRemainingTime[0]==0){
+                    cancel();
+                    Platform.runLater(()->chessBoardPane.endGame(true));
+                }
+            }
+        },0, 1000L);
+    }
+
+    private void showPauseMenu(){
         mainPane.setDisable(true);
         mainPane.setEffect(new GaussianBlur(30));
-        root.getChildren().add(settingsMenu);
+        root.getChildren().add(pauseMenu);
     }
 
     private void endGame(){//todo give option to ask for a rematch
-        Text checkmate= chessBoardPane.internalBoard.isWhiteTurn()?blackWon:whiteWon;
-        formatStandardText(checkmate,heightProperty(),15,Color.GREY,glowEffect(Color.RED,Color.GOLD));
-//        checkmate.setPreserveRatio(true);
-//        checkmate.fitWidthProperty().bind(heightProperty().divide(3));
-        settingsMenu.getChildren().remove(0);//removes resume button
-        settingsMenu.getChildren().add(0,checkmate);
+        clockTimer.cancel();
+        pauseMenu.setViewOrder(1);
+        Text endMessage;
+        if(chessBoardPane.internalBoard.isWhiteTurn()){
+            endMessage= new Text("BLACK WON");
+            formatStandardText(endMessage,heightProperty(),15,Color.color(0.24, 0.24, 0.24),glowEffect(Color.RED,Color.GOLD));
+        }else{
+            endMessage= new Text("WHITE WON");
+            formatStandardText(endMessage,heightProperty(),15,Color.WHITE,glowEffect(Color.CYAN,Color.GOLD));
+        }
+        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&blackRemainingTime[0]!=0&&whiteRemainingTime[0]!=0){
+            endMessage= new Text("DRAW");
+            formatStandardText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
+        }
 
-        settingsMenu.spacingProperty().bind(heightProperty().divide(8));
 
-        settingsMenu.getChildren().add(1,new ImageCustomButton(
-                heightProperty().divide(10),
-                "PlaceHolderText.png"
-        ));
+
+        pauseMenu.getChildren().remove(0);//removes resume button
+        pauseMenu.getChildren().add(0,endMessage);
+
+        pauseMenu.spacingProperty().bind(heightProperty().divide(8));
+
+        CustomButton rematch= new CustomButton(heightProperty(),"REMATCH",15,Color.color(0.24, 0.24, 0.24));
+        rematch.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        rematch.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        rematch.setOnAction(e->previousSceneButton.fire());//todo
+
+        pauseMenu.getChildren().add(1,rematch);
         mainPane.getChildren().removeAll(moveHistory,rightMostPane);
-        mainPane.getChildren().add(settingsMenu);
+        mainPane.getChildren().add(pauseMenu);
 
     }
 
     @Override
     public GamePane previousMenu() {
-        return new SingleplayerGamePane();
+        return new SingleplayerGamePane(whiteIsBottom);//todo
     }
 
     @Override

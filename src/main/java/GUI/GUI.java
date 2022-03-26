@@ -9,6 +9,7 @@ import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
@@ -33,7 +34,7 @@ public class GUI extends Application {
         StackPane root= new StackPane();
         root.setAlignment(null);
         root.setBackground(getBackgroundImage("Main Background.png",root,true));
-        GamePane initialPane= new SingleplayerGamePane();
+        GamePane initialPane= new SingleplayerGamePane(true);
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
         primaryStage.setScene(mainScene);
@@ -88,7 +89,12 @@ public class GUI extends Application {
     }
 
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){
-        BackgroundImage bImage = new BackgroundImage(getImage(imageName), BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, new BackgroundSize(region.getWidth(), region.getHeight(), true, true, true, cover));
+        BackgroundImage bImage = new BackgroundImage(
+                getImage(imageName),
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(region.getWidth(), region.getHeight(), false, false, true, cover));
         return new Background(bImage);
     }
 
@@ -96,6 +102,13 @@ public class GUI extends Application {
 
         //mute controller
         currentMenu.muteButton.setOnAction(e->BGM.setMute(!BGM.isMute()));
+        currentMenu.muteButton.setOnMouseReleased(e->{
+            if(BGM.isMute())
+                currentMenu.muteButton.setGraphic(new ImageView(getImage("Mute.png")));
+            else
+                currentMenu.muteButton.setGraphic(new ImageView(getImage("Unmute.png")));
+            currentMenu.muteButton.getGraphic().setEffect(currentMenu.muteButton.hoveredGlowEffect);
+        });
 
         //nextMenu
         currentMenu.nextSceneButton.setOnAction(e->{
