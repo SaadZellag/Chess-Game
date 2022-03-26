@@ -1,8 +1,9 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Piece {
+public class Piece implements Serializable {
     public final boolean isWhite;
     public final PieceType type;
 

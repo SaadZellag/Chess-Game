@@ -1,8 +1,9 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Move {
+public class Move implements Serializable {
     public enum Info {
         PROMOTION,
         EN_PASSANT,
