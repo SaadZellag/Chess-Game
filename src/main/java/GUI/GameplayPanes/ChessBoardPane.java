@@ -1,5 +1,6 @@
-package GUI.GameScene;
+package GUI.GameplayPanes;
 
+import GUI.CustomButton;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Board;
@@ -19,6 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
@@ -131,6 +133,13 @@ public class ChessBoardPane extends StackPane{
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
 
 
+            addEventHandler(KeyEvent.KEY_PRESSED,e->{//todo this is for testing, remove later
+                int random = (int)(Math.random()*possibleMoves.size()-1);
+                Move move=possibleMoves.get(random);
+                animateMovePiece(move);
+            });
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -232,6 +241,7 @@ public class ChessBoardPane extends StackPane{
         double offset=cloneView.getFitWidth()/2*(whiteIsBottom ?-1:1);
         Point2D p=sceneToLocal(e.getSceneX()+offset,e.getSceneY()+offset);
         cloneView.relocate(p.getX(),p.getY());
+        cloneView.setVisible(true);
     }
 
     public void tileReleased(int index, MouseEvent e){
@@ -250,14 +260,14 @@ public class ChessBoardPane extends StackPane{
         if(selectedPieceIndex ==newIndex&&isDragging){ //return piece to original position if there was no move done
             buttons[index].getGraphic().setVisible(true);
             buttons[index].setSelected(true);
-            draggingSurface.getChildren().remove(cloneView);
+            draggingSurface.getChildren().removeAll(cloneView);
             displayPossibleMoves(index);
             isDragging=false;
             return;
         }
         if(isDragging){//move piece to new location when dragging
             isDragging=false;
-            draggingSurface.getChildren().remove(cloneView);
+            draggingSurface.getChildren().removeAll(cloneView);
             movePiece(index,newIndex);
         }
     }
@@ -268,8 +278,11 @@ public class ChessBoardPane extends StackPane{
         buttons[index].setSelected(true);
         String CURRENT_TILE_COLOR = "rgba(0, 255, 0, 0.5)";
         buttons[index].setStyle("-fx-background-color:"+ CURRENT_TILE_COLOR);
+
+        //Cannot control opponent pieces unless it's local multiplayer
         if(!isLocalGame&&internalBoard.isWhiteTurn()!= whiteIsBottom)
             return;
+
         for(Move move:possibleMoves){
             if(index==move.initialLocation){
                 buttons[move.finalLocation].setDisable(false);
@@ -292,25 +305,13 @@ public class ChessBoardPane extends StackPane{
         Image cloneImage= ((ImageView) buttons[index].getGraphic()).getImage();
         cloneView = new ImageView(cloneImage);
         formatPieceImageView(internalBoard.getPieces()[index].isWhite,cloneView);
+        cloneView.setVisible(false);
         draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
 
     private void movePiece(int index, int newIndex) {
-        playedMovesCounter++;
 
-        draggingSurface.getChildren().remove(cloneView);
-        buttons[index].setSelected(false);
-
-        //Remove moves from history if you had undone
-        while (boardHistory.size()>playedMovesCounter){
-            boardHistory.remove(playedMovesCounter).toFEN();
-            moveHistoryList.remove(playedMovesCounter-1);
-        }
-
-        //Store previous board state so that you can undo
-        boardHistory.add(internalBoard.clone());
-        internalBoard=boardHistory.get(playedMovesCounter);
 
 
         loop: for (Move mv : possibleMoves) {
@@ -333,6 +334,22 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
+        playedMovesCounter++;
+
+        draggingSurface.getChildren().removeAll(cloneView);
+        buttons[mv.initialLocation].setSelected(false);
+
+        //Remove moves from history if you had undone
+        while (boardHistory.size()>playedMovesCounter){
+            boardHistory.remove(playedMovesCounter).toFEN();
+            moveHistoryList.remove(playedMovesCounter-1);
+        }
+
+        //Store previous board state so that you can undo
+        boardHistory.add(internalBoard.clone());
+        internalBoard=boardHistory.get(playedMovesCounter);
+
+
         moveHistoryList.add(mv);
         clearSelectedTiles();
         isDragging=false;
@@ -386,7 +403,44 @@ public class ChessBoardPane extends StackPane{
                         grid.setMouseTransparent(false);
                     });
                 }
-                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
+                Platform.runLater(()-> {
+                    cloneView.relocate(initialX + i * slopeX, initialY + i * slopeY);
+                    cloneView.setVisible(true);
+                });
+            }
+        },0,1000/REFRESH_RATE);
+    }
+    private synchronized void animateMovePiece(Move mv) {//this method is to animate moves not done by the user
+
+        createDraggablePiece(mv.initialLocation);
+        buttons[mv.initialLocation].setSelected(false);
+        grid.setMouseTransparent(true);
+
+        moveAnimationThread.schedule(new TimerTask() {
+            int i=0;
+            final double OFFSET =cloneView.getFitWidth()/2;
+
+            final double MULTIPLIER =8;
+            final double  initialX=buttons[mv.initialLocation].getLayoutX()+ OFFSET;
+            final double initialY=buttons[mv.initialLocation].getLayoutY()+ OFFSET;
+            final double finalX=buttons[mv.finalLocation].getLayoutX()+ OFFSET;
+            final double finalY=buttons[mv.finalLocation].getLayoutY()+ OFFSET;
+
+            final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
+            final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
+            @Override
+            public void run() {
+                if (++i==REFRESH_RATE/ MULTIPLIER){
+                    cancel();
+                    Platform.runLater(()->{
+                        finalizeMovePlay(mv);
+                        grid.setMouseTransparent(false);
+                    });
+                }
+                Platform.runLater(()-> {
+                    cloneView.relocate(initialX + i * slopeX, initialY + i * slopeY);
+                    cloneView.setVisible(true);
+                });
             }
         },0,1000/REFRESH_RATE);
     }
@@ -410,6 +464,10 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void handlePromotion(Move mv) {
+        if(!isLocalGame&&internalBoard.isWhiteTurn()!= whiteIsBottom) {
+            piecePromoted(mv,mv.promotionPiece);
+            return;
+        }
         grid.setMouseTransparent(true);
         draggingSurface.setMouseTransparent(false);
         draggingSurface.getChildren().add(promotionMenu);
@@ -478,11 +536,14 @@ public class ChessBoardPane extends StackPane{
                     Platform.runLater(()->{
                         finalizeMovePlay(mv);
                         grid.setMouseTransparent(false);
-                        draggingSurface.getChildren().remove(cloneView);
+                        draggingSurface.getChildren().removeAll(cloneView);
 
                     });
                 }
-                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
+                Platform.runLater(()-> {
+                    cloneView.relocate(initialX + i * slopeX, initialY + i * slopeY);
+                    cloneView.setVisible(true);
+                });
             }
         },0,1000/REFRESH_RATE);
     }
@@ -513,11 +574,14 @@ public class ChessBoardPane extends StackPane{
                     Platform.runLater(()->{
                         finalizeMovePlay(mv);
                         grid.setMouseTransparent(false);
-                        draggingSurface.getChildren().remove(cloneView);
+                        draggingSurface.getChildren().removeAll(cloneView);
 
                     });
                 }
-                Platform.runLater(()->cloneView.relocate(initialX+ i*slopeX,initialY+ i*slopeY));
+                Platform.runLater(()-> {
+                    cloneView.relocate(initialX + i * slopeX, initialY + i * slopeY);
+                    cloneView.setVisible(true);
+                });
             }
         },0,1000/REFRESH_RATE);
     }

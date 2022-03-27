@@ -1,4 +1,4 @@
-package GUI.GameScene;
+package GUI;
 
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -37,6 +37,9 @@ public class CustomButton extends Button {
         setOnMouseEntered(e->graphic.setEffect(hoveredGlowEffect));
         setOnMouseExited(e-> graphic.setEffect(idleGlowEffect));
         prefSizePropertyBind();
+    }
+    public  CustomButton(){
+
     }
 
     public CustomButton(DoubleBinding Y_BINDING){

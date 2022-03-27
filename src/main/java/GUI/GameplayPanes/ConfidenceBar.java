@@ -1,4 +1,4 @@
-package GUI.GameScene;
+package GUI.GameplayPanes;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;

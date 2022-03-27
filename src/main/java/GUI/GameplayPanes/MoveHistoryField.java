@@ -1,4 +1,4 @@
-package GUI.GameScene;
+package GUI.GameplayPanes;
 
 import game.ChessUtils;
 import game.Move;

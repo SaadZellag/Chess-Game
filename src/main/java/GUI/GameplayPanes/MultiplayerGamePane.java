@@ -1,5 +1,9 @@
-package GUI.GameScene;
+package GUI.GameplayPanes;
 
+import GUI.CustomButton;
+import GUI.GamePane;
+import GUI.MainMenuPane;
+import GUI.PlayPane;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Move;
@@ -39,17 +43,22 @@ public class MultiplayerGamePane extends GamePane {
     public MultiplayerGamePane(boolean whiteIsBottom,boolean isLocalGame) {
         this.whiteIsBottom=whiteIsBottom;
 
+
         //parent inherited buttons
         muteButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         muteButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        previousSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15,Color.color(0.24, 0.24, 0.24));
+        previousSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15,Color.WHITE);
         previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
-        nextSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15,Color.color(0.24, 0.24, 0.24));
+        nextSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15,Color.WHITE);
         nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+
+        nextSceneButton2= new CustomButton(heightProperty(),"REMATCH",15,Color.WHITE);
+        nextSceneButton2.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
+        nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
 
         getChildren().add(root);
@@ -103,7 +112,7 @@ public class MultiplayerGamePane extends GamePane {
 
 
 
-        CustomButton resume= new CustomButton(heightProperty(),"RESUME",15,Color.color(0.24, 0.24, 0.24));
+        CustomButton resume= new CustomButton(heightProperty(),"RESUME",15,Color.WHITE);
         resume.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         resume.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
@@ -178,26 +187,28 @@ public class MultiplayerGamePane extends GamePane {
 
         pauseMenu.spacingProperty().bind(heightProperty().divide(8));
 
-        CustomButton rematch= new CustomButton(heightProperty(),"REMATCH",15,Color.color(0.24, 0.24, 0.24));
-        rematch.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        rematch.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
-        rematch.setOnAction(e->previousSceneButton.fire());//todo
 
-        pauseMenu.getChildren().add(1,rematch);
+
+        pauseMenu.getChildren().add(1,nextSceneButton2);
         mainPane.getChildren().removeAll(moveHistory,rightMostPane);
         mainPane.getChildren().add(pauseMenu);
 
     }
 
     @Override
-    public GamePane previousMenu() {
-        return new SingleplayerGamePane(whiteIsBottom);//todo
+    public GamePane previousMenu() {//Main menu
+        return new MainMenuPane();
     }
 
     @Override
-    public GamePane nextMenu() {
+    public GamePane nextMenu() {//Exit game
         Platform.exit();
         System.exit(0);
         return null;
+    }
+
+    @Override
+    public GamePane nextMenu2() {//rematch
+        return null;//todo
     }
 }

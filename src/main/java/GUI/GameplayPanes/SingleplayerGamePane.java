@@ -1,15 +1,20 @@
-package GUI.GameScene;
+package GUI.GameplayPanes;
 
+import GUI.CustomButton;
+import GUI.GamePane;
+import GUI.MainMenuPane;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
-    boolean whiteIsBottom;
+    private final boolean whiteIsBottom;
+    private final double difficulty;
 
-    public SingleplayerGamePane(boolean whiteIsBottom) {
+    public SingleplayerGamePane(boolean whiteIsBottom,double difficulty) {
         super(whiteIsBottom,true);
         this.whiteIsBottom=whiteIsBottom;
+        this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
         undoButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
         undoButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
@@ -33,9 +38,14 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         undoButton.setOnAction(e->chessBoardPane.undo());
         redoButton.setOnAction(e->chessBoardPane.redo());
     }
+
     @Override
-    public GamePane previousMenu() {
-        return new MultiplayerGamePane(whiteIsBottom,false);
+    public GamePane nextMenu2() {//Rematch
+        return new SingleplayerGamePane(whiteIsBottom,difficulty);
+    }
+    @Override
+    public GamePane previousMenu() {//Main Menu
+        return new MainMenuPane();
     }
 
 

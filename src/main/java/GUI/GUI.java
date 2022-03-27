@@ -1,13 +1,11 @@
 package GUI;
 
-import GUI.GameScene.GamePane;
-import GUI.GameScene.SingleplayerGamePane;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -32,9 +30,8 @@ public class GUI extends Application {
 
         //Initial scene
         StackPane root= new StackPane();
-        root.setAlignment(null);
         root.setBackground(getBackgroundImage("Main Background.png",root,true));
-        GamePane initialPane= new SingleplayerGamePane(true);
+        GamePane initialPane= new MainMenuPane();
         root.getChildren().add(initialPane);
         Scene mainScene= new Scene(root,950,510);
         primaryStage.setScene(mainScene);
@@ -66,6 +63,10 @@ public class GUI extends Application {
         primaryStage.setMinWidth(1050);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
+        primaryStage.setOnCloseRequest(e->{
+            Platform.exit();
+            System.exit(0);
+        });
         primaryStage.show();
 
     }
@@ -110,13 +111,24 @@ public class GUI extends Application {
             currentMenu.muteButton.getGraphic().setEffect(currentMenu.muteButton.hoveredGlowEffect);
         });
 
-        //nextMenu
+        //nextMenus
         currentMenu.nextSceneButton.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu();
             root.getChildren().add(nextMenu);
             root.getChildren().remove(currentMenu);
             HandleSceneSwitch(root,nextMenu,BGM);
-
+        });
+        currentMenu.nextSceneButton2.setOnAction(e->{
+            GamePane nextMenu=  currentMenu.nextMenu2();
+            root.getChildren().add(nextMenu);
+            root.getChildren().remove(currentMenu);
+            HandleSceneSwitch(root,nextMenu,BGM);
+        });
+        currentMenu.nextSceneButton3.setOnAction(e->{
+            GamePane nextMenu=  currentMenu.nextMenu3();
+            root.getChildren().add(nextMenu);
+            root.getChildren().remove(currentMenu);
+            HandleSceneSwitch(root,nextMenu,BGM);
         });
 
         //previousMenu
