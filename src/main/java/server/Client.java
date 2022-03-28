@@ -6,11 +6,13 @@ import game.Piece;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import static game.PieceType.PAWN;
 
 public class Client {
     private static final int PORT = 6969;
+    String host;
     public int playerID;
     private int movesPlayed;
     private Socket clientSocket;
@@ -19,25 +21,21 @@ public class Client {
     private ObjectOutputStream objOut;
     private ObjectInputStream objIn;
 
-    public String getHost() {
-        ArrayList<String> hostArray = new MulticastFinder().multicast();
-        if (hostArray.size() > 1) {
-            //TODO: Let player choose which host they want
-            return hostArray.get(0); //This is temporary
-        } else {
-            return hostArray.get(0);
-        }
+    public static HashMap<String, String> getHostDict() {
+        return new MulticastFinder().multicast();
     }
 
-    public Client(int source) {
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public Client(String host) {
         System.out.println("--- Client ---");
         try {
-            //0 = run from host and 1 = run from external client
-            String hostIP;
-            if (source == 0) {
-                hostIP = getHost();
-            } else {
-                hostIP = "localhost";
+            //1 = run from host and 0 = run from external client
+            String hostIP = "localhost";
+            if (!host.equals("localhost")) {
+                hostIP = host;
             }
             clientSocket = new Socket(hostIP, PORT);
             out = new DataOutputStream(clientSocket.getOutputStream());
@@ -95,17 +93,5 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        Piece p = new Piece(false, PAWN);
-        Move m = new Move(p, 12, 18);
-
-        Scanner s = new Scanner(System.in);
-        System.out.println("0 for host 1 for client");
-        int o = s.nextInt();
-
-        Client c = new Client(o);
-        c.sendMove(m);
     }
 }

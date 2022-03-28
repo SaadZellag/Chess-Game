@@ -3,11 +3,13 @@ package server;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
 
 public class MulticastFinder {
 
-    public ArrayList<String> multicast() {
-        ArrayList<String> ips = new ArrayList<>();
+    public HashMap<String, String> multicast() {
+        HashMap<String, String> ips = new HashMap<>();
         try {
             InetAddress mcastaddr = InetAddress.getByName("230.0.0.0");
 
@@ -26,7 +28,8 @@ public class MulticastFinder {
                 recPacket = new DatagramPacket(recvBuf, recvBuf.length);
                 try {
                     socket.receive(recPacket);
-                    ips.add(recPacket.getAddress().getHostAddress());
+                    ips.put(recPacket.getAddress().getHostAddress(), recPacket.getAddress().getCanonicalHostName());
+
                 } catch (SocketTimeoutException ignored) {}
             }
 
