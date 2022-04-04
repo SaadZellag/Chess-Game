@@ -11,19 +11,18 @@ import static game.PieceType.PAWN;
  */
 public class Client1Sim {
     public static void main(String[] args) {
-        Client a = new Client(0);
+        Client a = new Client("localhost");
         Piece p = new Piece(false, PAWN);
         Move m = new Move(p, 12, 18);
         Move rm;
         Scanner in = new Scanner(System.in);
 
         for (; ; ) {
-            if (a.isTurn()) {
-
+            if (a.currentTurn() == 0) {
                 System.out.println("PLAY:");
                 if (in.nextInt() == 1) {
                     a.sendMove(m);
-                    a.receiveMove();
+                    System.out.println(a.receiveMove());
                 }
             }
         }

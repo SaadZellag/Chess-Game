@@ -52,8 +52,8 @@ public class Client {
     public void sendMove(Move move) {
         try {
             objOut.writeObject(move);
-            out.flush();
-            System.out.println("Sent move to server.");
+            objOut.flush();
+            System.out.println("Sent move " + move.toString() + " to server.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,8 +67,7 @@ public class Client {
         }
 
         try {
-            if (in.available() == 1 && objIn.available() == 1) {
-                movesPlayed = in.readInt();
+            if (objIn.available() != 0) {
                 Move rm = (Move) objIn.readObject();
                 System.out.println("Player " + playerID + " received move from opposing player.");
                 return rm;
@@ -79,10 +78,17 @@ public class Client {
         return null;
     }
 
-     public boolean isTurn() {
-         movesPlayed++;
-        //Turn = 0 for player 1 and 1 for player 2
-         return movesPlayed == playerID;
+     public int currentTurn() {
+        try {
+            if (in.available() == 0) {
+                return 0;
+            }
+            movesPlayed = in.readInt();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Turn % 2 = 0 for P1 && 1 for P2
+         return movesPlayed % 2;
      }
 
     public void stopConnection() {

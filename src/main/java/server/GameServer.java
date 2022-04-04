@@ -17,7 +17,7 @@ public class GameServer {
     private ServerSocket ss;
     private int playersCon;
     // 0 = white's turn to play and 1 == black's turn
-    int movesPlayed = 0;
+    int movesPlayed;
     private ServerSideConnection whiteConnection;
     private ServerSideConnection blackConnection;
     private Move whiteMove;
@@ -52,9 +52,9 @@ public class GameServer {
                 } else {
                     blackConnection = ssc;
                 }
-                threadList.add(new Thread(ssc));
-                //Thread t = new Thread(ssc);
-                //t.start();
+                //threadList.add(new Thread(ssc));
+                Thread t = new Thread(ssc);
+                t.start();
             }
             System.out.println("All players connected.");
             for (Thread t : threadList) {
@@ -99,18 +99,19 @@ public class GameServer {
 
                 //Right now the first player to connect is white and the second is black
                     while (true) {
-
                         //ID 1 = first player connected so white
                         if (playerID == 1) {
                             whiteMove = (Move) objIn.readObject();
-                            System.out.println("White played move " + movesPlayed);
+                            System.out.println("White played move " + movesPlayed + " move: " + whiteMove);
                             movesPlayed++;
-                            blackConnection.sendBackMove(whiteMove, movesPlayed);
+                            blackConnection.sendBackMove(whiteMove);
+                            blackConnection.sendBackTurn(movesPlayed);
                         } else {
                             blackMove = (Move) objIn.readObject();
-                            System.out.println("Black played move " + movesPlayed);
+                            System.out.println("Black played move " + movesPlayed + " move: " + blackMove);
                             movesPlayed++;
-                            whiteConnection.sendBackMove(blackMove, movesPlayed);
+                            whiteConnection.sendBackMove(blackMove);
+                            whiteConnection.sendBackTurn(movesPlayed);
                         }
                     }
 
@@ -119,11 +120,18 @@ public class GameServer {
             }
         }
 
-        public void sendBackMove(Move m, int mp) {
+        public void sendBackMove(Move m) {
             try {
                 objOut.writeObject(m);
-                out.write(mp);
                 objOut.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void sendBackTurn(int mp) {
+            try {
+                out.writeInt(mp);
                 out.flush();
             } catch (IOException e) {
                 e.printStackTrace();
