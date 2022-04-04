@@ -3,33 +3,40 @@ package GUI;
 import GUI.GameplayPanes.MultiplayerGamePane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import server.Client;
+import server.GameServer;
 
-import static GUI.GUI.*;
+import static GUI.GUI.formatStandardText;
+import static GUI.GUI.glowEffect;
 
-public class MultiplayerLAN_Pane extends GamePane {
+public class CreateRoomPane extends GamePane {
+    CreateRoomPane(){
 
-    MultiplayerLAN_Pane(){
+        GameServer gameServer= new GameServer();
+        gameServer.accept();
+
+        Client serverClient= new Client("localhost");//todo change to  localhost
+
         VBox mainPane= new VBox();
 
         mainPane.prefWidthProperty().bind(widthProperty());
         mainPane.prefHeightProperty().bind(heightProperty());
         mainPane.setAlignment(Pos.TOP_CENTER);
         heightProperty().addListener(e->mainPane.setSpacing(heightProperty().divide(15).doubleValue()));
-       getChildren().add(mainPane);
+        getChildren().add(mainPane);
 
         final Text PLAY= new Text("PLAY");
-        formatStandardText(PLAY,heightProperty(),10,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(PLAY,heightProperty(),10, Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
 
-        final Text LAN_PLAY= new Text(" LAN PLAY");
-        formatStandardText(LAN_PLAY,heightProperty(),30,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        final Text CREATE_ROOM= new Text(" CREATE ROOM");
+        formatStandardText(CREATE_ROOM,heightProperty(),30,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
 
-        VBox topPane= new VBox(PLAY,LAN_PLAY);
+        VBox topPane= new VBox(PLAY,CREATE_ROOM);
         topPane.setAlignment(Pos.TOP_LEFT);
         topPane.setSpacing(0);
         topPane.setPadding(new Insets(40,0,0,40));
@@ -40,14 +47,7 @@ public class MultiplayerLAN_Pane extends GamePane {
         VBox.setVgrow(bottomPane, Priority.ALWAYS);
 
 
-        nextSceneButton = new CustomButton(heightProperty(),"CREATE ROOM",10, Color.WHITE);
-        nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
-        nextSceneButton.setOnAction(e-> this.nextMenu());
 
-        nextSceneButton2 = new CustomButton(heightProperty(),"JOIN ROOM",10, Color.WHITE);
-        nextSceneButton2.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
 
         previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
@@ -56,21 +56,17 @@ public class MultiplayerLAN_Pane extends GamePane {
 
         bottomPane.getChildren().add(previousSceneButton);
 
-        mainPane.getChildren().addAll(topPane,nextSceneButton,nextSceneButton2,bottomPane);
+        mainPane.getChildren().addAll(topPane,nextSceneButton,bottomPane);
     }
     @Override
     public GamePane nextMenu() {//Create room
-        return new CreateRoomPane();
+        return new MultiplayerGamePane(true,false);//todo
     }
 
-    @Override
-    public GamePane nextMenu2() {//Join room
-        return new JoinRoomPane();
-    }
 
     @Override
     public GamePane previousMenu() {//PlayPane
-        return new PlayPane();
+        return new PlayPane();//todo need to close server when exiting
     }
 
 }
