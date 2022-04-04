@@ -145,7 +145,7 @@ public class ChessUtils {
     public static String moveToUCI(Move move) {
         Objects.requireNonNull(move);
 
-        return indexToAlgebraic(move.initialLocation) +"-"+ indexToAlgebraic(move.finalLocation);
+        return indexToAlgebraic(move.initialLocation) + indexToAlgebraic(move.finalLocation);
     }
 
     public static Move UCIToMove(String UCI, Piece piece) throws IllegalArgumentException {

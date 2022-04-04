@@ -214,47 +214,52 @@ public class Board implements Cloneable{
             pieceEaten = Optional.empty();
         }
 
-
-        // Checking special flags
-        if (move.moveInfo != null) {
-            switch (move.moveInfo) {
-                case EN_PASSANT -> {
-                    int delta = this.isWhiteTurn ? 8 : -8;
-                    pieceEaten = Optional.of(this.pieces[move.finalLocation + delta]); // Should be a pawn
-                    this.pieces[move.finalLocation + delta] = null;
-                }
-                case KING_CASTLE -> {
-                    this.pieces[move.finalLocation - 1] = this.pieces[move.finalLocation + 1];
-                    this.pieces[move.finalLocation + 1] = null;
-                }
-                case QUEEN_CASTLE -> {
-                    this.pieces[move.finalLocation + 1] = this.pieces[move.finalLocation - 2];
-                    this.pieces[move.finalLocation - 2] = null;
-                }
-                case PROMOTION -> {
-                    this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
-                }
-
-            }
-
-            // Castling
-        }
-        this.enPassantTargetSquare = GameInfo.enPassantTargetSquare(move.extraInfo);
-//        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
-
-        // Handling extra info
-        if (move.extraInfo != 0) {
-            this.canWhiteCastleKingSide = GameInfo.canWhiteCastleKingSide(move.extraInfo);
-            this.canWhiteCastleQueenSide = GameInfo.canWhiteCastleQueenSide(move.extraInfo);
-            this.canBlackCastleKingSide = GameInfo.canBlackCastleKingSide(move.extraInfo);
-            this.canBlackCastleQueenSide = GameInfo.canBlackCastleQueenSide(move.extraInfo);
-
-            this.enPassantTargetSquare = 63 - GameInfo.enPassantTargetSquare(move.extraInfo);
-
-        }
+        String currentFEN = this.toFEN();
+        long[] bitboard = BitBoard.fromFEN(currentFEN);
+        BitBoard.playMove(bitboard, ChessUtils.moveToUCI(move));
 
 
-        this.isWhiteTurn = !this.isWhiteTurn;
+
+//        // Checking special flags
+//        if (move.moveInfo != null) {
+//            switch (move.moveInfo) {
+//                case EN_PASSANT -> {
+//                    int delta = this.isWhiteTurn ? 8 : -8;
+//                    pieceEaten = Optional.of(this.pieces[move.finalLocation + delta]); // Should be a pawn
+//                    this.pieces[move.finalLocation + delta] = null;
+//                }
+//                case KING_CASTLE -> {
+//                    this.pieces[move.finalLocation - 1] = this.pieces[move.finalLocation + 1];
+//                    this.pieces[move.finalLocation + 1] = null;
+//                }
+//                case QUEEN_CASTLE -> {
+//                    this.pieces[move.finalLocation + 1] = this.pieces[move.finalLocation - 2];
+//                    this.pieces[move.finalLocation - 2] = null;
+//                }
+//                case PROMOTION -> {
+//                    this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
+//                }
+//
+//            }
+//
+//            // Castling
+//        }
+//        this.enPassantTargetSquare = GameInfo.enPassantTargetSquare(move.extraInfo);
+////        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
+//
+//        // Handling extra info
+//        if (move.extraInfo != 0) {
+//            this.canWhiteCastleKingSide = GameInfo.canWhiteCastleKingSide(move.extraInfo);
+//            this.canWhiteCastleQueenSide = GameInfo.canWhiteCastleQueenSide(move.extraInfo);
+//            this.canBlackCastleKingSide = GameInfo.canBlackCastleKingSide(move.extraInfo);
+//            this.canBlackCastleQueenSide = GameInfo.canBlackCastleQueenSide(move.extraInfo);
+//
+//            this.enPassantTargetSquare = 63 - GameInfo.enPassantTargetSquare(move.extraInfo);
+//
+//        }
+//
+//
+//        this.isWhiteTurn = !this.isWhiteTurn;
 
         return pieceEaten;
     }

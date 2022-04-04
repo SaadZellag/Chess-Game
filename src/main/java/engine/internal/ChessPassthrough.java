@@ -39,13 +39,10 @@ public interface ChessPassthrough {
 
             if (MoveInfo.isEnPassant(info)) {
                 moveInfo = Move.Info.EN_PASSANT;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.EN_PASSANT));
             } else if (MoveInfo.isKingCastle(info)) {
                 moveInfo = Move.Info.KING_CASTLE;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.KING_CASTLE));
             } else if (MoveInfo.isQueenCastle(info)) {
                 moveInfo = Move.Info.QUEEN_CASTLE;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.QUEEN_CASTLE));
             }
 
             if (moveInfo == null) {
