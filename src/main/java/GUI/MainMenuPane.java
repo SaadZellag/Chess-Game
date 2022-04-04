@@ -33,6 +33,8 @@ public class MainMenuPane extends GamePane{
         nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
         mainPane.getChildren().addAll(CHESS,nextSceneButton,nextSceneButton2);
+
+        //Todo quit game button
     }
     @Override
     public GamePane nextMenu() {//Play

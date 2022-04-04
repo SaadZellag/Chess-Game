@@ -102,6 +102,10 @@ public class SinglePlayerSettingsPane extends GamePane{
         slider.setPrefHeight(30);
         slider.maxWidthProperty().bind(widthProperty().divide(1.2));
         slider.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+//        slider.setMinorTickCount(10);
+//        slider.setShowTickLabels(true);
+//        slider.setShowTickMarks(true);
+//        slider.setMajorTickUnit(25);
 
         final Text DIFFICULTY= new Text("ENGINE DIFFICULTY");
         formatStandardText(DIFFICULTY,heightProperty(),15,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
