@@ -20,6 +20,7 @@ public class CreateRoomPane extends GamePane {
         GameServer gameServer= new GameServer();
         gameServer.accept();
 
+
         Client serverClient= new Client("localhost");//todo change to  localhost
 
         VBox mainPane= new VBox();

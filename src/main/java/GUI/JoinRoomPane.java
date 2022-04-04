@@ -3,6 +3,8 @@ package GUI;
 import GUI.GameplayPanes.MultiplayerGamePane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
@@ -10,16 +12,20 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import server.Client;
+
+import java.security.cert.CertificateNotYetValidException;
+import java.util.HashMap;
 
 import static GUI.GUI.*;
 
 public class JoinRoomPane extends GamePane{
     JoinRoomPane(){
 //        Client connectingClient= new Client("localhost");//todo write ip of the host, only create once host room has been selected
-
+        HashMap<String,String> hashMap=Client.getHostDict();
 
         //todo client needs to be in a loop
 
@@ -57,25 +63,29 @@ public class JoinRoomPane extends GamePane{
         nextSceneButton.setDisable(true);
 
         final VBox listOfRooms= new VBox();
+        listOfRooms.setStyle("-fx-background:transparent;-fx-background-color:rgba(0,255,0,0.5);");
         final ScrollPane scrollPane= new ScrollPane();
         scrollPane.setStyle("-fx-background:transparent;-fx-background-color:rgba(0,0,255,0.5);");
 //        final ImageView backgroundImagePane = new ImageView(getImage("RoundTextArea.png"));
         listOfRooms.setAlignment(Pos.CENTER);
 
+
 //
-        scrollPane.prefHeightProperty().bind(heightProperty().divide(3));
-        scrollPane.prefWidthProperty().bind(widthProperty().divide(2));
+        scrollPane.prefHeightProperty().bind(heightProperty().divide(2));
+        scrollPane.maxWidthProperty().bind(widthProperty().divide(1.3));
 
 
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setContent(listOfRooms);
+        listOfRooms.prefWidthProperty().bind(scrollPane.widthProperty());
         scrollPane.setPannable(true);
 
-        final TextFlow NO_ROOMS_FOUND= new TextFlow(new Text("NO ROOMS FOUND, PLEASE REFRESH"));
-        listOfRooms.getChildren().add(NO_ROOMS_FOUND);
+        final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE REFRESH");
+        formatStandardText(NO_ROOMS_FOUND,heightProperty(),18,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
 
-        formatStandardText((Text)NO_ROOMS_FOUND.getChildren().get(0),heightProperty(),10, Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+
+        listOfRooms.getChildren().add(NO_ROOMS_FOUND);
 
 
         ToggleGroup toggleGroup= new ToggleGroup();
