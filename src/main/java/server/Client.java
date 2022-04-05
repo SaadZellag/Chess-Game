@@ -16,10 +16,8 @@ public class Client {
     public int playerID;
     private int movesPlayed;
     private Socket clientSocket;
-    private DataOutputStream out;
-    private DataInputStream in;
-    private ObjectOutputStream objOut;
-    private ObjectInputStream objIn;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
 
     public static HashMap<String, String> getHostDict() {
         return new MulticastFinder().multicast();
@@ -38,10 +36,12 @@ public class Client {
                 hostIP = host;
             }
             clientSocket = new Socket(hostIP, PORT);
-            out = new DataOutputStream(clientSocket.getOutputStream());
-            in = new DataInputStream(clientSocket.getInputStream());
-            objOut = new ObjectOutputStream(clientSocket.getOutputStream());
-            objIn = new ObjectInputStream(clientSocket.getInputStream());
+
+            InputStream inputStream = clientSocket.getInputStream();
+            OutputStream outputStream = clientSocket.getOutputStream();
+
+            out = new ObjectOutputStream(outputStream);
+            in = new ObjectInputStream(inputStream);
             playerID = in.readInt();
             System.out.println("Connected as player " + playerID);
         } catch (IOException e) {
@@ -51,8 +51,8 @@ public class Client {
 
     public void sendMove(Move move) {
         try {
-            objOut.writeObject(move);
-            objOut.flush();
+            out.writeObject(move);
+            out.flush();
             System.out.println("Sent move " + move.toString() + " to server.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,18 +60,11 @@ public class Client {
         //return in.readUTF();
     }
 
-    public Move receiveMove() {
-        if (playerID == 1 && movesPlayed == 0) {
-            movesPlayed++;
-            return null;
-        }
-
+    public Turn receiveTurn() {
         try {
-            if (objIn.available() != 0) {
-                Move rm = (Move) objIn.readObject();
-                System.out.println("Player " + playerID + " received move from opposing player.");
-                return rm;
-            }
+            Turn rt = (Turn) in.readObject();
+            System.out.println("Player " + playerID + " received " + rt.getMove() + " | Total turns: " + rt.getMovesPlayed());
+            return rt;
         } catch(IOException | ClassNotFoundException e){
             e.printStackTrace();
         }

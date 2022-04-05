@@ -9,7 +9,6 @@ import game.Move;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class GameServer {
 
@@ -22,7 +21,6 @@ public class GameServer {
     private ServerSideConnection blackConnection;
     private Move whiteMove;
     private Move blackMove = null;
-    private ArrayList<Thread> threadList = new ArrayList<>();
     Thread beacon;
 
     public GameServer() {
@@ -57,9 +55,7 @@ public class GameServer {
                 t.start();
             }
             System.out.println("All players connected.");
-            for (Thread t : threadList) {
-                t.start();
-            }
+
             beacon.interrupt();
 
         } catch (IOException e) {
@@ -69,10 +65,9 @@ public class GameServer {
 
     private class ServerSideConnection implements Runnable {
         private Socket socket;
-        private DataInputStream in;
-        private DataOutputStream out;
-        private ObjectInputStream objIn;
-        private ObjectOutputStream objOut;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
+        private Turn turn;
         int playerID;
 
         public ServerSideConnection(Socket s, int id) {
@@ -80,10 +75,10 @@ public class GameServer {
             this.playerID = id;
 
             try {
-                in = new DataInputStream(socket.getInputStream());
-                out = new DataOutputStream(socket.getOutputStream());
-                objIn = new ObjectInputStream(socket.getInputStream());
-                objOut = new ObjectOutputStream(socket.getOutputStream());
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream();
+                in = new ObjectInputStream(inputStream);
+                out = new ObjectOutputStream(outputStream);
             } catch (IOException e) {
                 System.out.println("IO error from server side connection constructor");
                 e.printStackTrace();
@@ -101,17 +96,22 @@ public class GameServer {
                     while (true) {
                         //ID 1 = first player connected so white
                         if (playerID == 1) {
-                            whiteMove = (Move) objIn.readObject();
-                            System.out.println("White played move " + movesPlayed + " move: " + whiteMove);
+                            whiteMove = (Move) in.readObject();
+                            System.out.println("White played move " + movesPlayed + " | " + whiteMove);
                             movesPlayed++;
-                            blackConnection.sendBackMove(whiteMove);
-                            blackConnection.sendBackTurn(movesPlayed);
+                            turn = new Turn(whiteMove, movesPlayed);
+                            blackConnection.sendBackTurn(turn);
+                            System.out.println("Sent " + whiteMove);
+                            System.out.println("Sent total moves to black: " + movesPlayed);
+
                         } else {
-                            blackMove = (Move) objIn.readObject();
-                            System.out.println("Black played move " + movesPlayed + " move: " + blackMove);
+                            blackMove = (Move) in.readObject();
+                            System.out.println("Black played move " + movesPlayed + " | " + blackMove);
                             movesPlayed++;
-                            whiteConnection.sendBackMove(blackMove);
-                            whiteConnection.sendBackTurn(movesPlayed);
+                            turn = new Turn(blackMove, movesPlayed);
+                            whiteConnection.sendBackTurn(turn);
+                            System.out.println("Sent: " + blackMove);
+                            System.out.println("Sent total moves to white: " + movesPlayed);
                         }
                     }
 
@@ -120,19 +120,11 @@ public class GameServer {
             }
         }
 
-        public void sendBackMove(Move m) {
+        public void sendBackTurn(Turn turn) {
             try {
-                objOut.writeObject(m);
-                objOut.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void sendBackTurn(int mp) {
-            try {
-                out.writeInt(mp);
+                out.writeObject(turn);
                 out.flush();
+                System.out.println("This was the move sent: " + turn.getMove());
             } catch (IOException e) {
                 e.printStackTrace();
             }

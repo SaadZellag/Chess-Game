@@ -20,6 +20,7 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
         try {
+            System.out.println("---Establishing connection");
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
@@ -30,7 +31,8 @@ public class ClientHandler extends Thread {
 
         while (true) {
             try {
-                if (!((inputLine = in.readLine()) != null)) break;
+                if ((inputLine = in.readLine()) == null)
+                    break;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -38,7 +40,7 @@ public class ClientHandler extends Thread {
                 out.println("Goodbye.");
                 break;
             }
-            out.println(inputLine);
+            out.println("Hello Received.");
         }
 
         try {
