@@ -71,19 +71,6 @@ public class Client {
         return null;
     }
 
-     public int currentTurn() {
-        try {
-            if (in.available() == 0) {
-                return 0;
-            }
-            movesPlayed = in.readInt();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Turn % 2 = 0 for P1 && 1 for P2
-         return movesPlayed % 2;
-     }
-
     public void stopConnection() {
         try {
             in.close();
