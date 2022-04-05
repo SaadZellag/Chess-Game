@@ -20,17 +20,13 @@ public class MainMenuPane extends GamePane{
 
         final Text CHESS= new Text("CHESS");
 
-        formatStandardText(CHESS,heightProperty(),5,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(CHESS,heightProperty(),5);
 
 
-        nextSceneButton = new CustomButton(heightProperty(),"PLAY",10, Color.WHITE);
-        nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton = new CustomButton(heightProperty(),"PLAY",10);
         nextSceneButton.setOnAction(e-> this.nextMenu());
 
-        nextSceneButton2 = new CustomButton(heightProperty(),"TIPS",10, Color.WHITE);
-        nextSceneButton2.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton2 = new CustomButton(heightProperty(),"TIPS",10);
 
         mainPane.getChildren().addAll(CHESS,nextSceneButton,nextSceneButton2);
 

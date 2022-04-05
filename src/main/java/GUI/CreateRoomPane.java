@@ -32,10 +32,10 @@ public class CreateRoomPane extends GamePane {
         getChildren().add(mainPane);
 
         final Text PLAY= new Text("PLAY");
-        formatStandardText(PLAY,heightProperty(),10, Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(PLAY,heightProperty(),10);
 
         final Text CREATE_ROOM= new Text(" CREATE ROOM");
-        formatStandardText(CREATE_ROOM,heightProperty(),30,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(CREATE_ROOM,heightProperty(),30);
 
         VBox topPane= new VBox(PLAY,CREATE_ROOM);
         topPane.setAlignment(Pos.TOP_LEFT);
@@ -52,8 +52,7 @@ public class CreateRoomPane extends GamePane {
 
 
         previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
-        previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+
 
         bottomPane.getChildren().add(previousSceneButton);
 
