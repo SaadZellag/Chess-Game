@@ -15,24 +15,26 @@ import static GUI.GUI.*;
 
 public class CustomButton extends Button {
     private  Node graphic;
-    public DropShadow idleGlowEffect=glowEffect(Color.TRANSPARENT, Color.TRANSPARENT);
-    public DropShadow hoveredGlowEffect=glowEffect(Color.TRANSPARENT, Color.TRANSPARENT);
+    public DropShadow idleGlowEffect=glowEffect(Color.CYAN, Color.MAGENTA);
+    public DropShadow hoveredGlowEffect=glowEffect(Color.BLACK, Color.RED);
+    public Color fill= Color.WHITE;
     private DoubleBinding Y_BINDING;
 
-    public CustomButton(ReadOnlyDoubleProperty propertyToListen, String text, double fontScale, Color fill){//for text
+    public CustomButton(ReadOnlyDoubleProperty propertyToListen, String text, double fontScale){//for text
         graphic=new Text (text);
-        formatStandardText((Text)graphic,propertyToListen,fontScale,fill,idleGlowEffect);
-        setBackground(null);
+        formatText((Text)graphic,propertyToListen,fontScale,fill,idleGlowEffect);
+        setStyle("-fx-background-color:transparent");
         setPadding(new Insets(5,5,5,5));
         setGraphic(graphic);
         setOnMouseEntered(e->graphic.setEffect(hoveredGlowEffect));
         setOnMouseExited(e-> graphic.setEffect(idleGlowEffect));
     }
-    public CustomButton(DoubleBinding Y_BINDING, String backgroundImage){//for images
+    public CustomButton(DoubleBinding Y_BINDING, String image){//for images
         this.Y_BINDING = Y_BINDING;
-        graphic=new ImageView(getImage(backgroundImage));
+        graphic=new ImageView(getImage(image));
         setGraphic(graphic);
-        setBackground(null);
+        graphic.setEffect(idleGlowEffect);
+        setStyle("-fx-background-color:transparent");
         setPadding(new Insets(10,10,10,10));
         setOnMouseEntered(e->graphic.setEffect(hoveredGlowEffect));
         setOnMouseExited(e-> graphic.setEffect(idleGlowEffect));
@@ -42,9 +44,9 @@ public class CustomButton extends Button {
 
     }
 
-    public CustomButton(DoubleBinding Y_BINDING){
+    public CustomButton(DoubleBinding Y_BINDING){//custom button that had indeterminate graphic
         this.Y_BINDING = Y_BINDING;
-        setBackground(null);
+        setStyle("-fx-background-color:transparent");
         setPadding(new Insets(10,10,10,10));
         setOnMouseEntered(e->setEffect(new ColorAdjust(0,0.2,-0.2,0)));
         setOnMouseExited(e->setEffect(new ColorAdjust(0,0,0,0)));
@@ -69,6 +71,11 @@ public class CustomButton extends Button {
     }
     public void setHoveredGlowEffect(Color color1, Color color2){
         hoveredGlowEffect=glowEffect(color1, color2);
+    }
+    public void setFill(Color fill){
+        this.fill=fill;
+        if(graphic instanceof Text)
+            ((Text) graphic).setFill(fill);
     }
 
 }

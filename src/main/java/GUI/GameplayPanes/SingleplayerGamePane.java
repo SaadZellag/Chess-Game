@@ -16,12 +16,8 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         this.whiteIsBottom=whiteIsBottom;
         this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
-        undoButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        undoButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
         CustomButton redoButton= new CustomButton(heightProperty().divide(13),"RedoArrow.png");
-        redoButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        redoButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
         mainPane.setSpacing(9);
 
         ConfidenceBar confidenceBar= new ConfidenceBar(heightProperty(),whiteIsBottom);

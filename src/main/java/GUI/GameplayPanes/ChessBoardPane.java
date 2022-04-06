@@ -77,10 +77,10 @@ public class ChessBoardPane extends StackPane{
 
     private final Runnable runOnGameOver;
 
-    private final boolean isLocalGame;
+    private final boolean isLocalMultiplayer;
 
-    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver,boolean isLocalGame){
-        this.isLocalGame=isLocalGame;
+    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver,boolean isLocalMultiplayer){
+        this.isLocalMultiplayer = isLocalMultiplayer;
         this.runOnGameOver=runOnGameOver;
 
         boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
@@ -133,11 +133,11 @@ public class ChessBoardPane extends StackPane{
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
 
 
-            addEventHandler(KeyEvent.KEY_PRESSED,e->{//todo this is for testing, remove later
-                int random = (int)(Math.random()*possibleMoves.size()-1);
-                Move move=possibleMoves.get(random);
-                animateMovePiece(move);
-            });
+//            addEventHandler(KeyEvent.KEY_PRESSED,e->{//todo this is for testing, remove later
+//                int random = (int)(Math.random()*possibleMoves.size()-1);
+//                Move move=possibleMoves.get(random);
+//                animateMovePiece(move);
+//            });
 
 
         } catch (IOException e) {
@@ -280,7 +280,7 @@ public class ChessBoardPane extends StackPane{
         buttons[index].setStyle("-fx-background-color:"+ CURRENT_TILE_COLOR);
 
         //Cannot control opponent pieces unless it's local multiplayer
-        if(!isLocalGame&&internalBoard.isWhiteTurn()!= whiteIsBottom)
+        if(!isLocalMultiplayer &&internalBoard.isWhiteTurn()!= whiteIsBottom)
             return;
 
         for(Move move:possibleMoves){
@@ -464,7 +464,7 @@ public class ChessBoardPane extends StackPane{
     }
 
     private void handlePromotion(Move mv) {
-        if(!isLocalGame&&internalBoard.isWhiteTurn()!= whiteIsBottom) {
+        if(!isLocalMultiplayer &&internalBoard.isWhiteTurn()!= whiteIsBottom) {
             piecePromoted(mv,mv.promotionPiece);
             return;
         }

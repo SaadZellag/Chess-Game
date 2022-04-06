@@ -24,10 +24,10 @@ public class MultiplayerLAN_Pane extends GamePane {
        getChildren().add(mainPane);
 
         final Text PLAY= new Text("PLAY");
-        formatStandardText(PLAY,heightProperty(),10,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(PLAY,heightProperty(),10);
 
         final Text LAN_PLAY= new Text(" LAN PLAY");
-        formatStandardText(LAN_PLAY,heightProperty(),30,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(LAN_PLAY,heightProperty(),30);
 
         VBox topPane= new VBox(PLAY,LAN_PLAY);
         topPane.setAlignment(Pos.TOP_LEFT);
@@ -40,19 +40,13 @@ public class MultiplayerLAN_Pane extends GamePane {
         VBox.setVgrow(bottomPane, Priority.ALWAYS);
 
 
-        nextSceneButton = new CustomButton(heightProperty(),"CREATE ROOM",10, Color.WHITE);
-        nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton = new CustomButton(heightProperty(),"CREATE ROOM",10);
         nextSceneButton.setOnAction(e-> this.nextMenu());
 
-        nextSceneButton2 = new CustomButton(heightProperty(),"JOIN ROOM",10, Color.WHITE);
-        nextSceneButton2.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton2 = new CustomButton(heightProperty(),"JOIN ROOM",10);
 
 
         previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
-        previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
 
         bottomPane.getChildren().add(previousSceneButton);
 

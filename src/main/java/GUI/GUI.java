@@ -3,7 +3,6 @@ package GUI;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -82,11 +81,17 @@ public class GUI extends Application {
         secondShadow.setInput(firstShadow);
         return secondShadow;
     }
-    public static void formatStandardText(Text text, ReadOnlyDoubleProperty propertyToListen, double fontScale, Color fill,DropShadow idleGlowEffect){
+    public static void formatText(Text text, ReadOnlyDoubleProperty propertyToListen, double fontScale, Color fill, DropShadow glowEffect){
         text.setFill(fill);
         text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale));
         propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
-        text.setEffect(idleGlowEffect);
+        text.setEffect(glowEffect);
+    }
+    public static void formatStandardText(Text text, ReadOnlyDoubleProperty propertyToListen, double fontScale){
+        text.setFill(Color.color(0.24,0.24,0.24));
+        text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale));
+        propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
+        text.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
     }
 
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){

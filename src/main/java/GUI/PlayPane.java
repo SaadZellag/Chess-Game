@@ -26,7 +26,7 @@ public class PlayPane extends GamePane{
         getChildren().add(mainPane);
 
         final Text PLAY= new Text("PLAY");
-        formatStandardText(PLAY,heightProperty(),10,Color.color(0.24,0.24,0.24),glowEffect(Color.CYAN,Color.MAGENTA));
+        formatStandardText(PLAY,heightProperty(),10);
         VBox topPane= new VBox(PLAY);
         topPane.setAlignment(Pos.TOP_LEFT);
         topPane.setPadding(new Insets(40,0,0,40));
@@ -37,22 +37,13 @@ public class PlayPane extends GamePane{
         bottomPane.setPadding(new Insets(0,0,5,40));
         VBox.setVgrow(bottomPane, Priority.ALWAYS);
 
-        nextSceneButton = new CustomButton(heightProperty(),"SINGLE PLAYER",10, Color.WHITE);
-        nextSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
-        nextSceneButton.setOnAction(e-> this.nextMenu());
+        nextSceneButton = new CustomButton(heightProperty(),"SINGLE PLAYER",10);
 
-        nextSceneButton2 = new CustomButton(heightProperty(),"LOCAL MULTIPLAYER",10, Color.WHITE);
-        nextSceneButton2.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton2.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton2 = new CustomButton(heightProperty(),"LOCAL MULTIPLAYER",10);
 
-        nextSceneButton3 = new CustomButton(heightProperty(),"LAN PLAY",10, Color.WHITE);
-        nextSceneButton3.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        nextSceneButton3.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
+        nextSceneButton3 = new CustomButton(heightProperty(),"LAN PLAY",10);
 
         previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
-        previousSceneButton.setIdleGlowEffect(Color.CYAN,Color.MAGENTA);
-        previousSceneButton.setHoveredGlowEffect(Color.RED,Color.TRANSPARENT);
         bottomPane.getChildren().add(previousSceneButton);
 
 
