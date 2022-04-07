@@ -1,11 +1,10 @@
 package server;
 /*
-    This is another Host type of class, just following
-    guidelines for a two player game instead of simply a server.
+    Server class that receives, handles, and sends back
+     input from two clients
 */
 
 import game.Move;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,8 +18,6 @@ public class GameServer {
     int movesPlayed;
     private ServerSideConnection whiteConnection;
     private ServerSideConnection blackConnection;
-    private Move whiteMove;
-    private Move blackMove = null;
     Thread beacon;
 
     public GameServer() {
@@ -67,7 +64,6 @@ public class GameServer {
         private Socket socket;
         private ObjectInputStream in;
         private ObjectOutputStream out;
-        private Turn turn;
         int playerID;
 
         public ServerSideConnection(Socket s, int id) {
@@ -95,23 +91,22 @@ public class GameServer {
                 //Right now the first player to connect is white and the second is black
                     while (true) {
                         //ID 1 = first player connected so white
+                        Turn turn;
                         if (playerID == 1) {
-                            whiteMove = (Move) in.readObject();
+                            Move whiteMove = (Move) in.readObject();
                             System.out.println("White played move " + movesPlayed + " | " + whiteMove);
                             movesPlayed++;
                             turn = new Turn(whiteMove, movesPlayed);
                             blackConnection.sendBackTurn(turn);
-                            System.out.println("Sent " + whiteMove);
-                            System.out.println("Sent total moves to black: " + movesPlayed);
+                            System.out.println("Sent " + whiteMove + " | " + movesPlayed);
 
                         } else {
-                            blackMove = (Move) in.readObject();
+                            Move blackMove = (Move) in.readObject();
                             System.out.println("Black played move " + movesPlayed + " | " + blackMove);
                             movesPlayed++;
                             turn = new Turn(blackMove, movesPlayed);
                             whiteConnection.sendBackTurn(turn);
-                            System.out.println("Sent: " + blackMove);
-                            System.out.println("Sent total moves to white: " + movesPlayed);
+                            System.out.println("Sent: " + blackMove + " | " + movesPlayed);
                         }
                     }
 
