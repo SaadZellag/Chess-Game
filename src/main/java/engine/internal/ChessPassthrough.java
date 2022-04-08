@@ -31,7 +31,7 @@ public interface ChessPassthrough {
             Piece piece = new Piece(isWhite, PieceType.VALUES[pieceMoved]);
 
             if (promotion != 0) {
-                convertedMoves.add(new Move(piece, start, end, PieceType.VALUES[promotion], bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, PieceType.VALUES[promotion], Move.Info.PROMOTION, bitboardClone[BitBoard.GAME_INFO]));
                 continue;
             }
 
@@ -47,9 +47,9 @@ public interface ChessPassthrough {
 
             if (moveInfo == null) {
                 // Normal move
-                convertedMoves.add(new Move(piece, start, end, bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, null, null, bitboardClone[BitBoard.GAME_INFO]));
             } else {
-                convertedMoves.add(new Move(piece, start, end, moveInfo, bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, null, moveInfo, bitboardClone[BitBoard.GAME_INFO]));
             }
         }
 

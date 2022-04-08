@@ -24,6 +24,10 @@ public class Board implements Cloneable{
         this.parseFEN(FEN);
     }
 
+    public static Board initialPosition() {
+        return new Board(BitBoard.STARTING_POSITION_FEN);
+    }
+
     private Board(Board toCopy) {
         this.pieces = toCopy.pieces.clone();
         this.isWhiteTurn = toCopy.isWhiteTurn;
@@ -191,8 +195,12 @@ public class Board implements Cloneable{
     public Optional<Piece> playMove(Move move) {
         Objects.requireNonNull(move);
 
-        // Making sure the move makes sense
-        // DOES NOT CHECK IF MOVE IS LEGAL
+        // Checking if the move is legal
+        Optional<Move> engineMove = Move.toEngineMove(this, move);
+        if (engineMove.isEmpty()) {
+            throw new IllegalArgumentException("Illegal Move Received");
+        }
+        move = engineMove.get();
 
         // The original place is the same as in board
         Piece initialPiece = this.pieces[move.initialLocation];
@@ -214,52 +222,46 @@ public class Board implements Cloneable{
             pieceEaten = Optional.empty();
         }
 
-        String currentFEN = this.toFEN();
-        long[] bitboard = BitBoard.fromFEN(currentFEN);
-        BitBoard.playMove(bitboard, ChessUtils.moveToUCI(move));
+//         Checking special flags
+        if (move.moveInfo != null) {
+            switch (move.moveInfo) {
+                case EN_PASSANT -> {
+                    int delta = this.isWhiteTurn ? 8 : -8;
+                    pieceEaten = Optional.of(this.pieces[move.finalLocation + delta]); // Should be a pawn
+                    this.pieces[move.finalLocation + delta] = null;
+                }
+                case KING_CASTLE -> {
+                    this.pieces[move.finalLocation - 1] = this.pieces[move.finalLocation + 1];
+                    this.pieces[move.finalLocation + 1] = null;
+                }
+                case QUEEN_CASTLE -> {
+                    this.pieces[move.finalLocation + 1] = this.pieces[move.finalLocation - 2];
+                    this.pieces[move.finalLocation - 2] = null;
+                }
+                case PROMOTION -> {
+                    this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
+                }
+
+            }
+
+            // Castling
+        }
+        this.enPassantTargetSquare = GameInfo.enPassantTargetSquare(move.extraInfo);
+//        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
+
+        // Handling extra info
+        if (move.extraInfo != 0) {
+            this.canWhiteCastleKingSide = GameInfo.canWhiteCastleKingSide(move.extraInfo);
+            this.canWhiteCastleQueenSide = GameInfo.canWhiteCastleQueenSide(move.extraInfo);
+            this.canBlackCastleKingSide = GameInfo.canBlackCastleKingSide(move.extraInfo);
+            this.canBlackCastleQueenSide = GameInfo.canBlackCastleQueenSide(move.extraInfo);
+
+            this.enPassantTargetSquare = 63 - GameInfo.enPassantTargetSquare(move.extraInfo);
+
+        }
 
 
-
-//        // Checking special flags
-//        if (move.moveInfo != null) {
-//            switch (move.moveInfo) {
-//                case EN_PASSANT -> {
-//                    int delta = this.isWhiteTurn ? 8 : -8;
-//                    pieceEaten = Optional.of(this.pieces[move.finalLocation + delta]); // Should be a pawn
-//                    this.pieces[move.finalLocation + delta] = null;
-//                }
-//                case KING_CASTLE -> {
-//                    this.pieces[move.finalLocation - 1] = this.pieces[move.finalLocation + 1];
-//                    this.pieces[move.finalLocation + 1] = null;
-//                }
-//                case QUEEN_CASTLE -> {
-//                    this.pieces[move.finalLocation + 1] = this.pieces[move.finalLocation - 2];
-//                    this.pieces[move.finalLocation - 2] = null;
-//                }
-//                case PROMOTION -> {
-//                    this.pieces[move.finalLocation] = new Piece(this.isWhiteTurn, move.promotionPiece);
-//                }
-//
-//            }
-//
-//            // Castling
-//        }
-//        this.enPassantTargetSquare = GameInfo.enPassantTargetSquare(move.extraInfo);
-////        System.out.println(ChessUtils.moveToUCI(move) + ": " + Long.toBinaryString(move.extraInfo));
-//
-//        // Handling extra info
-//        if (move.extraInfo != 0) {
-//            this.canWhiteCastleKingSide = GameInfo.canWhiteCastleKingSide(move.extraInfo);
-//            this.canWhiteCastleQueenSide = GameInfo.canWhiteCastleQueenSide(move.extraInfo);
-//            this.canBlackCastleKingSide = GameInfo.canBlackCastleKingSide(move.extraInfo);
-//            this.canBlackCastleQueenSide = GameInfo.canBlackCastleQueenSide(move.extraInfo);
-//
-//            this.enPassantTargetSquare = 63 - GameInfo.enPassantTargetSquare(move.extraInfo);
-//
-//        }
-//
-//
-//        this.isWhiteTurn = !this.isWhiteTurn;
+        this.isWhiteTurn = !this.isWhiteTurn;
 
         return pieceEaten;
     }
