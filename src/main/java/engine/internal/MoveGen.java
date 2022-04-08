@@ -13,25 +13,12 @@ public class MoveGen {
     private MoveGen() {
     }
 
-    // Used for checking purposes
-    private static void addMove(final int move, final List<Integer> moves) {
-//        int start = BitMove.fromIndex(move);
-//        int end = BitMove.toIndex(move);
-//
-//        if (start == end) {
-//            throw new IllegalStateException("Start == End: " + BitMove.moveToAlgebraic(move));
-//        }
-//        if (moves.contains(move)) {
-//            throw new IllegalStateException("Already there");
-//        }
-        moves.add(move);
-    }
 
     private static void addPromotion(final int from, final int to, final List<Integer> moves) {
-        addMove(BitMove.fromPromotion(from, to , QUEEN), moves);
-        addMove(BitMove.fromPromotion(from, to, ROOK), moves);
-        addMove(BitMove.fromPromotion(from, to, BISHOP), moves);
-        addMove(BitMove.fromPromotion(from, to, KNIGHT), moves);
+        moves.add(BitMove.fromPromotion(from, to , QUEEN));
+        moves.add(BitMove.fromPromotion(from, to, ROOK));
+        moves.add(BitMove.fromPromotion(from, to, BISHOP));
+        moves.add(BitMove.fromPromotion(from, to, KNIGHT));
     }
 
     private static void generatePawnMoves(boolean isWhite, long currentPawns, long opposingPieces, long allPieces, int enPassantTargetSquare, List<Integer> moves) {
@@ -66,8 +53,6 @@ public class MoveGen {
             pawnEast = Pawn.blackEastAttack(currentPawns) & (opposingPieces | enPassantMask);
         }
 
-
-
         // Adding promotions
         int j;
         while ((j = Long.numberOfTrailingZeros(singlePushes & promotionMask)) != 64) {
@@ -88,43 +73,24 @@ public class MoveGen {
         // Adding pushes
         // Single pushes
         while ((j = Long.numberOfTrailingZeros(singlePushes)) != 64) {
-            addMove(BitMove.from(j+singlePushShift, j, PAWN), moves);
+            moves.add(BitMove.from(j+singlePushShift, j, PAWN));
             singlePushes &= singlePushes-1;
         }
         // Double Pushes
         while ((j = Long.numberOfTrailingZeros(doublePushes)) != 64) {
-            addMove(BitMove.fromEnPassant(j+doublePushShift, j, j+singlePushShift), moves);
+            moves.add(BitMove.fromEnPassant(j+doublePushShift, j, j+singlePushShift));
             doublePushes &= doublePushes-1;
         }
 
         // Adding Attacks
         while ((j = Long.numberOfTrailingZeros(pawnWest)) != 64) {
-            addMove(BitMove.from(j+westShift, j, PAWN), moves);
+            moves.add(BitMove.from(j+westShift, j, PAWN));
             pawnWest &= pawnWest-1;
         }
         while ((j = Long.numberOfTrailingZeros(pawnEast)) != 64) {
-            addMove(BitMove.from(j+eastShift, j, PAWN), moves);
+            moves.add(BitMove.from(j+eastShift, j, PAWN));
             pawnEast &= pawnEast-1;
         }
-
-        // Adding all captures
-//        for (int i = 0; i < 64; i++) {
-//            // TODO: Make branchless
-//            long mask = 1L << i;
-//            if ((singlePushes & mask) != 0) {
-//                addMove(BitMove.from(i+singlePushShift, i, PAWN), moves);
-//            }
-//            if ((doublePushes & mask) != 0) {
-//                addMove(BitMove.fromEnPassant(i+doublePushShift, i, i+singlePushShift), moves);
-//            }
-//            if ((pawnWest & mask) != 0) {
-//                addMove(BitMove.from(i+westShift, i, PAWN), moves);
-//            }
-//            if ((pawnEast & mask) != 0) {
-//                addMove(BitMove.from(i+eastShift, i, PAWN), moves);
-//            }
-//        }
-
     }
 
     private static void generateSlidingPieces(long pieces, long currentPieces, long allPieces, int pieceType, List<Integer> moves, BiFunction<Integer, Long, Long> attacksGetter) {
@@ -136,7 +102,7 @@ public class MoveGen {
 
             // Getting every attack index
             while ((j = Long.numberOfTrailingZeros(attacks)) != 64) {
-                addMove(BitMove.from(i, j, pieceType), moves);
+                moves.add(BitMove.from(i, j, pieceType));
                 attacks &= attacks-1;
             }
             pieces &= pieces-1;
@@ -156,7 +122,7 @@ public class MoveGen {
 
             // Getting every attack index
             while ((j = Long.numberOfTrailingZeros(attacks)) != 64) {
-                addMove(BitMove.from(i, j, KNIGHT), moves);
+                moves.add(BitMove.from(i, j, KNIGHT));
                 attacks &= attacks-1;
             }
             knights &= knights-1;
@@ -175,7 +141,7 @@ public class MoveGen {
         int i = Long.numberOfTrailingZeros(currentKing), j;
         long attacks = King.getAttack(currentKing) & ~currentPieces; // Preventing eating current pieces
         while ((j = Long.numberOfTrailingZeros(attacks)) != 64) {
-            addMove(BitMove.from(i, j, KING), moves);
+            moves.add(BitMove.from(i, j, KING));
             attacks &= attacks-1;
         }
 
@@ -184,14 +150,14 @@ public class MoveGen {
             long kingPath = (currentKing << 2) | (currentKing << 1) | currentKing;
             long rookPath = (currentKing << 3) | (currentKing << 2) | (currentKing << 1); // Moving to the left
             if (((kingPath & attackers) == 0) && (rookPath & allPieces) == 0) { // No attacking piece or ally pieces
-                addMove(BitMove.from(i, i+2, KING), moves);
+                moves.add(BitMove.from(i, i+2, KING));
             }
         }
         if (canCastleEast) {
             long kingPath = (currentKing >>> 2) | (currentKing >>> 1) | currentKing;
             long rookPath = (currentKing >>> 2) | (currentKing >>> 1); // Moving to the right
             if (((kingPath & attackers) == 0) && (rookPath & allPieces) == 0) { // No attacking piece or ally pieces
-                addMove(BitMove.from(i, i-2, KING), moves);
+                moves.add(BitMove.from(i, i-2, KING));
             }
         }
     }
@@ -274,7 +240,7 @@ public class MoveGen {
 
     private static boolean isMoveLegal(long[] board, int move) {
         BitBoard.playMove(board, move);
-        board[GAME_INFO] ^= 1;
+        board[GAME_INFO] ^= 1; // Setting turn to opponent
         return isInCheck(board);
     }
 

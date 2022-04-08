@@ -2,6 +2,7 @@ package game;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Move implements Serializable {
     public enum Info {
@@ -18,41 +19,57 @@ public class Move implements Serializable {
     public final Info moveInfo;
     public final long extraInfo; // Contains Castling right
 
-
     public Move(Piece piece, int initialLocation, int finalLocation) {
-        this.piece = Objects.requireNonNull(piece);
-        this.initialLocation = initialLocation;
-        this.finalLocation = finalLocation;
-        this.promotionPiece = null;
-        this.moveInfo = null;
-        this.extraInfo = 0;
+        this(piece, initialLocation, finalLocation, null);
     }
 
-    public Move(Piece piece, int initialLocation, int finalLocation, long extraInfo) {
-        this.piece = Objects.requireNonNull(piece);
-        this.initialLocation = initialLocation;
-        this.finalLocation = finalLocation;
-        this.promotionPiece = null;
-        this.moveInfo = null;
-        this.extraInfo = extraInfo;
+    public Move(Piece piece, int initialLocation, int finalLocation, PieceType promotionPiece) {
+       this(piece, initialLocation, finalLocation, promotionPiece, null, 0);
     }
 
-    public Move(Piece piece, int initialLocation, int finalLocation, PieceType promotionPiece, long extraInfo) {
-        this.piece = Objects.requireNonNull(piece);
-        this.initialLocation = initialLocation;
-        this.finalLocation = finalLocation;
-        this.promotionPiece = Objects.requireNonNull(promotionPiece);
-        this.moveInfo = Info.PROMOTION;
-        this.extraInfo = extraInfo;
+    // Returns the move with extra info in it
+    public static Optional<Move> toEngineMove(Board board, Move simpleMove) {
+        return board.generatePossibleMoves().stream().filter(m -> m.equals(simpleMove)).findAny();
     }
 
-    public Move(Piece piece, int initialLocation, int finalLocation, Info moveInfo, long extraInfo) {
+    // ================================ Should not be used outside the engine =============================== //
+    public Move(Piece piece, int initialLocation, int finalLocation, PieceType promotionPiece, Info moveInfo, long extraInfo) {
         this.piece = Objects.requireNonNull(piece);
         this.initialLocation = initialLocation;
         this.finalLocation = finalLocation;
-        this.promotionPiece = null;
+        this.promotionPiece = promotionPiece;
         this.moveInfo = moveInfo;
         this.extraInfo = extraInfo;
     }
+    // ================================ Should not be used outside the engine =============================== //
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Move move = (Move) o;
+
+        if (initialLocation != move.initialLocation) return false;
+        if (finalLocation != move.finalLocation) return false;
+        if (!piece.equals(move.piece)) return false;
+        if (promotionPiece != move.promotionPiece) return false;
+        return moveInfo == move.moveInfo;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = piece.hashCode();
+        result = 31 * result + initialLocation;
+        result = 31 * result + finalLocation;
+        result = 31 * result + (promotionPiece != null ? promotionPiece.hashCode() : 0);
+        result = 31 * result + (moveInfo != null ? moveInfo.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return ChessUtils.moveToUCI(this);
+    }
 }

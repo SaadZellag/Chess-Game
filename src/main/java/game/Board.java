@@ -24,6 +24,10 @@ public class Board implements Cloneable{
         this.parseFEN(FEN);
     }
 
+    public static Board initialPosition() {
+        return new Board(BitBoard.STARTING_POSITION_FEN);
+    }
+
     private Board(Board toCopy) {
         this.pieces = toCopy.pieces.clone();
         this.isWhiteTurn = toCopy.isWhiteTurn;
@@ -191,8 +195,12 @@ public class Board implements Cloneable{
     public Optional<Piece> playMove(Move move) {
         Objects.requireNonNull(move);
 
-        // Making sure the move makes sense
-        // DOES NOT CHECK IF MOVE IS LEGAL
+        // Checking if the move is legal
+        Optional<Move> engineMove = Move.toEngineMove(this, move);
+        if (engineMove.isEmpty()) {
+            throw new IllegalArgumentException("Illegal Move Received");
+        }
+        move = engineMove.get();
 
         // The original place is the same as in board
         Piece initialPiece = this.pieces[move.initialLocation];
@@ -214,8 +222,7 @@ public class Board implements Cloneable{
             pieceEaten = Optional.empty();
         }
 
-
-        // Checking special flags
+//         Checking special flags
         if (move.moveInfo != null) {
             switch (move.moveInfo) {
                 case EN_PASSANT -> {

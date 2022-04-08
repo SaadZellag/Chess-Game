@@ -31,7 +31,7 @@ public interface ChessPassthrough {
             Piece piece = new Piece(isWhite, PieceType.VALUES[pieceMoved]);
 
             if (promotion != 0) {
-                convertedMoves.add(new Move(piece, start, end, PieceType.VALUES[promotion], bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, PieceType.VALUES[promotion], Move.Info.PROMOTION, bitboardClone[BitBoard.GAME_INFO]));
                 continue;
             }
 
@@ -39,20 +39,17 @@ public interface ChessPassthrough {
 
             if (MoveInfo.isEnPassant(info)) {
                 moveInfo = Move.Info.EN_PASSANT;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.EN_PASSANT));
             } else if (MoveInfo.isKingCastle(info)) {
                 moveInfo = Move.Info.KING_CASTLE;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.KING_CASTLE));
             } else if (MoveInfo.isQueenCastle(info)) {
                 moveInfo = Move.Info.QUEEN_CASTLE;
-//                convertedMoves.add(new Move(piece, start, end, Move.Info.QUEEN_CASTLE));
             }
 
             if (moveInfo == null) {
                 // Normal move
-                convertedMoves.add(new Move(piece, start, end, bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, null, null, bitboardClone[BitBoard.GAME_INFO]));
             } else {
-                convertedMoves.add(new Move(piece, start, end, moveInfo, bitboardClone[BitBoard.GAME_INFO]));
+                convertedMoves.add(new Move(piece, start, end, null, moveInfo, bitboardClone[BitBoard.GAME_INFO]));
             }
         }
 

@@ -145,7 +145,11 @@ public class ChessUtils {
     public static String moveToUCI(Move move) {
         Objects.requireNonNull(move);
 
-        return indexToAlgebraic(move.initialLocation) +"-"+ indexToAlgebraic(move.finalLocation);
+        String promotion = move.moveInfo == Move.Info.PROMOTION ?
+                String.valueOf(pieceTypeToChar(move.promotionPiece, false))
+                : "";
+
+        return indexToAlgebraic(move.initialLocation) + indexToAlgebraic(move.finalLocation) + promotion;
     }
 
     public static Move UCIToMove(String UCI, Piece piece) throws IllegalArgumentException {
@@ -158,8 +162,13 @@ public class ChessUtils {
 
         int initialPosition = algebraicToIndex(UCI.substring(0, 2));
         int finalPosition = algebraicToIndex(UCI.substring(2, 4));
+        PieceType promotionPiece = null;
+        String promition = UCI.substring(4);
+        if (!promition.isEmpty()) {
+            promotionPiece = charToPieceType(promition.charAt(0));
+        }
 
-        return new Move(piece, initialPosition, finalPosition);
+        return new Move(piece, initialPosition, finalPosition, promotionPiece);
     }
 
 }

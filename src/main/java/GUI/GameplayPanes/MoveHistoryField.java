@@ -84,7 +84,9 @@ public class MoveHistoryField extends VBox {
             Text piece= new Text(pieceMoved);
             piece.setFont(Font.font("", FontWeight.BOLD, fontSize));
 
-            Text UCI= new Text(ChessUtils.moveToUCI(move));
+            String moveStr = ChessUtils.moveToUCI(move);
+
+            Text UCI= new Text(moveStr.substring(0, 2) + "-" + moveStr.substring(2, 4));
             UCI.setFont(Font.loadFont(getResource("pixelatedFont.otf"),fontSize));
 
             Text promotionPiece= new Text(promotion);
