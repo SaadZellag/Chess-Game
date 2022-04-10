@@ -54,8 +54,7 @@ public class Move implements Serializable {
         if (initialLocation != move.initialLocation) return false;
         if (finalLocation != move.finalLocation) return false;
         if (!piece.equals(move.piece)) return false;
-        if (promotionPiece != move.promotionPiece) return false;
-        return moveInfo == move.moveInfo;
+        return promotionPiece == move.promotionPiece;
     }
 
     @Override
@@ -64,7 +63,6 @@ public class Move implements Serializable {
         result = 31 * result + initialLocation;
         result = 31 * result + finalLocation;
         result = 31 * result + (promotionPiece != null ? promotionPiece.hashCode() : 0);
-        result = 31 * result + (moveInfo != null ? moveInfo.hashCode() : 0);
         return result;
     }
 
