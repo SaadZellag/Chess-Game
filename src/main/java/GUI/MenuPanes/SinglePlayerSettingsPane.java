@@ -1,12 +1,11 @@
-package GUI;
+package GUI.MenuPanes;
 
+import GUI.CustomButton;
+import GUI.GamePane;
 import GUI.GameplayPanes.SingleplayerGamePane;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -15,45 +14,20 @@ import java.util.Random;
 import static GUI.GUI.formatStandardText;
 import static GUI.GUI.glowEffect;
 
-public class SinglePlayerSettingsPane extends GamePane{
+public class SinglePlayerSettingsPane extends MenuPane {
     private boolean whiteIsBottom;
     private final Slider slider;
 
     public SinglePlayerSettingsPane(){
-        VBox mainPane= new VBox();
+        heightProperty().addListener(e-> MIDDLE_PANE.setSpacing(heightProperty().divide(42).doubleValue()));
 
-        mainPane.prefWidthProperty().bind(widthProperty());
-        mainPane.prefHeightProperty().bind(heightProperty());
-        mainPane.setAlignment(Pos.TOP_CENTER);
-        heightProperty().addListener(e->mainPane.setSpacing(heightProperty().divide(42).doubleValue()));
-
-        getChildren().add(mainPane);
-
-        final Text PLAY= new Text("PLAY");
-        formatStandardText(PLAY,heightProperty(),10);
-
-        final Text SINGLE_PLAYER= new Text("SINGLE PLAYER");
-        formatStandardText(SINGLE_PLAYER,heightProperty(),30);
-
-        VBox topPane= new VBox(PLAY,SINGLE_PLAYER);
-        topPane.setAlignment(Pos.TOP_LEFT);
-        topPane.setSpacing(0);
-        topPane.setPadding(new Insets(40,0,0,40));
+        UPPER_TEXT.setText("PLAY");
+        UPPER_SUBTEXT.setText("SINGLE PLAYER");
 
         final Text PLAYER_COLOR= new Text(" PLAYER COLOR");
         formatStandardText(PLAYER_COLOR,heightProperty(),15);
 
-        HBox bottomPane= new HBox();
-        bottomPane.setAlignment(Pos.BOTTOM_LEFT);
-        bottomPane.setPadding(new Insets(0,0,5,40));
-        VBox.setVgrow(bottomPane, Priority.ALWAYS);
-
         nextSceneButton = new CustomButton(heightProperty(),"START",13);
-        nextSceneButton.setOnAction(e-> this.nextMenu());
-
-
-        previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");
-        bottomPane.getChildren().add(previousSceneButton);
 
         HBox startingColors= new HBox();
         startingColors.setAlignment(Pos.CENTER);
@@ -62,16 +36,15 @@ public class SinglePlayerSettingsPane extends GamePane{
         CustomButton white= new CustomButton(heightProperty().divide(10),"Pieces/W_King.png");
         white.setHoveredGlowEffect(Color.MAGENTA,Color.CYAN);
 
-
         CustomButton black= new CustomButton(heightProperty().divide(10),"Pieces/B_King.png");
         black.setIdleGlowEffect(Color.RED,Color.GOLD);
         black.setHoveredGlowEffect(Color.GOLD,Color.RED);
-
 
         CustomButton random= new CustomButton(heightProperty(),"?",10);
         Random rng= new Random();
         random.setIdleGlowEffect(Color.RED,Color.CYAN);
         random.setHoveredGlowEffect(Color.CYAN,Color.RED);
+
         startingColors.getChildren().addAll(black,white,random);
 
         random.setOnAction(e->{
@@ -105,7 +78,7 @@ public class SinglePlayerSettingsPane extends GamePane{
         final Text DIFFICULTY= new Text("ENGINE DIFFICULTY");
         formatStandardText(DIFFICULTY,heightProperty(),15);
 
-        mainPane.getChildren().addAll(topPane,PLAYER_COLOR,startingColors,DIFFICULTY,slider,nextSceneButton,bottomPane);
+        MIDDLE_PANE.getChildren().addAll(PLAYER_COLOR,startingColors,DIFFICULTY,slider,nextSceneButton);
         random.fire();
     }
     @Override

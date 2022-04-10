@@ -110,6 +110,7 @@ public class MoveHistoryField extends VBox {
 
     }
 
+
     public void prefSizePropertyBind (DoubleBinding binding){
         backgroundImagePane.setPreserveRatio(true);
         backgroundImagePane.fitHeightProperty().bind(binding.divide(1.1));

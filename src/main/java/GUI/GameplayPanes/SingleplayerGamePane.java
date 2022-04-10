@@ -1,18 +1,18 @@
 package GUI.GameplayPanes;
 
 import GUI.CustomButton;
+import GUI.GameMode;
 import GUI.GamePane;
-import GUI.MainMenuPane;
+import GUI.MenuPanes.MainMenuPane;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean whiteIsBottom;
     private final double difficulty;
 
     public SingleplayerGamePane(boolean whiteIsBottom,double difficulty) {
-        super(whiteIsBottom,true);
+        super(whiteIsBottom, GameMode.SOLO);
         this.whiteIsBottom=whiteIsBottom;
         this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
@@ -33,6 +33,10 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
 
         undoButton.setOnAction(e->chessBoardPane.undo());
         redoButton.setOnAction(e->chessBoardPane.redo());
+
+        chessBoardPane.setDifficulty(difficulty);
+        ConfidenceBar.percentage=0.5;
+//        confidenceBar.setPercentage(chessBoardPane.confidence);
     }
 
     @Override

@@ -1,6 +1,9 @@
 package GUI.GameplayPanes;
 
 import GUI.CustomButton;
+import GUI.GameMode;
+import engine.Engine;
+import engine.MoveResult;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Board;
@@ -20,15 +23,16 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import javafx.scene.paint.Color;
 
 import static GUI.GUI.*;
+import static GUI.GameMode.*;
 
 public class ChessBoardPane extends StackPane{
 
@@ -77,10 +81,13 @@ public class ChessBoardPane extends StackPane{
 
     private final Runnable runOnGameOver;
 
-    private final boolean isLocalMultiplayer;
+    private final GameMode gameMode;
 
-    public ChessBoardPane(ReadOnlyDoubleProperty binding,Runnable runOnGameOver,boolean isLocalMultiplayer){
-        this.isLocalMultiplayer = isLocalMultiplayer;
+    final long[] whiteRemainingTime = {TimeUnit.MINUTES.toMillis(10)};
+    final long[] blackRemainingTime= {TimeUnit.MINUTES.toMillis(10)};
+
+    public ChessBoardPane(ReadOnlyDoubleProperty binding, Runnable runOnGameOver, GameMode gameMode){
+        this.gameMode = gameMode;
         this.runOnGameOver=runOnGameOver;
 
         boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
@@ -132,20 +139,37 @@ public class ChessBoardPane extends StackPane{
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
 
+            startEngine();
+
 
 //            addEventHandler(KeyEvent.KEY_PRESSED,e->{//todo this is for testing, remove later
 //                int random = (int)(Math.random()*possibleMoves.size()-1);
 //                Move move=possibleMoves.get(random);
 //                animateMovePiece(move);
 //            });
-
+            Timer clockTimer= new Timer();
+            clockTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if(internalBoard.isWhiteTurn()==whiteIsBottom){
+                        whiteRemainingTime[0]-=1000;
+                    }else{
+                        blackRemainingTime[0]-=1000;
+                    }
+                    if(blackRemainingTime[0]==0||whiteRemainingTime[0]==0){
+                        cancel();
+                        Platform.runLater(()->endGame(true));
+                    }
+                }
+            },0, 1000L);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
-
+    public void setDifficulty(Double difficulty){
+        Engine.setDifficulty(difficulty);
+    }
     private void placePieces() {
         Piece[] pieces = internalBoard.getPieces();
 
@@ -186,8 +210,6 @@ public class ChessBoardPane extends StackPane{
             pieceImageView.setEffect(glowEffect(Color.RED,Color.GOLD));
         isInCheck();
     }
-
-
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         minHeightProperty().bind(binding.divide(1.1));//this makes the pane smaller for some reason
         minWidthProperty().bind(binding.divide(1.1));//this makes the pane smaller for some reason
@@ -200,7 +222,6 @@ public class ChessBoardPane extends StackPane{
         grid.minHeightProperty().bind(heightProperty().multiply(0.9075));
         grid.minWidthProperty().bind(grid.prefHeightProperty());
     }
-
     public void tileClicked(int index) {
         if(buttons[index].isSelected()){
             selectedPieceIndex = index;
@@ -214,9 +235,6 @@ public class ChessBoardPane extends StackPane{
         clearSelectedTiles();
 
     }
-
-
-
     public void tileDragged(int draggedTileIndex, MouseEvent e){
         //Allows moving piece to tile even if you drag it slightly
         if(selectedPieceIndex!=draggedTileIndex&&buttons[draggedTileIndex].isSelected()&&!isDragging){
@@ -243,7 +261,6 @@ public class ChessBoardPane extends StackPane{
         cloneView.relocate(p.getX(),p.getY());
         cloneView.setVisible(true);
     }
-
     public void tileReleased(int index, MouseEvent e){
         grid.setCursor(Cursor.DEFAULT);
         if(buttons[index].getGraphic()==null||grid.isMouseTransparent()){//do nothing if you were dragging an empty tile or if animating
@@ -271,8 +288,6 @@ public class ChessBoardPane extends StackPane{
             movePiece(index,newIndex);
         }
     }
-
-
     public void displayPossibleMoves (int index){
         clearSelectedTiles();
         buttons[index].setSelected(true);
@@ -280,7 +295,7 @@ public class ChessBoardPane extends StackPane{
         buttons[index].setStyle("-fx-background-color:"+ CURRENT_TILE_COLOR);
 
         //Cannot control opponent pieces unless it's local multiplayer
-        if(!isLocalMultiplayer &&internalBoard.isWhiteTurn()!= whiteIsBottom)
+        if((gameMode.equals(SOLO)||gameMode.equals(ONLINE)) &&internalBoard.isWhiteTurn()!= whiteIsBottom)
             return;
 
         for(Move move:possibleMoves){
@@ -309,11 +324,7 @@ public class ChessBoardPane extends StackPane{
         draggingSurface.getChildren().add(cloneView);
         isDragging=!isDragging;
     }
-
     private void movePiece(int index, int newIndex) {
-
-
-
         loop: for (Move mv : possibleMoves) {
             if (!(mv.initialLocation == index && mv.finalLocation == newIndex)) {
                 continue;
@@ -332,7 +343,6 @@ public class ChessBoardPane extends StackPane{
         }
 
     }
-
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
         playedMovesCounter++;
 
@@ -349,7 +359,6 @@ public class ChessBoardPane extends StackPane{
         boardHistory.add(internalBoard.clone());
         internalBoard=boardHistory.get(playedMovesCounter);
 
-
         moveHistoryList.add(mv);
         clearSelectedTiles();
         isDragging=false;
@@ -357,9 +366,26 @@ public class ChessBoardPane extends StackPane{
 
         placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
-        if(possibleMoves.size()==0)
+        if(possibleMoves.size()==0) {
             endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));
+            return;
+        }
 
+        startEngine();
+    }
+
+    private void startEngine() {
+        if(gameMode.equals(SOLO)){
+            Thread t= new Thread(()->{
+//                MoveResult bestMove=Engine.getBestMove(internalBoard,whiteIsBottom?blackRemainingTime[0] : whiteRemainingTime[0]);//todo
+                MoveResult bestMove=Engine.getBestMove(internalBoard,100);//todo if it has a lot of time it plays moves for the opponent
+                ConfidenceBar.percentage=bestMove.confidence;
+
+                if((internalBoard.isWhiteTurn()!= whiteIsBottom)&&!grid.isMouseTransparent())
+                    Platform.runLater(()->animateMovePiece(bestMove.move));
+            });
+            t.start();
+        }
     }
 
     private void isInCheck() {
@@ -376,7 +402,6 @@ public class ChessBoardPane extends StackPane{
             }
         }
     }
-
     private void animateMovePiece(int selectedPieceIndex, int newIndex) {
 
         createDraggablePiece(selectedPieceIndex);
@@ -444,7 +469,6 @@ public class ChessBoardPane extends StackPane{
             }
         },0,1000/REFRESH_RATE);
     }
-
     public void endGame(boolean isCheckmate) {
         setBackground(dangerBackGround);
 
@@ -462,9 +486,9 @@ public class ChessBoardPane extends StackPane{
 
         runOnGameOver.run();
     }
-
     private void handlePromotion(Move mv) {
-        if(!isLocalMultiplayer &&internalBoard.isWhiteTurn()!= whiteIsBottom) {
+
+        if((gameMode.equals(SOLO)||gameMode.equals(ONLINE)) &&internalBoard.isWhiteTurn()!= whiteIsBottom) {//do not show your opponent's promotion menu
             piecePromoted(mv,mv.promotionPiece);
             return;
         }
@@ -497,7 +521,6 @@ public class ChessBoardPane extends StackPane{
         promotionButtons[2].setOnAction(e->piecePromoted(mv,PieceType.QUEEN));
         promotionButtons[3].setOnAction(e->piecePromoted(mv,PieceType.KNIGHT));
     }
-
     private void piecePromoted(Move mv,PieceType pieceType) {
         for (Move possibleMove:possibleMoves) {
             if(possibleMove.promotionPiece==pieceType&&possibleMove.finalLocation==mv.finalLocation){
@@ -509,7 +532,6 @@ public class ChessBoardPane extends StackPane{
         draggingSurface.getChildren().remove(promotionMenu);
         draggingSurface.setMouseTransparent(true);
     }
-
     private void handleQueenCaste(Move mv) {
         buttons[mv.finalLocation].setGraphic(cloneView);
         createDraggablePiece(internalBoard.isWhiteTurn()?56:0);
@@ -547,7 +569,6 @@ public class ChessBoardPane extends StackPane{
             }
         },0,1000/REFRESH_RATE);
     }
-
     private void handleKingCastle(Move mv) {
         buttons[mv.finalLocation].setGraphic(cloneView);
         createDraggablePiece(internalBoard.isWhiteTurn()?63:7);
@@ -585,7 +606,6 @@ public class ChessBoardPane extends StackPane{
             }
         },0,1000/REFRESH_RATE);
     }
-
     public void rotatePieces() {
         for (ToggleButton button:buttons){
             if(button.getGraphic()!=null)

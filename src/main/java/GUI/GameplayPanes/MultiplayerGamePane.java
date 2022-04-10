@@ -1,9 +1,9 @@
 package GUI.GameplayPanes;
 
 import GUI.CustomButton;
+import GUI.GameMode;
 import GUI.GamePane;
-import GUI.MainMenuPane;
-import GUI.PlayPane;
+import GUI.MenuPanes.MainMenuPane;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Move;
@@ -36,19 +36,18 @@ public class MultiplayerGamePane extends GamePane {
 
     private final VBox rightMostPane;
 
-    final long[] whiteRemainingTime = {TimeUnit.MINUTES.toMillis(10)};
-    final long[] blackRemainingTime= {TimeUnit.MINUTES.toMillis(10)};
+
 
     private final Timer clockTimer= new Timer();
-    public MultiplayerGamePane(boolean whiteIsBottom,boolean isLocalGame) {
+    public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode) {
         this.whiteIsBottom=whiteIsBottom;
 
 
         //parent inherited buttons
 
-        previousSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);
+        nextSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);
 
-        nextSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15);
+        previousSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15);
 
         nextSceneButton2= new CustomButton(heightProperty(),"REMATCH",15);
 
@@ -62,7 +61,7 @@ public class MultiplayerGamePane extends GamePane {
         //lefMostPane
         VBox leftMostPane = new VBox();
 
-        chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame,isLocalGame);
+        chessBoardPane = new ChessBoardPane(heightProperty(), this::endGame,gameMode);
         if (!whiteIsBottom){
             chessBoardPane.setRotate(180);
             chessBoardPane.rotatePieces();
@@ -93,7 +92,7 @@ public class MultiplayerGamePane extends GamePane {
         rightMostPane.setViewOrder(1);
 
         //muteButton
-        rightMostPane.getChildren().add(muteButton);
+        rightMostPane.getChildren().add(MUTE_BUTTON);
 
         //pauseMenuButton
         CustomButton pauseMenuButton = new CustomButton(heightProperty().divide(7),"MenuIcon.png");
@@ -116,7 +115,7 @@ public class MultiplayerGamePane extends GamePane {
         pauseMenu.spacingProperty().bind(heightProperty().divide(6));
         pauseMenu.setBackground(getBackgroundImage("RoundTextArea.png", pauseMenu,false));
 
-        pauseMenu.getChildren().addAll(resume,previousSceneButton,nextSceneButton);
+        pauseMenu.getChildren().addAll(resume,nextSceneButton,previousSceneButton);
         pauseMenu.minWidthProperty().bind(chessBoardPane.heightProperty().multiply(0.9));
 
     }
@@ -128,22 +127,16 @@ public class MultiplayerGamePane extends GamePane {
             @Override
             public void run() {
                 if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
-                    whiteRemainingTime[0]-=1000;
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(whiteRemainingTime[0]);
-                    long millis =whiteRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.whiteRemainingTime[0]);
+                    long millis =chessBoardPane.whiteRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }else{
-                    blackRemainingTime[0]-=1000;
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(blackRemainingTime[0]);
-                    long millis =blackRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.blackRemainingTime[0]);
+                    long millis =chessBoardPane.blackRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }
-                if(blackRemainingTime[0]==0||whiteRemainingTime[0]==0){
-                    cancel();
-                    Platform.runLater(()->chessBoardPane.endGame(true));
-                }
             }
-        },0, 1000L);
+        },0, 1000L/REFRESH_RATE);
     }
 
     private void showPauseMenu(){
@@ -163,7 +156,7 @@ public class MultiplayerGamePane extends GamePane {
             endMessage= new Text("WHITE WON");
             formatText(endMessage,heightProperty(),15,Color.WHITE,glowEffect(Color.CYAN,Color.GOLD));
         }
-        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&blackRemainingTime[0]!=0&&whiteRemainingTime[0]!=0){
+        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&chessBoardPane.blackRemainingTime[0]!=0&&chessBoardPane.whiteRemainingTime[0]!=0){
             endMessage= new Text("DRAW");
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }
@@ -184,19 +177,12 @@ public class MultiplayerGamePane extends GamePane {
     }
 
     @Override
-    public GamePane previousMenu() {//Main menu
-        return new MainMenuPane();
+    public GamePane nextMenu() {
+        return new MainMenuPane();//Main menu
     }
 
     @Override
-    public GamePane nextMenu() {//Exit game
-        Platform.exit();
-        System.exit(0);
-        return null;
-    }
-
-    @Override
-    public GamePane nextMenu2() {//rematch
-        return null;//todo
+    public GamePane nextMenu2() {
+        return null;//todo rematch
     }
 }

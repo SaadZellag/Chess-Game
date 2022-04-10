@@ -1,9 +1,11 @@
 package GUI;
 
+import GUI.MenuPanes.MainMenuPane;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,6 +17,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -93,6 +96,14 @@ public class GUI extends Application {
         propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
         text.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
     }
+    public static void formatStandardText(Label text, ReadOnlyDoubleProperty propertyToListen, double fontScale){
+        text.setTextFill(Color.color(0.24,0.24,0.24));
+        text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale));
+        propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
+        text.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
+        text.setWrapText(true);
+        text.setTextAlignment(TextAlignment.CENTER);
+    }
 
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){
         BackgroundImage bImage = new BackgroundImage(
@@ -107,13 +118,13 @@ public class GUI extends Application {
     public void HandleSceneSwitch(StackPane root, GamePane currentMenu,MediaPlayer BGM){
 
         //mute controller
-        currentMenu.muteButton.setOnAction(e->BGM.setMute(!BGM.isMute()));
-        currentMenu.muteButton.setOnMouseReleased(e->{
+        currentMenu.MUTE_BUTTON.setOnAction(e->BGM.setMute(!BGM.isMute()));
+        currentMenu.MUTE_BUTTON.setOnMouseReleased(e->{
             if(BGM.isMute())
-                currentMenu.muteButton.setGraphic(new ImageView(getImage("Mute.png")));
+                currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Mute.png")));
             else
-                currentMenu.muteButton.setGraphic(new ImageView(getImage("Unmute.png")));
-            currentMenu.muteButton.getGraphic().setEffect(currentMenu.muteButton.hoveredGlowEffect);
+                currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Unmute.png")));
+            currentMenu.MUTE_BUTTON.getGraphic().setEffect(currentMenu.MUTE_BUTTON.hoveredGlowEffect);
         });
 
         //nextMenus
@@ -143,6 +154,11 @@ public class GUI extends Application {
             root.getChildren().remove(currentMenu);
             HandleSceneSwitch(root,previousMenu,BGM);
         });
+        if(BGM.isMute())
+            currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Mute.png")));
+        else
+            currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Unmute.png")));
+        currentMenu.MUTE_BUTTON.getGraphic().setEffect(currentMenu.MUTE_BUTTON.idleGlowEffect);
     }
 
 }
