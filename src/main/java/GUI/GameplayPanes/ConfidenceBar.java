@@ -52,17 +52,7 @@ public class ConfidenceBar extends GridPane {
             }
         }, 4000, 1000 / REFRESH_RATE);
 
-
-//        setOnMouseClicked(e-> {// Todo this is for testing purposes, remove later
-//            double i=Math.random();
-//            this.percentage = i;
-//            System.out.println(i);
-//
-//        });
     }
-//    public void setPercentage(Double percentage){
-//        this.percentage=percentage;
-//    }
 
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         bottom.heightProperty().bind(binding.divide(1.1));

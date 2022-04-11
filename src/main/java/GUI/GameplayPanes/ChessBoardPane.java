@@ -27,7 +27,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import javafx.scene.paint.Color;
 
@@ -40,6 +40,7 @@ public class ChessBoardPane extends StackPane{
     private final CustomButton[] promotionButtons=new CustomButton[4];
 
     private final Timer moveAnimationThread = new Timer(true);
+    private ExecutorService engineThread= Executors.newSingleThreadExecutor();
 
     public Board internalBoard;
     private int playedMovesCounter=0;
@@ -140,13 +141,6 @@ public class ChessBoardPane extends StackPane{
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
 
             startEngine();
-
-
-//            addEventHandler(KeyEvent.KEY_PRESSED,e->{//todo this is for testing, remove later
-//                int random = (int)(Math.random()*possibleMoves.size()-1);
-//                Move move=possibleMoves.get(random);
-//                animateMovePiece(move);
-//            });
             Timer clockTimer= new Timer();
             clockTimer.schedule(new TimerTask() {
                 @Override
@@ -353,6 +347,8 @@ public class ChessBoardPane extends StackPane{
         while (boardHistory.size()>playedMovesCounter){
             boardHistory.remove(playedMovesCounter).toFEN();
             moveHistoryList.remove(playedMovesCounter-1);
+            System.out.println(engineThread.shutdownNow());
+            engineThread= Executors.newSingleThreadExecutor();//FIXME
         }
 
         //Store previous board state so that you can undo
@@ -370,23 +366,24 @@ public class ChessBoardPane extends StackPane{
             endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));
             return;
         }
-
         startEngine();
     }
 
     private void startEngine() {
-        if(gameMode.equals(SOLO)){
-            Thread t= new Thread(()->{
-                MoveResult bestMove=Engine.getBestMove(internalBoard,whiteIsBottom?blackRemainingTime : whiteRemainingTime);//todo
-//                MoveResult bestMove=Engine.getBestMove(internalBoard,100);//todo if it has a lot of time it plays moves for the opponent
-                ConfidenceBar.percentage=bestMove.confidence;
-
-                if((internalBoard.isWhiteTurn()!= whiteIsBottom)&&!grid.isMouseTransparent())
-                    Platform.runLater(()->animateMovePiece(bestMove.move));
-            });
-            t.start();
-        }
+        if(gameMode!=SOLO||(internalBoard.isWhiteTurn()==whiteIsBottom))
+            return;
+        engineThread.execute(()->{
+            engineIsPaused=false;
+            MoveResult bestMove=Engine.getBestMove(internalBoard,whiteIsBottom?blackRemainingTime : whiteRemainingTime);
+            ConfidenceBar.percentage=whiteIsBottom?bestMove.confidence:1-bestMove.confidence;//FIXME
+            while (engineIsPaused) {
+                Thread.onSpinWait();
+            }
+            Platform.runLater(()->animateMovePiece(bestMove.move));
+        });
     }
+
+    volatile boolean engineIsPaused=true;//todo ask why it recommends it to be volatile
 
     private void isInCheck() {
         Piece[]pieces =internalBoard.getPieces();
@@ -435,8 +432,8 @@ public class ChessBoardPane extends StackPane{
             }
         },0,1000/REFRESH_RATE);
     }
-    private synchronized void animateMovePiece(Move mv) {//this method is to animate moves not done by the user
-
+    private void animateMovePiece(Move mv) {//this method is to animate moves not done by the user
+        draggingSurface.getChildren().clear();
         createDraggablePiece(mv.initialLocation);
         buttons[mv.initialLocation].setSelected(false);
         grid.setMouseTransparent(true);
@@ -619,6 +616,9 @@ public class ChessBoardPane extends StackPane{
                 return;
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
+            if(!engineThread.isTerminated()) {
+                engineIsPaused=true;
+            }
             placePieces();
             isInCheck();
             clearSelectedTiles();
@@ -632,6 +632,9 @@ public class ChessBoardPane extends StackPane{
             placePieces();
             isInCheck();
             clearSelectedTiles();
+            if(!engineThread.isTerminated()) {
+                engineIsPaused=false;
+            }
         }
     }
 }

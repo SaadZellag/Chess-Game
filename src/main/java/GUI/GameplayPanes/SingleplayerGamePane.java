@@ -21,6 +21,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         mainPane.setSpacing(9);
 
         ConfidenceBar confidenceBar= new ConfidenceBar(heightProperty(),whiteIsBottom);
+        ConfidenceBar.percentage=0.5;
         mainPane.getChildren().add(0,confidenceBar);
 
         HBox undoRedoPane = new HBox();
@@ -35,8 +36,6 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         redoButton.setOnAction(e->chessBoardPane.redo());
 
         chessBoardPane.setDifficulty(difficulty);
-        ConfidenceBar.percentage=0.5;
-//        confidenceBar.setPercentage(chessBoardPane.confidence);
     }
 
     @Override

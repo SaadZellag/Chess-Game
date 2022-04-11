@@ -19,6 +19,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import server.GameServer;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GUI extends Application {
     static public final long REFRESH_RATE = 120;
@@ -70,8 +74,9 @@ public class GUI extends Application {
             System.exit(0);
         });
         primaryStage.show();
-
     }
+
+
     public static String getResource(String resourceName){
         return String.valueOf(GUI.class.getClassLoader().getResource("GUI/"+resourceName));
     }
@@ -116,7 +121,6 @@ public class GUI extends Application {
     }
 
     public void HandleSceneSwitch(StackPane root, GamePane currentMenu,MediaPlayer BGM){
-
         //mute controller
         currentMenu.MUTE_BUTTON.setOnAction(e->BGM.setMute(!BGM.isMute()));
         currentMenu.MUTE_BUTTON.setOnMouseReleased(e->{
