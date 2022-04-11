@@ -83,8 +83,8 @@ public class ChessBoardPane extends StackPane{
 
     private final GameMode gameMode;
 
-    final long[] whiteRemainingTime = {TimeUnit.MINUTES.toMillis(10)};
-    final long[] blackRemainingTime= {TimeUnit.MINUTES.toMillis(10)};
+    long whiteRemainingTime = TimeUnit.MINUTES.toMillis(10);
+    long blackRemainingTime= TimeUnit.MINUTES.toMillis(10);
 
     public ChessBoardPane(ReadOnlyDoubleProperty binding, Runnable runOnGameOver, GameMode gameMode){
         this.gameMode = gameMode;
@@ -152,11 +152,11 @@ public class ChessBoardPane extends StackPane{
                 @Override
                 public void run() {
                     if(internalBoard.isWhiteTurn()==whiteIsBottom){
-                        whiteRemainingTime[0]-=1000;
+                        whiteRemainingTime-=1000;
                     }else{
-                        blackRemainingTime[0]-=1000;
+                        blackRemainingTime-=1000;
                     }
-                    if(blackRemainingTime[0]==0||whiteRemainingTime[0]==0){
+                    if(blackRemainingTime==0||whiteRemainingTime==0){
                         cancel();
                         Platform.runLater(()->endGame(true));
                     }
@@ -377,8 +377,8 @@ public class ChessBoardPane extends StackPane{
     private void startEngine() {
         if(gameMode.equals(SOLO)){
             Thread t= new Thread(()->{
-//                MoveResult bestMove=Engine.getBestMove(internalBoard,whiteIsBottom?blackRemainingTime[0] : whiteRemainingTime[0]);//todo
-                MoveResult bestMove=Engine.getBestMove(internalBoard,100);//todo if it has a lot of time it plays moves for the opponent
+                MoveResult bestMove=Engine.getBestMove(internalBoard,whiteIsBottom?blackRemainingTime : whiteRemainingTime);//todo
+//                MoveResult bestMove=Engine.getBestMove(internalBoard,100);//todo if it has a lot of time it plays moves for the opponent
                 ConfidenceBar.percentage=bestMove.confidence;
 
                 if((internalBoard.isWhiteTurn()!= whiteIsBottom)&&!grid.isMouseTransparent())

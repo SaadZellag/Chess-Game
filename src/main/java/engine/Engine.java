@@ -51,9 +51,12 @@ public class Engine {
 
     public static MoveResult getBestMove(Board board, long timeLeft) {
         String[] result = getBestMove(board.toFEN(), (long)(timeLeft * 0.05)).split(" ");
+
         if (result.length != 2) {
             throw new IllegalStateException("Received unknown String from native method: " + Arrays.toString(result));
         }
+        System.out.println("Engine received: " + board.toFEN() + " | " + timeLeft + "ms");
+        System.out.println("Engine plays: " + result[0]);
 
         int initialPosition = ChessUtils.algebraicToIndex(result[0].substring(0, 2));
         Piece pieceMoved = board.getPieces()[initialPosition];

@@ -127,12 +127,12 @@ public class MultiplayerGamePane extends GamePane {
             @Override
             public void run() {
                 if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.whiteRemainingTime[0]);
-                    long millis =chessBoardPane.whiteRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.whiteRemainingTime);
+                    long millis =chessBoardPane.whiteRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }else{
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.blackRemainingTime[0]);
-                    long millis =chessBoardPane.blackRemainingTime[0]-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.blackRemainingTime);
+                    long millis =chessBoardPane.blackRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }
             }
@@ -156,7 +156,7 @@ public class MultiplayerGamePane extends GamePane {
             endMessage= new Text("WHITE WON");
             formatText(endMessage,heightProperty(),15,Color.WHITE,glowEffect(Color.CYAN,Color.GOLD));
         }
-        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&chessBoardPane.blackRemainingTime[0]!=0&&chessBoardPane.whiteRemainingTime[0]!=0){
+        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&chessBoardPane.blackRemainingTime!=0&&chessBoardPane.whiteRemainingTime!=0){
             endMessage= new Text("DRAW");
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }
