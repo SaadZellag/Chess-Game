@@ -17,6 +17,7 @@ import static GUI.GUI.glowEffect;
 public class SinglePlayerSettingsPane extends MenuPane {
     private boolean whiteIsBottom;
     private final Slider slider;
+    private long startingTime=10;//todo
 
     public SinglePlayerSettingsPane(){
         heightProperty().addListener(e-> MIDDLE_PANE.setSpacing(heightProperty().divide(42).doubleValue()));
@@ -83,7 +84,7 @@ public class SinglePlayerSettingsPane extends MenuPane {
     }
     @Override
     public GamePane nextMenu() {//Start
-        return new SingleplayerGamePane(whiteIsBottom,slider.getValue());
+        return new SingleplayerGamePane(whiteIsBottom,slider.getValue(),startingTime);
     }
 
     @Override

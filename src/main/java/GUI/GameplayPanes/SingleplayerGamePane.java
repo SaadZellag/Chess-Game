@@ -4,25 +4,35 @@ import GUI.CustomButton;
 import GUI.GameMode;
 import GUI.GamePane;
 import GUI.MenuPanes.MainMenuPane;
+import engine.Engine;
+import engine.MoveResult;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
-public class SingleplayerGamePane extends MultiplayerGamePane {
-    private final boolean whiteIsBottom;
-    private final double difficulty;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-    public SingleplayerGamePane(boolean whiteIsBottom,double difficulty) {
-        super(whiteIsBottom, GameMode.SOLO);
-        this.whiteIsBottom=whiteIsBottom;
+import static GUI.GUI.REFRESH_RATE;
+
+public class SingleplayerGamePane extends MultiplayerGamePane {
+    private final boolean WHITE_IS_BOTTOM;
+    private final double difficulty;
+    private final ConfidenceBar CONFIDENCE_BAR;
+    public SingleplayerGamePane(boolean WHITE_IS_BOTTOM, double difficulty, long startingTime) {
+        super(WHITE_IS_BOTTOM, GameMode.SOLO,startingTime);
+        this.WHITE_IS_BOTTOM = WHITE_IS_BOTTOM;
         this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
 
         CustomButton redoButton= new CustomButton(heightProperty().divide(13),"RedoArrow.png");
         mainPane.setSpacing(9);
 
-        ConfidenceBar confidenceBar= new ConfidenceBar(heightProperty(),whiteIsBottom);
-        ConfidenceBar.percentage=0.5;
-        mainPane.getChildren().add(0,confidenceBar);
+        CONFIDENCE_BAR= new ConfidenceBar(heightProperty(), WHITE_IS_BOTTOM);
+
+        mainPane.getChildren().add(0,CONFIDENCE_BAR);
 
         HBox undoRedoPane = new HBox();
         undoRedoPane.setSpacing(50);
@@ -36,11 +46,31 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         redoButton.setOnAction(e->chessBoardPane.redo());
 
         chessBoardPane.setDifficulty(difficulty);
+        startEngine();
+    }
+    private void startEngine() {
+        ExecutorService engineThread= Executors.newSingleThreadExecutor();
+        engineThread.execute(()->{
+            while(!chessBoardPane.isReceivingMove) {
+                Thread.onSpinWait();
+            }
+            MoveResult bestMove= Engine.getBestMove(chessBoardPane.internalBoard, WHITE_IS_BOTTOM ?blackRemainingTime : whiteRemainingTime);
+            CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
+            while (chessBoardPane.engineIsPaused) {
+                Thread.onSpinWait();
+            }
+            Platform.runLater(()-> {
+                chessBoardPane.isReceivingMove=false;
+                chessBoardPane.animateMovePiece(bestMove.move);
+                startEngine();
+            });
+
+        });
     }
 
     @Override
     public GamePane nextMenu2() {//Rematch
-        return new SingleplayerGamePane(whiteIsBottom,difficulty);
+        return new SingleplayerGamePane(WHITE_IS_BOTTOM,difficulty,startingTime);
     }
     @Override
     public GamePane previousMenu() {//Main Menu

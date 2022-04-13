@@ -5,6 +5,8 @@ import GUI.GameMode;
 import GUI.GamePane;
 import GUI.GameplayPanes.MultiplayerGamePane;
 
+import java.util.concurrent.TimeUnit;
+
 import static GUI.GameMode.SOLO;
 
 public class PlayPane extends MenuPane {
@@ -27,7 +29,7 @@ public class PlayPane extends MenuPane {
 
     @Override
     public GamePane nextMenu2() {//Local Multiplayer
-        return new MultiplayerGamePane(true, GameMode.LOCAL);
+        return new MultiplayerGamePane(true, GameMode.LOCAL, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override

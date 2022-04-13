@@ -36,21 +36,19 @@ public class MultiplayerGamePane extends GamePane {
 
     private final VBox rightMostPane;
 
-
+    public long startingTime=10;
 
     private final Timer clockTimer= new Timer();
-    public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode) {
+    public long whiteRemainingTime = TimeUnit.MINUTES.toMillis(startingTime);
+    public long blackRemainingTime= TimeUnit.MINUTES.toMillis(startingTime);
+    public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode,long startingTime) {
         this.whiteIsBottom=whiteIsBottom;
-
+        this.startingTime=startingTime;
 
         //parent inherited buttons
-
         nextSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);
-
         previousSceneButton= new CustomButton(heightProperty(),"QUIT GAME",15);
-
         nextSceneButton2= new CustomButton(heightProperty(),"REMATCH",15);
-
 
         getChildren().add(root);
         root.getChildren().add(mainPane);
@@ -66,9 +64,9 @@ public class MultiplayerGamePane extends GamePane {
             chessBoardPane.setRotate(180);
             chessBoardPane.rotatePieces();
         }
-        Text upperTimer= new Text("10:00");
+        Text upperTimer= new Text();
         formatStandardText(upperTimer,heightProperty(),30);
-        Text lowerTimer= new Text("10:00");
+        Text lowerTimer= new Text();
         formatStandardText(lowerTimer,heightProperty(),30);
         lowerTimer.setViewOrder(1);
         startTimers(upperTimer,lowerTimer);
@@ -122,21 +120,30 @@ public class MultiplayerGamePane extends GamePane {
 
     private void startTimers(Text upperTimer,Text lowerTimer) {
         Date startTime= new Date();
+        long minutes=TimeUnit.MILLISECONDS.toMinutes(startingTime);
+        long millis =whiteRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
+        lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
+        upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
 
-        clockTimer.schedule(new TimerTask() {
+        clockTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.whiteRemainingTime);
-                    long millis =chessBoardPane.whiteRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(whiteRemainingTime-=1000);
+                    long millis =whiteRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }else{
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(chessBoardPane.blackRemainingTime);
-                    long millis =chessBoardPane.blackRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
+                    long minutes=TimeUnit.MILLISECONDS.toMinutes(blackRemainingTime-=1000);
+                    long millis =blackRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
                     Platform.runLater(()->upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
                 }
+                if(blackRemainingTime==0||whiteRemainingTime==0){
+                    cancel();
+                    Platform.runLater(()->chessBoardPane.endGame(true));
+                    System.out.println("this ran");
+                }
             }
-        },0, 1000L/REFRESH_RATE);
+        },0, 1000L);
     }
 
     private void showPauseMenu(){
@@ -156,7 +163,7 @@ public class MultiplayerGamePane extends GamePane {
             endMessage= new Text("WHITE WON");
             formatText(endMessage,heightProperty(),15,Color.WHITE,glowEffect(Color.CYAN,Color.GOLD));
         }
-        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&chessBoardPane.blackRemainingTime!=0&&chessBoardPane.whiteRemainingTime!=0){
+        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&&blackRemainingTime!=0&&whiteRemainingTime!=0){
             endMessage= new Text("DRAW");
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }

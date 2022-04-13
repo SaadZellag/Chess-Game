@@ -23,6 +23,7 @@ public class JoinRoomPane extends MenuPane {
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
     private final CustomButton JOIN_BUTTON = new CustomButton(heightProperty(),"JOIN ROOM",10);
+    private long startingTime=10;//todo need to get this info from the server
     JoinRoomPane(){
 //        Client connectingClient= new Client("localhost");//todo write ip of the host, only create once host room has been selected
         //todo client needs to be in a loop
@@ -81,7 +82,6 @@ public class JoinRoomPane extends MenuPane {
                 else{
                     for (String IP:keys) {
                         CustomButton room= new CustomButton(heightProperty(),hashMap.get(IP),20);
-//                        System.out.println("IP: "+IP+"\nHostName: "+hashMap.get(IP));
                         room.setOnAction(e->{
                             hostIp=IP;
                             JOIN_BUTTON.setDisable(false);
@@ -96,7 +96,7 @@ public class JoinRoomPane extends MenuPane {
 
     @Override
     public GamePane nextMenu() {//Create room
-        return new MultiplayerGamePane(true, GameMode.ONLINE);//todo
+        return new MultiplayerGamePane(true, GameMode.ONLINE,startingTime);//todo
     }
 
 

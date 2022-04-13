@@ -13,6 +13,8 @@ import static GUI.GUI.*;
 import static GUI.GameMode.ONLINE;
 
 public class CreateRoomPane extends MenuPane {
+
+    private long startingTime=10;//todo
     CreateRoomPane(){
 //        Client serverClient= new Client("localhost");
 //        Thread t= new Thread(gameServer::accept);
@@ -27,7 +29,7 @@ public class CreateRoomPane extends MenuPane {
     }
     @Override
     public GamePane nextMenu() {//Create room
-        return new MultiplayerGamePane(true, GameMode.ONLINE);//todo
+        return new MultiplayerGamePane(true, GameMode.ONLINE,startingTime);//todo
     }
 
 
