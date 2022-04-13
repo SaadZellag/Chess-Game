@@ -10,10 +10,7 @@ import game.Move;
 import game.Piece;
 import game.PieceType;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -139,8 +136,7 @@ public class ChessBoardPane extends StackPane{
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
 
-            if(gameMode==SOLO&&(whiteIsBottom!=internalBoard.isWhiteTurn()))
-                isReceivingMove=true;
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -329,10 +325,13 @@ public class ChessBoardPane extends StackPane{
         buttons[mv.initialLocation].setSelected(false);
 
         //Remove moves from history if you had undone
-        while (boardHistory.size()>playedMovesCounter){
-            boardHistory.remove(playedMovesCounter).toFEN();
-            moveHistoryList.remove(playedMovesCounter-1);
-            //todo kill engine
+        if(gameMode==SOLO){
+            while (boardHistory.size()>playedMovesCounter){
+                boardHistory.remove(playedMovesCounter).toFEN();
+                moveHistoryList.remove(playedMovesCounter-1);
+                needsEngineKilled =true;
+                engineIsPaused=false;
+            }
         }
 
         //Store previous board state so that you can undo
@@ -354,7 +353,7 @@ public class ChessBoardPane extends StackPane{
             isReceivingMove=true;
     }
 
-
+    boolean needsEngineKilled =false;
     boolean engineIsPaused=false;
     boolean isReceivingMove=false;
 
@@ -585,6 +584,9 @@ public class ChessBoardPane extends StackPane{
                 button.getGraphic().setRotate(180);
         }
         whiteIsBottom =false;
+        if(gameMode==SOLO)
+            isReceivingMove=true;
+
     }
     public void undo(){
         if(playedMovesCounter!=0){
@@ -608,7 +610,7 @@ public class ChessBoardPane extends StackPane{
             placePieces();
             isInCheck();
             clearSelectedTiles();
-            if(gameMode==SOLO&&(boardHistory.size()-1==playedMovesCounter)) {//fixme
+            if(gameMode==SOLO&&(boardHistory.size()==playedMovesCounter)) {
                 engineIsPaused=false;
             }
         }

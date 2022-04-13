@@ -10,12 +10,8 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static GUI.GUI.REFRESH_RATE;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean WHITE_IS_BOTTOM;
@@ -58,6 +54,10 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
             CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
             while (chessBoardPane.engineIsPaused) {
                 Thread.onSpinWait();
+                if(chessBoardPane.needsEngineKilled) {//fixme this is horrible code
+                    startEngine();
+                    engineThread.shutdownNow();
+                }
             }
             Platform.runLater(()-> {
                 chessBoardPane.isReceivingMove=false;
