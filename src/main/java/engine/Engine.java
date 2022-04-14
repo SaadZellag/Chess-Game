@@ -8,8 +8,15 @@ import game.Piece;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Engine {
+
+    private static final double PERCENTAGE_USAGE = 0.04;
+
+    private Engine() {};
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
@@ -30,7 +37,7 @@ public class Engine {
         if (isWindows()) {
             fileName = "jnilib.dll";
         } else if (isUnix()) {
-            fileName = "jnilib.so";
+            fileName = "libjnilib.so";
         } else {
             throw new IllegalStateException("Unsupported OS: " + OS);
         }
@@ -38,35 +45,56 @@ public class Engine {
         System.load(path);
     }
 
-    private static native void init();
-
     static {
         init();
     }
 
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public static native void newGame();
+    private static Future<MoveResult> currentSearch = null;
+
+    public static Future<MoveResult> getBestMove(Board board, long timeLeft) {
+        checkSearchStatus();
+        currentSearch = executor.submit(() -> {
+            String[] result = getBestMove(board.toFEN(), (long) (timeLeft * PERCENTAGE_USAGE)).split(" ");
+
+            if (result.length != 2) {
+                throw new IllegalStateException("Received unknown String from native method: " + Arrays.toString(result));
+            }
+
+            int initialPosition = ChessUtils.algebraicToIndex(result[0].substring(0, 2));
+            Piece pieceMoved = board.getPieces()[initialPosition];
+
+            return new MoveResult(
+                    ChessUtils.UCIToMove(result[0], pieceMoved),
+                    Integer.parseInt(result[1]) / 2000.0 + 0.5
+            );
+        });
+        return currentSearch;
+    }
+
+    public static Future<MoveResult> getCurrentSearch() {
+        return currentSearch;
+    }
+
+    public static boolean cancelCurrentSearch() {
+        stopCurrentSearch();
+        return currentSearch.cancel(false);
+    }
+
+    private static void checkSearchStatus() {
+        if (currentSearch != null && currentSearch.isCancelled()) {
+            throw new IllegalCallerException("Cannot call another search while one is pending");
+        }
+    }
+
+
+    private static native void init();
 
     public static native void setDifficulty(double difficulty);
 
-    public static MoveResult getBestMove(Board board, long timeLeft) {
-        String[] result = getBestMove(board.toFEN(), (long)(timeLeft * 0.05)).split(" ");
-
-        if (result.length != 2) {
-            throw new IllegalStateException("Received unknown String from native method: " + Arrays.toString(result));
-        }
-        System.out.println("Engine received: " + board.toFEN() + " | " + timeLeft + "ms");
-        System.out.println("Engine plays: " + result[0]);
-
-        int initialPosition = ChessUtils.algebraicToIndex(result[0].substring(0, 2));
-        Piece pieceMoved = board.getPieces()[initialPosition];
-
-        return new MoveResult(
-            ChessUtils.UCIToMove(result[0], pieceMoved),
-                Integer.parseInt(result[1]) / 2000.0 + 0.5
-        );
-    }
-
     private static native String getBestMove(String FEN, long timeMs) throws IllegalArgumentException;
+
+    private static native void stopCurrentSearch();
 
 }

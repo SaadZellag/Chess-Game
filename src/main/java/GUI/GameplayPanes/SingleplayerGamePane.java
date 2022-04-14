@@ -10,8 +10,10 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean WHITE_IS_BOTTOM;
@@ -50,7 +52,14 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
             while(!chessBoardPane.isReceivingMove) {
                 Thread.onSpinWait();
             }
-            MoveResult bestMove= Engine.getBestMove(chessBoardPane.internalBoard, WHITE_IS_BOTTOM ?blackRemainingTime : whiteRemainingTime);
+            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, WHITE_IS_BOTTOM ?blackRemainingTime : whiteRemainingTime);
+            MoveResult bestMove;
+            try {
+                bestMove = engineMove.get();
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
             CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
             while (chessBoardPane.engineIsPaused) {
                 Thread.onSpinWait();
