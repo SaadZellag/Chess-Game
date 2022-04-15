@@ -10,7 +10,9 @@ import game.Move;
 import game.Piece;
 import game.PieceType;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -141,9 +143,6 @@ public class ChessBoardPane extends StackPane{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    public void setDifficulty(Double difficulty){
-        Engine.setDifficulty(difficulty);
     }
     private void placePieces() {
         Piece[] pieces = internalBoard.getPieces();
@@ -325,12 +324,11 @@ public class ChessBoardPane extends StackPane{
         buttons[mv.initialLocation].setSelected(false);
 
         //Remove moves from history if you had undone
-        if(gameMode==SOLO){
+        if(gameMode==SOLO&&(boardHistory.size()>playedMovesCounter)){
+            Engine.cancelCurrentSearch();
             while (boardHistory.size()>playedMovesCounter){
                 boardHistory.remove(playedMovesCounter).toFEN();
                 moveHistoryList.remove(playedMovesCounter-1);
-                needsEngineKilled =true;
-                engineIsPaused=false;
             }
         }
 
@@ -353,7 +351,6 @@ public class ChessBoardPane extends StackPane{
             isReceivingMove=true;
     }
 
-    boolean needsEngineKilled =false;
     boolean engineIsPaused=false;
     boolean isReceivingMove=false;
 

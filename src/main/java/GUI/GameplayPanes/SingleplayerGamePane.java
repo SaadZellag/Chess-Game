@@ -10,10 +10,7 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean WHITE_IS_BOTTOM;
@@ -43,7 +40,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         undoButton.setOnAction(e->chessBoardPane.undo());
         redoButton.setOnAction(e->chessBoardPane.redo());
 
-        chessBoardPane.setDifficulty(difficulty);
+        Engine.setDifficulty(difficulty);
         startEngine();
     }
     private void startEngine() {
@@ -53,27 +50,32 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
                 Thread.onSpinWait();
             }
             Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, WHITE_IS_BOTTOM ?blackRemainingTime : whiteRemainingTime);
-            MoveResult bestMove;
+            MoveResult bestMove = null;
             try {
                 bestMove = engineMove.get();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
                 return;
+            }catch (CancellationException ignored){
+
             }
-            CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
             while (chessBoardPane.engineIsPaused) {
                 Thread.onSpinWait();
-                if(chessBoardPane.needsEngineKilled) {//fixme this is horrible code
-                    startEngine();
+                if(engineMove.isCancelled()) {
+                    System.out.println("this ran");
+                    chessBoardPane.engineIsPaused=false;
                     engineThread.shutdownNow();
+                    startEngine();
+                    return;
                 }
             }
+            CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
+            MoveResult finalBestMove = bestMove;
             Platform.runLater(()-> {
                 chessBoardPane.isReceivingMove=false;
-                chessBoardPane.animateMovePiece(bestMove.move);
+                chessBoardPane.animateMovePiece(finalBestMove.move);
                 startEngine();
             });
-
         });
     }
 
