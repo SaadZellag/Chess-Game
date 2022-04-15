@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean WHITE_IS_BOTTOM;
     private final double difficulty;
-    private final ConfidenceBar CONFIDENCE_BAR;
+
     public SingleplayerGamePane(boolean WHITE_IS_BOTTOM, double difficulty, long startingTime) {
         super(WHITE_IS_BOTTOM, GameMode.SOLO,startingTime);
         this.WHITE_IS_BOTTOM = WHITE_IS_BOTTOM;
@@ -25,9 +25,9 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         CustomButton redoButton= new CustomButton(heightProperty().divide(13),"RedoArrow.png");
         mainPane.setSpacing(9);
 
-        CONFIDENCE_BAR= new ConfidenceBar(heightProperty(), WHITE_IS_BOTTOM);
+        ConfidenceBar confidenceBar = new ConfidenceBar(heightProperty(), WHITE_IS_BOTTOM);
 
-        mainPane.getChildren().add(0,CONFIDENCE_BAR);
+        mainPane.getChildren().add(0, confidenceBar);
 
         HBox undoRedoPane = new HBox();
         undoRedoPane.setSpacing(50);
@@ -41,43 +41,33 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
         redoButton.setOnAction(e->chessBoardPane.redo());
 
         Engine.setDifficulty(difficulty);
-        startEngine();
+        if(!whiteIsBottom)
+            startEngine(chessBoardPane);
     }
-    private void startEngine() {
-        ExecutorService engineThread= Executors.newSingleThreadExecutor();
+
+    public static void startEngine(ChessBoardPane chessBoardPane) {
+        ExecutorService engineThread = Executors.newSingleThreadExecutor();
         engineThread.execute(()->{
-            while(!chessBoardPane.isReceivingMove) {
-                Thread.onSpinWait();
-            }
-            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, WHITE_IS_BOTTOM ?blackRemainingTime : whiteRemainingTime);
-            MoveResult bestMove = null;
+            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, whiteIsBottom?blackRemainingTime:whiteRemainingTime);
+            MoveResult bestMove ;
             try {
                 bestMove = engineMove.get();
+                ConfidenceBar.percentage=bestMove.confidence;
+                while (chessBoardPane.engineIsPaused) {
+                    Thread.onSpinWait();
+                    if(engineMove.isCancelled()) {
+                        engineThread.shutdownNow();
+                        return;
+                    }
+                }
+                Platform.runLater(()->chessBoardPane.animateMovePiece(bestMove.move));
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
-                return;
             }catch (CancellationException ignored){
-
             }
-            while (chessBoardPane.engineIsPaused) {
-                Thread.onSpinWait();
-                if(engineMove.isCancelled()) {
-                    System.out.println("this ran");
-                    chessBoardPane.engineIsPaused=false;
-                    engineThread.shutdownNow();
-                    startEngine();
-                    return;
-                }
-            }
-            CONFIDENCE_BAR.setPercentage(WHITE_IS_BOTTOM ?bestMove.confidence:1-bestMove.confidence);//FIXME
-            MoveResult finalBestMove = bestMove;
-            Platform.runLater(()-> {
-                chessBoardPane.isReceivingMove=false;
-                chessBoardPane.animateMovePiece(finalBestMove.move);
-                startEngine();
-            });
         });
     }
+
 
     @Override
     public GamePane nextMenu2() {//Rematch

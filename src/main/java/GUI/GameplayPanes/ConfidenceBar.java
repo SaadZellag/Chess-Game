@@ -19,7 +19,7 @@ public class ConfidenceBar extends GridPane {
     Rectangle top = new Rectangle(19,600, Color.BLACK);
     Rectangle bottom = new Rectangle(19,600,Color.WHITE);
 
-    private double percentage = 0.5;
+    public static double percentage = 0.5;
 
 
     // Recommended 0 (non-inclusive) and 1 to determine how fast the rectangle updates
@@ -34,6 +34,7 @@ public class ConfidenceBar extends GridPane {
             bottom=temp;
         }
         prefSizePropertyBind(binding);
+        percentage=0.5;
 
 
         stackPane.setAlignment(Pos.TOP_CENTER);
@@ -53,10 +54,6 @@ public class ConfidenceBar extends GridPane {
         }, 4000, 1000 / REFRESH_RATE);
 
     }
-    public void setPercentage(Double percentage){
-        this.percentage=percentage;
-    }
-
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
         bottom.heightProperty().bind(binding.divide(1.1));
         bottom.widthProperty().bind(binding.divide(24));

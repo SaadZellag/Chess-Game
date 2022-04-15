@@ -31,19 +31,19 @@ public class MultiplayerGamePane extends GamePane {
 
     ObservableList<Move> moveHistoryList;
     public MoveHistoryField moveHistory;
-    public boolean whiteIsBottom;
+    public static boolean whiteIsBottom;
     public ChessBoardPane chessBoardPane;
 
     private final VBox rightMostPane;
 
-    public long startingTime=10;
+    public static long startingTime=10;
 
     private final Timer clockTimer= new Timer();
-    public long whiteRemainingTime = TimeUnit.MINUTES.toMillis(startingTime);
-    public long blackRemainingTime= TimeUnit.MINUTES.toMillis(startingTime);
+    public static long whiteRemainingTime = TimeUnit.MINUTES.toMillis(startingTime);
+    public static long blackRemainingTime= TimeUnit.MINUTES.toMillis(startingTime);
     public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode,long startingTime) {
-        this.whiteIsBottom=whiteIsBottom;
-        this.startingTime=startingTime;
+        MultiplayerGamePane.whiteIsBottom =whiteIsBottom;
+        MultiplayerGamePane.startingTime =startingTime;
 
         //parent inherited buttons
         nextSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);

@@ -24,6 +24,8 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
@@ -52,7 +54,7 @@ public class ChessBoardPane extends StackPane{
 
     private final ToggleButton[] buttons = new ToggleButton[64];
     private boolean isDragging=false;
-    private boolean whiteIsBottom =true;
+    public boolean whiteIsBottom =true;
 
     private ImageView cloneView;
 
@@ -137,6 +139,11 @@ public class ChessBoardPane extends StackPane{
                 promotionMenu.getChildren().add(promotionButtons[i]);
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
+            setOnKeyPressed(e->{
+                if(e.getCode()== KeyCode.T) {
+                    System.out.println(engineIsPaused);
+                }
+            });
 
 
 
@@ -323,7 +330,7 @@ public class ChessBoardPane extends StackPane{
         draggingSurface.getChildren().removeAll(cloneView);
         buttons[mv.initialLocation].setSelected(false);
 
-        //Remove moves from history if you had undone
+        //Remove moves from history if you had undone and tells engine that the board has changed
         if(gameMode==SOLO&&(boardHistory.size()>playedMovesCounter)){
             Engine.cancelCurrentSearch();
             while (boardHistory.size()>playedMovesCounter){
@@ -347,12 +354,13 @@ public class ChessBoardPane extends StackPane{
             endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));
             return;
         }
-        if(gameMode==SOLO&&(whiteIsBottom!=internalBoard.isWhiteTurn()))
-            isReceivingMove=true;
+        if(gameMode==SOLO&&(whiteIsBottom!=internalBoard.isWhiteTurn())) {
+            engineIsPaused=false;
+            SingleplayerGamePane.startEngine(this);
+        }
     }
 
-    boolean engineIsPaused=false;
-    boolean isReceivingMove=false;
+    volatile boolean engineIsPaused=false;
 
     private void isInCheck() {
         Piece[]pieces =internalBoard.getPieces();
@@ -437,7 +445,7 @@ public class ChessBoardPane extends StackPane{
     public void endGame(boolean isCheckmate) {
         setBackground(dangerBackGround);
         if(gameMode==SOLO)
-            isReceivingMove=false;
+            Engine.cancelCurrentSearch();
         grid.setMouseTransparent(true);
 
 
@@ -581,9 +589,6 @@ public class ChessBoardPane extends StackPane{
                 button.getGraphic().setRotate(180);
         }
         whiteIsBottom =false;
-        if(gameMode==SOLO)
-            isReceivingMove=true;
-
     }
     public void undo(){
         if(playedMovesCounter!=0){
@@ -591,9 +596,7 @@ public class ChessBoardPane extends StackPane{
                 return;
             internalBoard=boardHistory.get(--playedMovesCounter);
             possibleMoves=internalBoard.generatePossibleMoves();
-            if(gameMode==SOLO) {
-                engineIsPaused=true;
-            }
+            engineIsPaused=true;
             placePieces();
             isInCheck();
             clearSelectedTiles();
@@ -607,7 +610,7 @@ public class ChessBoardPane extends StackPane{
             placePieces();
             isInCheck();
             clearSelectedTiles();
-            if(gameMode==SOLO&&(boardHistory.size()==playedMovesCounter)) {
+            if(playedMovesCounter>=boardHistory.size()-1) {
                 engineIsPaused=false;
             }
         }
