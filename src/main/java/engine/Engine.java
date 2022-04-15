@@ -33,7 +33,7 @@ public class Engine {
     }
 
     static {
-        String fileName = null;
+        String fileName;
         if (isWindows()) {
             fileName = "jnilib.dll";
         } else if (isUnix()) {
@@ -83,7 +83,7 @@ public class Engine {
     }
 
     private static void checkSearchStatus() {
-        if (currentSearch != null && currentSearch.isCancelled()) {
+        if (currentSearch != null && !(currentSearch.isCancelled() | currentSearch.isDone())) {
             throw new IllegalCallerException("Cannot call another search while one is pending");
         }
     }
