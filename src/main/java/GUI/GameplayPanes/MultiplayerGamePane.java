@@ -19,6 +19,8 @@ import javafx.scene.text.Text;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
@@ -41,6 +43,7 @@ public class MultiplayerGamePane extends GamePane {
     private final Timer clockTimer= new Timer();
     public static long whiteRemainingTime = TimeUnit.MINUTES.toMillis(startingTime);
     public static long blackRemainingTime= TimeUnit.MINUTES.toMillis(startingTime);
+
     public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode,long startingTime) {
         MultiplayerGamePane.whiteIsBottom =whiteIsBottom;
         MultiplayerGamePane.startingTime =startingTime;
@@ -115,8 +118,8 @@ public class MultiplayerGamePane extends GamePane {
 
         pauseMenu.getChildren().addAll(resume,nextSceneButton,previousSceneButton);
         pauseMenu.minWidthProperty().bind(chessBoardPane.heightProperty().multiply(0.9));
-
     }
+
 
     private void startTimers(Text upperTimer,Text lowerTimer) {
         Date startTime= new Date();

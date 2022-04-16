@@ -16,8 +16,7 @@ public class CreateRoomPane extends MenuPane {
 
     private long startingTime=10;//todo
     CreateRoomPane(){
-//        Client serverClient= new Client("localhost");
-//        Thread t= new Thread(gameServer::accept);
+        launchServer(this);
         UPPER_TEXT.setText("PLAY");
         UPPER_SUBTEXT.setText(" CREATE ROOM");
 
@@ -25,6 +24,8 @@ public class CreateRoomPane extends MenuPane {
         formatStandardText(WAITING,heightProperty(),15);
         heightProperty().addListener(e->WAITING.setPadding(new Insets(heightProperty().divide(5).doubleValue(),50,0,50)) );
         MIDDLE_PANE.getChildren().addAll(WAITING);
+
+
 
     }
     @Override

@@ -16,7 +16,7 @@ public class Engine {
 
     private static final double PERCENTAGE_USAGE = 0.04;
 
-    private Engine() {};
+    private Engine() {}
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 

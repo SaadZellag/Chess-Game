@@ -40,7 +40,7 @@ public class MenuPane extends GamePane {
         bottomPane.setPadding(new Insets(0,0,5,40));
         VBox.setVgrow(bottomPane, Priority.ALWAYS);
 
-        previousSceneButton = new CustomButton(heightProperty().divide(10),"Board.png");//todo
+        previousSceneButton = new CustomButton(heightProperty().divide(10),"UndoArrow.png");
 
         bottomPane.getChildren().addAll(previousSceneButton, MUTE_BUTTON);
         MAIN_PANE.getChildren().addAll(topPane, MIDDLE_PANE, bottomPane);

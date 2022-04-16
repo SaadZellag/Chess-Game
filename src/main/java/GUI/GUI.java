@@ -1,6 +1,10 @@
 package GUI;
 
+import GUI.GameplayPanes.ChessBoardPane;
+import GUI.GameplayPanes.MultiplayerGamePane;
+import GUI.MenuPanes.CreateRoomPane;
 import GUI.MenuPanes.MainMenuPane;
+import game.Move;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -19,23 +23,28 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import server.Client;
 import server.GameServer;
+import server.Turn;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GUI extends Application {
-    static public final long REFRESH_RATE = 120;
+    static public final long REFRESH_RATE = 90;
 
     public static void main(String[] args) {
         launch(args);
     }
-
+    private static GameServer gameServer;
+    private static Client client;
+    private static volatile boolean waitingForMove =true;
+    private static StackPane root= new StackPane();
     @Override
     public void start(Stage primaryStage) {
 
         //Initial scene
-        StackPane root= new StackPane();
+
         root.setBackground(getBackgroundImage("Main Background.png",root,true));
         GamePane initialPane= new MainMenuPane();
         root.getChildren().add(initialPane);
@@ -53,7 +62,7 @@ public class GUI extends Application {
         MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
 //        BGM.play();//todo make sure to uncomment this
-        HandleSceneSwitch(root,initialPane,BGM);
+        HandleSceneSwitch(initialPane,BGM);
 
 
         //fullscreen command
@@ -63,8 +72,8 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
-//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");//todo make sure to uncomment this
-//        primaryStage.setFullScreen(true);
+        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
+        primaryStage.setFullScreen(true);
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
@@ -75,6 +84,61 @@ public class GUI extends Application {
         });
         primaryStage.show();
     }
+    private static Move sentMove;
+    public static void launchServer(CreateRoomPane createRoomPane){
+        ExecutorService serverThread= Executors.newFixedThreadPool(2);
+        serverThread.execute(()-> {
+            gameServer= new GameServer();
+            gameServer.accept();
+            Platform.runLater(()->createRoomPane.nextSceneButton.fire());
+        });
+        serverThread.execute(()-> {
+            client = new Client("localhost");
+            int moves=0;
+            while(!serverThread.isShutdown()){
+                if(moves==0){
+                    while (waitingForMove) {
+                        Thread.onSpinWait();
+                    }
+                    waitingForMove=true;
+                    client.sendMove(sentMove);
+                    System.out.println(sentMove.toString()+" was sent");
+                    moves++;
+                }
+                Turn turn = client.receiveTurn();
+                System.out.println(turn.getMove().toString()+" was received");
+                Platform.runLater(()-> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
+                while (waitingForMove) {
+                    Thread.onSpinWait();
+                }
+                client.sendMove(sentMove);
+                System.out.println(sentMove.toString()+" was sent");
+                waitingForMove=true;
+            }
+        });
+    }
+    public static void joinServer(String ip){
+        ExecutorService userThread= Executors.newSingleThreadExecutor();
+        userThread.execute(()-> {
+            client = new Client(ip);
+            while(!userThread.isShutdown()){
+                Turn turn = client.receiveTurn();
+                System.out.println(turn.getMove().toString()+" was received");
+                Platform.runLater(()-> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
+                while (waitingForMove) {
+                    Thread.onSpinWait();
+                }
+                client.sendMove(sentMove);
+                waitingForMove=true;
+            }
+        });
+    }
+    public static void sendMove(Move move){
+        System.out.println(move.toString()+" should be sent");
+        sentMove=move;
+        waitingForMove =false;
+    }
+
 
 
     public static String getResource(String resourceName){
@@ -120,7 +184,7 @@ public class GUI extends Application {
         return new Background(bImage);
     }
 
-    public void HandleSceneSwitch(StackPane root, GamePane currentMenu,MediaPlayer BGM){
+    public void HandleSceneSwitch(GamePane currentMenu,MediaPlayer BGM){
         //mute controller
         currentMenu.MUTE_BUTTON.setOnAction(e->BGM.setMute(!BGM.isMute()));
         currentMenu.MUTE_BUTTON.setOnMouseReleased(e->{
@@ -136,19 +200,19 @@ public class GUI extends Application {
             GamePane nextMenu=  currentMenu.nextMenu();
             root.getChildren().add(nextMenu);
             root.getChildren().remove(currentMenu);
-            HandleSceneSwitch(root,nextMenu,BGM);
+            HandleSceneSwitch(nextMenu,BGM);
         });
         currentMenu.nextSceneButton2.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu2();
             root.getChildren().add(nextMenu);
             root.getChildren().remove(currentMenu);
-            HandleSceneSwitch(root,nextMenu,BGM);
+            HandleSceneSwitch(nextMenu,BGM);
         });
         currentMenu.nextSceneButton3.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu3();
             root.getChildren().add(nextMenu);
             root.getChildren().remove(currentMenu);
-            HandleSceneSwitch(root,nextMenu,BGM);
+            HandleSceneSwitch(nextMenu,BGM);
         });
 
         //previousMenu
@@ -156,7 +220,7 @@ public class GUI extends Application {
             GamePane previousMenu=  currentMenu.previousMenu();
             root.getChildren().add(previousMenu);
             root.getChildren().remove(currentMenu);
-            HandleSceneSwitch(root,previousMenu,BGM);
+            HandleSceneSwitch(previousMenu,BGM);
         });
         if(BGM.isMute())
             currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Mute.png")));

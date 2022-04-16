@@ -30,6 +30,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javafx.scene.paint.Color;
 
@@ -139,13 +141,6 @@ public class ChessBoardPane extends StackPane{
                 promotionMenu.getChildren().add(promotionButtons[i]);
             }
             promotionMenu.setStyle("-fx-background-color:rgba(0, 0, 255, 0.5)");
-            setOnKeyPressed(e->{
-                if(e.getCode()== KeyCode.T) {
-                    System.out.println(engineIsPaused);
-                }
-            });
-
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -276,7 +271,7 @@ public class ChessBoardPane extends StackPane{
         buttons[index].setStyle("-fx-background-color:"+ CURRENT_TILE_COLOR);
 
         //Cannot control opponent pieces unless it's local multiplayer
-        if((gameMode.equals(SOLO)||gameMode.equals(ONLINE)) &&internalBoard.isWhiteTurn()!= whiteIsBottom)
+        if(gameMode!=LOCAL &&internalBoard.isWhiteTurn()!= whiteIsBottom)
             return;
 
         for(Move move:possibleMoves){
@@ -346,10 +341,14 @@ public class ChessBoardPane extends StackPane{
         moveHistoryList.add(mv);
         clearSelectedTiles();
         isDragging=false;
+        if(gameMode==ONLINE&&(whiteIsBottom==internalBoard.isWhiteTurn())){
+            sendMove(mv);
+        }
         internalBoard.playMove(mv);
 
         placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
+
         if(possibleMoves.size()==0) {
             endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));
             return;
@@ -390,11 +389,11 @@ public class ChessBoardPane extends StackPane{
             final double finalX=buttons[newIndex].getLayoutX()+ OFFSET;
             final double finalY=buttons[newIndex].getLayoutY()+ OFFSET;
 
-            final double slopeX=(finalX-initialX)/REFRESH_RATE* MULTIPLIER;
-            final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
+            final double slopeX=((finalX-initialX)/REFRESH_RATE)* MULTIPLIER;
+            final double slopeY=((finalY-initialY)/REFRESH_RATE)* MULTIPLIER;
             @Override
             public void run() {
-                if (++i==REFRESH_RATE/ MULTIPLIER){
+                if (++i>=REFRESH_RATE/ MULTIPLIER){
                     cancel();
                     Platform.runLater(()->{
                         movePiece(selectedPieceIndex,newIndex);
@@ -428,7 +427,7 @@ public class ChessBoardPane extends StackPane{
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
             @Override
             public void run() {
-                if (++i==REFRESH_RATE/ MULTIPLIER){
+                if (++i>=REFRESH_RATE/ MULTIPLIER){
                     cancel();
                     Platform.runLater(()->{
                         finalizeMovePlay(mv);
@@ -465,7 +464,7 @@ public class ChessBoardPane extends StackPane{
     }
     private void handlePromotion(Move mv) {
 
-        if((gameMode.equals(SOLO)||gameMode.equals(ONLINE)) &&internalBoard.isWhiteTurn()!= whiteIsBottom) {//do not show your opponent's promotion menu
+        if(gameMode!=LOCAL &&(internalBoard.isWhiteTurn()!= whiteIsBottom)) {//do not show your opponent's promotion menu
             piecePromoted(mv,mv.promotionPiece);
             return;
         }
@@ -530,7 +529,7 @@ public class ChessBoardPane extends StackPane{
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
             @Override
             public void run() {
-                if (++i==REFRESH_RATE/ MULTIPLIER){
+                if (++i>=REFRESH_RATE/ MULTIPLIER){
                     cancel();
                     Platform.runLater(()->{
                         finalizeMovePlay(mv);
@@ -567,7 +566,7 @@ public class ChessBoardPane extends StackPane{
             final double slopeY=(finalY-initialY)/REFRESH_RATE* MULTIPLIER;
             @Override
             public void run() {
-                if (++i==REFRESH_RATE/ MULTIPLIER){
+                if (++i>=REFRESH_RATE/ MULTIPLIER){
                     cancel();
                     Platform.runLater(()->{
                         finalizeMovePlay(mv);

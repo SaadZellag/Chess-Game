@@ -22,21 +22,15 @@ public class JoinRoomPane extends MenuPane {
     private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE REFRESH");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
-    private final CustomButton JOIN_BUTTON = new CustomButton(heightProperty(),"JOIN ROOM",10);
+
     private long startingTime=10;//todo need to get this info from the server
     JoinRoomPane(){
-//        Client connectingClient= new Client("localhost");//todo write ip of the host, only create once host room has been selected
-        //todo client needs to be in a loop
-
         heightProperty().addListener(e->MIDDLE_PANE.setSpacing(heightProperty().divide(20).doubleValue()));
 
         UPPER_TEXT.setText("PLAY");
         UPPER_SUBTEXT.setText(" JOIN ROOM");
-
-        JOIN_BUTTON.setDisable(true);
-        JOIN_BUTTON.setOnAction(e-> {
-            //todo
-        });
+        nextSceneButton = new CustomButton(heightProperty(),"JOIN ROOM",10);
+        nextSceneButton.setDisable(true);
 
         final ScrollPane SCROLL_PANE= new ScrollPane();
         SCROLL_PANE.setStyle("-fx-background:transparent;-fx-background-color:rgba(0,0,255,0.5);");
@@ -63,7 +57,7 @@ public class JoinRoomPane extends MenuPane {
             }
         });
 
-        MIDDLE_PANE.getChildren().addAll(REFRESH_PROMPT,SCROLL_PANE, JOIN_BUTTON);
+        MIDDLE_PANE.getChildren().addAll(REFRESH_PROMPT,SCROLL_PANE, nextSceneButton);
     }
 
     private void findOpenRooms() {
@@ -77,14 +71,14 @@ public class JoinRoomPane extends MenuPane {
                 LIST_OF_ROOMS.getChildren().clear();
                 if(keys.length==0) {
                     LIST_OF_ROOMS.getChildren().add(NO_ROOMS_FOUND);
-                    JOIN_BUTTON.setDisable(true);
+                    nextSceneButton.setDisable(true);
                 }
                 else{
                     for (String IP:keys) {
                         CustomButton room= new CustomButton(heightProperty(),hashMap.get(IP),20);
                         room.setOnAction(e->{
                             hostIp=IP;
-                            JOIN_BUTTON.setDisable(false);
+                            nextSceneButton.setDisable(false);
                         });
                         LIST_OF_ROOMS.getChildren().add(room);
                     }
@@ -96,7 +90,8 @@ public class JoinRoomPane extends MenuPane {
 
     @Override
     public GamePane nextMenu() {//Create room
-        return new MultiplayerGamePane(true, GameMode.ONLINE,startingTime);//todo
+        joinServer(hostIp);
+        return new MultiplayerGamePane(false, GameMode.ONLINE,startingTime);
     }
 
 
