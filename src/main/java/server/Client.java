@@ -19,7 +19,7 @@ public class Client {
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public static HashMap<String, String> getHostDict() {
+    public static ArrayList<String> getHostIPs() {
         return new MulticastFinder().multicast();
     }
 
@@ -60,24 +60,36 @@ public class Client {
         //return in.readUTF();
     }
 
+    public void endGame() {
+        try {
+            out.writeObject(null);
+            out.flush();
+            in.close();
+            out.close();
+            clientSocket.close();
+            System.out.println("Sent end signal to server.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Turn receiveTurn() {
         try {
             Turn rt = (Turn) in.readObject();
+
+            if (rt == null) {
+                System.out.println("Received end game signal.");
+                in.close();
+                out.close();
+                clientSocket.close();
+                return null;
+            }
+
             System.out.println("Player " + playerID + " received " + rt.getMove() + " | Total turns: " + rt.getMovesPlayed());
             return rt;
         } catch(IOException | ClassNotFoundException e){
             e.printStackTrace();
         }
         return null;
-    }
-
-    public void stopConnection() {
-        try {
-            in.close();
-            out.close();
-            clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

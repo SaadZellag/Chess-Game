@@ -8,6 +8,7 @@ import game.Move;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class GameServer {
 
@@ -19,6 +20,8 @@ public class GameServer {
     private ServerSideConnection whiteConnection;
     private ServerSideConnection blackConnection;
     Thread beacon;
+
+    ArrayList<Thread> threadList = new ArrayList<>();
 
     public GameServer() {
         System.out.println("---Game Server---");
@@ -47,10 +50,14 @@ public class GameServer {
                 } else {
                     blackConnection = ssc;
                 }
-                //threadList.add(new Thread(ssc));
-                Thread t = new Thread(ssc);
+                threadList.add(new Thread(ssc));
+                //Thread t = new Thread(ssc);
+                //t.start();
+            }
+            for (Thread t : threadList) {
                 t.start();
             }
+
             System.out.println("All players connected.");
 
             beacon.interrupt();
@@ -88,12 +95,18 @@ public class GameServer {
                 out.writeInt(playerID);
                 out.flush();
 
-                //Right now the first player to connect is white and the second is black
+                //To terminate the game, call end game from either client
                     while (true) {
                         //ID 1 = first player connected so white
                         Turn turn;
+
                         if (playerID == 1) {
                             Move whiteMove = (Move) in.readObject();
+                            if (whiteMove == null) {
+                                System.out.println("Closing server.");
+                                blackConnection.sendBackTurn(null);
+                                break;
+                            }
                             System.out.println("White played move " + movesPlayed + " | " + whiteMove);
                             movesPlayed++;
                             turn = new Turn(whiteMove, movesPlayed);
@@ -102,6 +115,11 @@ public class GameServer {
 
                         } else {
                             Move blackMove = (Move) in.readObject();
+                            if (blackMove == null) {
+                                System.out.println("Closing server.");
+                                whiteConnection.sendBackTurn(null);
+                                break;
+                            }
                             System.out.println("Black played move " + movesPlayed + " | " + blackMove);
                             movesPlayed++;
                             turn = new Turn(blackMove, movesPlayed);
@@ -110,18 +128,36 @@ public class GameServer {
                         }
                     }
 
+                    whiteConnection.closeConnection();
+                    blackConnection.closeConnection();
+
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                System.out.println("IO exception from run method.");
             }
         }
 
         public void sendBackTurn(Turn turn) {
             try {
+
+                if (turn == null) {
+                    out.writeObject(null);
+                    out.flush();
+                    System.out.println("Sent end game signal to client.");
+                    return;
+                }
+
                 out.writeObject(turn);
                 out.flush();
                 System.out.println("This was the move sent: " + turn.getMove());
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+        public void closeConnection() {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("IO exception from closeConnection method.");
             }
         }
     }

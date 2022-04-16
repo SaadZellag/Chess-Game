@@ -29,10 +29,19 @@ public class WhiteSim {
             }
 
             rt = a.receiveTurn();
+
+            //null turn means end game, shutdown handled in the client class
+            if (rt == null) {
+                break;
+            }
+
             System.out.println("PLAY:");
             if (in.nextInt() == 1) {
                 a.sendMove(m);
                 System.out.println(rt.getMove());
+            } else {
+                a.endGame();
+                break;
             }
         }
     }

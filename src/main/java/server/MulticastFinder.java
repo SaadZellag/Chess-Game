@@ -7,14 +7,12 @@ import java.util.Dictionary;
 import java.util.HashMap;
 
 public class MulticastFinder {
-
-    public HashMap<String, String> multicast() {
-        HashMap<String, String> ips = new HashMap<>();
+    public ArrayList<String> multicast() {
+        ArrayList<String> ips = new ArrayList<>();
         try {
             InetAddress mcastaddr = InetAddress.getByName("230.0.0.0");
 
-            // The multicast server runs on port 6970 to leave 6969 free
-            // for the GameServer socket
+            // The multicast server runs on port 6970 to leave 6969 free for the GameServer socket
             InetSocketAddress group = new InetSocketAddress(mcastaddr, 6970);
             NetworkInterface networkInterface = NetworkInterface.getByName("en0");
             MulticastSocket socket = new MulticastSocket(6970);
@@ -28,7 +26,7 @@ public class MulticastFinder {
                 recPacket = new DatagramPacket(recvBuf, recvBuf.length);
                 try {
                     socket.receive(recPacket);
-                    ips.put(recPacket.getAddress().getHostAddress(), recPacket.getAddress().getCanonicalHostName());
+                    ips.add(recPacket.getAddress().getHostAddress());
 
                 } catch (SocketTimeoutException ignored) {}
             }
@@ -41,4 +39,5 @@ public class MulticastFinder {
         }
         return ips;
     }
+
 }

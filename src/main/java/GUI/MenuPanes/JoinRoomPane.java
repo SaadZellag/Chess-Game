@@ -11,7 +11,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import server.Client;
+import server.IdGenerator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static GUI.GUI.*;
@@ -61,21 +63,21 @@ public class JoinRoomPane extends MenuPane {
     }
 
     private void findOpenRooms() {
+        IdGenerator generator = new IdGenerator();
         LIST_OF_ROOMS.getChildren().clear();
         LIST_OF_ROOMS.getChildren().add(LOOKING);
         Thread t = new Thread(()->{
-            HashMap<String,String> hashMap=Client.getHostDict();
-            String[] keys= hashMap.keySet().toArray(new String[0]);
+            ArrayList<String> ArrayList =Client.getHostIPs();
 
             Platform.runLater(()->{
                 LIST_OF_ROOMS.getChildren().clear();
-                if(keys.length==0) {
+                if(ArrayList.size() == 0) {
                     LIST_OF_ROOMS.getChildren().add(NO_ROOMS_FOUND);
                     nextSceneButton.setDisable(true);
                 }
                 else{
-                    for (String IP:keys) {
-                        CustomButton room= new CustomButton(heightProperty(),hashMap.get(IP),20);
+                    for (String IP:ArrayList) {
+                        CustomButton room= new CustomButton(heightProperty(), generator.ipToID(IP),20);
                         room.setOnAction(e->{
                             hostIp=IP;
                             nextSceneButton.setDisable(false);
