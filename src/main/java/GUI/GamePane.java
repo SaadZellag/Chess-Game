@@ -8,6 +8,7 @@ public class GamePane extends Pane {
     public GamePane nextMenu2(){return null;}
     public GamePane nextMenu3(){return null;}
     public GamePane previousMenu(){
+        GUI.shutDownServer();
         Platform.exit();
         System.exit(0);
         return null;

@@ -108,11 +108,13 @@ public class GUI extends Application {
             if (timeoutStatus == 0) {
                 Platform.runLater(() -> createRoomPane.nextSceneButton.fire());
             } else if (timeoutStatus == 1) {
-                /*
-                Here you should display something to the host letting them know they
-                went "idle", with a button for them to restart the server. (call launch server once again)
-                 */
-                gameServer.closeSocket();
+                shutDownServer();
+                Platform.runLater(()->{
+                    if(!createRoomPane.isPreviousMenuCall){
+                        createRoomPane.MIDDLE_PANE.getChildren().clear();
+                        createRoomPane.MIDDLE_PANE.getChildren().addAll(createRoomPane.TIME_OUT,createRoomPane.RELOAD_BUTTON);
+                    }
+                });
             }
         });
         serverThread.execute(()-> {
@@ -180,10 +182,9 @@ public class GUI extends Application {
             }
         });
     }
-    public static void shutDownServer(){//todo
-//        if (client!=null)
-//        client.endGame();
-        gameServer.closeSocket();
+    public static void shutDownServer(){
+        if(gameServer!=null)
+            gameServer.closeSocket();
         waitingForMove=true;
     }
     public static void sendMove(Move move){
@@ -265,7 +266,6 @@ public class GUI extends Application {
             ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu,BGM);
         });
-
         //previousMenu
         currentMenu.previousSceneButton.setOnAction(e->{
             GamePane previousMenu=  currentMenu.previousMenu();

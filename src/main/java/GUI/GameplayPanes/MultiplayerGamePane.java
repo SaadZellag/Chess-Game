@@ -136,7 +136,6 @@ public class MultiplayerGamePane extends GamePane {
                 if(blackRemainingTime==0||whiteRemainingTime==0){
                     cancel();
                     Platform.runLater(()->chessBoardPane.endGame(true));
-                    System.out.println("this ran");
                 }
             }
         },0, 1000L);
@@ -148,7 +147,8 @@ public class MultiplayerGamePane extends GamePane {
         root.getChildren().add(pauseMenu);
     }
 
-    private void endGame(){//todo give option to ask for a rematch
+    private void endGame(){
+        shutDownServer();//todo do something else if we want option for rematch
         clockTimer.cancel();
         pauseMenu.setViewOrder(1);
         Text endMessage;
@@ -164,7 +164,6 @@ public class MultiplayerGamePane extends GamePane {
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }
 
-
         pauseMenu.getChildren().remove(0);//removes resume button
         pauseMenu.getChildren().add(0,endMessage);
 
@@ -172,7 +171,9 @@ public class MultiplayerGamePane extends GamePane {
 
 
 
-        pauseMenu.getChildren().add(1,nextSceneButton2);
+        if(gameMode!=ONLINE)
+            pauseMenu.getChildren().add(1,nextSceneButton2);
+
         mainPane.getChildren().removeAll(moveHistory,rightMostPane);
         mainPane.getChildren().add(pauseMenu);
 
@@ -182,18 +183,11 @@ public class MultiplayerGamePane extends GamePane {
     public GamePane nextMenu() {
         if(gameMode==ONLINE)
             shutDownServer();
-        return new MainMenuPane();//Main menu
+        return new MainMenuPane();
     }
 
     @Override
     public GamePane nextMenu2() {
-        return new MultiplayerGamePane(whiteIsBottom,gameMode);//todo rematch
-    }
-
-    @Override
-    public GamePane previousMenu(){
-        if(gameMode==ONLINE)
-            shutDownServer();
-        return super.previousMenu();
+        return new MultiplayerGamePane(whiteIsBottom,gameMode);
     }
 }

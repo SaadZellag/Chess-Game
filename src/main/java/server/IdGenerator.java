@@ -57,6 +57,7 @@ public class IdGenerator {
         for (String s : ip.split("\\.")) {
             bytes.add(Integer.parseInt(s));
         }
-        return wordArray[bytes.get(2)] + " " + wordArray[bytes.get(3)];
+        String s=wordArray[bytes.get(2)] + " " + wordArray[bytes.get(3)];
+        return s.toUpperCase();
     }
 }
