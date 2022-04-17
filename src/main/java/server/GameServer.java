@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class GameServer {
 
     private final int PORT = 6969;
-    private final int TIMEOUT = 12000;
+    private final int TIMEOUT = 60000;
     private ServerSocket ss;
     private Socket s;
     private int playersCon;
@@ -67,11 +67,12 @@ public class GameServer {
             if (playersCon == 2) {
                 System.out.println("All players connected.");
             }
-
             beacon.interrupt();
             System.out.println("SERVER: Shut down multicast server");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Exception in accept method.");
+            beacon.interrupt();
+            return 1;
         }
         return 0;
     }
