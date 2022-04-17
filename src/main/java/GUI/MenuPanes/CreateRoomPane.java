@@ -2,16 +2,14 @@ package GUI.MenuPanes;
 import GUI.GameMode;
 import GUI.GamePane;
 import GUI.GameplayPanes.MultiplayerGamePane;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
-import server.GameServer;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static GUI.GUI.*;
-import static GUI.GameMode.ONLINE;
-
 public class CreateRoomPane extends MenuPane {
     CreateRoomPane(){
         launchServer(this);
@@ -23,6 +21,14 @@ public class CreateRoomPane extends MenuPane {
         heightProperty().addListener(e->WAITING.setPadding(new Insets(heightProperty().divide(5).doubleValue(),50,0,50)) );
         MIDDLE_PANE.getChildren().addAll(WAITING);
 
+        previousSceneButton.setDisable(true);
+        Timer timer= new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(()->previousSceneButton.setDisable(false));
+            }
+        },2000);
 
 
     }
@@ -34,7 +40,8 @@ public class CreateRoomPane extends MenuPane {
 
     @Override
     public GamePane previousMenu() {
-        return shutDownServer();
+        shutDownServer();
+        return new MultiplayerLAN_Pane();
     }
 
 }

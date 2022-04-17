@@ -104,6 +104,7 @@ public class GUI extends Application {
         serverThread.execute(()-> {
             gameServer= new GameServer();
             timeoutStatus = gameServer.accept();
+            
             if (timeoutStatus == 0) {
                 Platform.runLater(() -> createRoomPane.nextSceneButton.fire());
             } else if (timeoutStatus == 1) {
@@ -179,11 +180,11 @@ public class GUI extends Application {
             }
         });
     }
-    public static GamePane shutDownServer(){//todo
+    public static void shutDownServer(){//todo
 //        if (client!=null)
-            client.endGame();
+//        client.endGame();
+        gameServer.closeSocket();
         waitingForMove=true;
-        return new MultiplayerLAN_Pane();
     }
     public static void sendMove(Move move){
         System.out.println(move.toString()+" should be sent");

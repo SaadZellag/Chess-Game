@@ -178,10 +178,10 @@ public class GameServer {
     public void closeSocket() {
         try {
         ss.close();
+        s.close();
         } catch (IOException e) {
             System.out.println("IO exception in run method");
         }
-
     }
 
     public static void main(String[] args) {
