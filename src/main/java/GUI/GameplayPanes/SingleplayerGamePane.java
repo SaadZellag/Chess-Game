@@ -16,8 +16,8 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
     private final boolean WHITE_IS_BOTTOM;
     private final double difficulty;
 
-    public SingleplayerGamePane(boolean WHITE_IS_BOTTOM, double difficulty, long startingTime) {
-        super(WHITE_IS_BOTTOM, GameMode.SOLO,startingTime);
+    public SingleplayerGamePane(boolean WHITE_IS_BOTTOM, double difficulty) {
+        super(WHITE_IS_BOTTOM, GameMode.SOLO);
         this.WHITE_IS_BOTTOM = WHITE_IS_BOTTOM;
         this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
@@ -71,7 +71,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
 
     @Override
     public GamePane nextMenu2() {//Rematch
-        return new SingleplayerGamePane(WHITE_IS_BOTTOM,difficulty,startingTime);
+        return new SingleplayerGamePane(WHITE_IS_BOTTOM,difficulty);
     }
     @Override
     public GamePane previousMenu() {//Main Menu

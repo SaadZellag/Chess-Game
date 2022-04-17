@@ -16,14 +16,12 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
+import static GUI.GameMode.ONLINE;
 
 public class MultiplayerGamePane extends GamePane {
     public HBox mainPane = new HBox();
@@ -35,18 +33,17 @@ public class MultiplayerGamePane extends GamePane {
     public MoveHistoryField moveHistory;
     public static boolean whiteIsBottom;
     public ChessBoardPane chessBoardPane;
-
     private final VBox rightMostPane;
-
-    public static long startingTime=10;
-
+    private static final long STARTING_TIME =10;
     private final Timer clockTimer= new Timer();
-    public static long whiteRemainingTime = TimeUnit.MINUTES.toMillis(startingTime);
-    public static long blackRemainingTime= TimeUnit.MINUTES.toMillis(startingTime);
-
-    public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode,long startingTime) {
+    public static long whiteRemainingTime = TimeUnit.MINUTES.toMillis(STARTING_TIME);
+    public static long blackRemainingTime= TimeUnit.MINUTES.toMillis(STARTING_TIME);
+    private final GameMode gameMode;
+    public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode) {
+        this.gameMode=gameMode;
         MultiplayerGamePane.whiteIsBottom =whiteIsBottom;
-        MultiplayerGamePane.startingTime =startingTime;
+        whiteRemainingTime = TimeUnit.MINUTES.toMillis(STARTING_TIME);
+        blackRemainingTime= TimeUnit.MINUTES.toMillis(STARTING_TIME);
 
         //parent inherited buttons
         nextSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);
@@ -122,12 +119,8 @@ public class MultiplayerGamePane extends GamePane {
 
 
     private void startTimers(Text upperTimer,Text lowerTimer) {
-        Date startTime= new Date();
-        long minutes=TimeUnit.MILLISECONDS.toMinutes(startingTime);
-        long millis =whiteRemainingTime-TimeUnit.MINUTES.toMillis(minutes);//
-        lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
-        upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
-
+        lowerTimer.setText(String.format("%d:%02d", STARTING_TIME,0));
+        upperTimer.setText(String.format("%d:%02d", STARTING_TIME,0));
         clockTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -172,7 +165,6 @@ public class MultiplayerGamePane extends GamePane {
         }
 
 
-
         pauseMenu.getChildren().remove(0);//removes resume button
         pauseMenu.getChildren().add(0,endMessage);
 
@@ -188,11 +180,20 @@ public class MultiplayerGamePane extends GamePane {
 
     @Override
     public GamePane nextMenu() {
+        if(gameMode==ONLINE)
+            shutDownServer();
         return new MainMenuPane();//Main menu
     }
 
     @Override
     public GamePane nextMenu2() {
-        return null;//todo rematch
+        return new MultiplayerGamePane(whiteIsBottom,gameMode);//todo rematch
+    }
+
+    @Override
+    public GamePane previousMenu(){
+        if(gameMode==ONLINE)
+            shutDownServer();
+        return super.previousMenu();
     }
 }

@@ -1,10 +1,9 @@
 package GUI;
 
-import GUI.GameplayPanes.ChessBoardPane;
 import GUI.GameplayPanes.MultiplayerGamePane;
-import GUI.MenuPanes.CreateRoomPane;
-import GUI.MenuPanes.MainMenuPane;
+import GUI.MenuPanes.*;
 import game.Move;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -23,6 +22,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import server.Client;
 import server.GameServer;
 import server.Turn;
@@ -35,22 +35,24 @@ public class GUI extends Application {
 
     public static ExecutorService serverThread;
     static public final long REFRESH_RATE = 90;
+    public static final Duration TRANSITION_DURATION=Duration.seconds(0.3);
+
     public static void main(String[] args) {
         launch(args);
     }
     private static GameServer gameServer;
     private static Client client;
     private static volatile boolean waitingForMove =true;
-    private static StackPane root = new StackPane();
+    private static final StackPane ROOT = new StackPane();
     @Override
     public void start(Stage primaryStage) {
 
         //Initial scene
 
-        root.setBackground(getBackgroundImage("Main Background.png",root,true));
+        ROOT.setBackground(getBackgroundImage("Main Background.png", ROOT,true));
         GamePane initialPane= new MainMenuPane();
-        root.getChildren().add(initialPane);
-        Scene mainScene= new Scene(root,950,510);
+        ROOT.getChildren().add(initialPane);
+        Scene mainScene= new Scene(ROOT,950,510);
         primaryStage.setScene(mainScene);
 
         //Aspect ratio
@@ -74,13 +76,14 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
-        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
-        primaryStage.setFullScreen(false); //I HAVE DISABLED AUTO FULLSCREEN - Alex
+//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");//todo make sure to uncomment this
+//        primaryStage.setFullScreen(false); //I HAVE DISABLED AUTO FULLSCREEN - Alex
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
         primaryStage.setOnCloseRequest(e->{
+            shutDownServer();
             Platform.exit();
             System.exit(0);
         });
@@ -145,7 +148,7 @@ public class GUI extends Application {
                         serverThread.shutdown();
                     }
                     System.out.println(turn.getMove().toString() + " was received");
-                    Platform.runLater(() -> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
+                    Platform.runLater(() -> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
                     while (waitingForMove) {
                         Thread.onSpinWait();
                     }
@@ -167,7 +170,7 @@ public class GUI extends Application {
                     userThread.shutdown();
                 }
                 System.out.println(turn.getMove().toString()+" was received");
-                Platform.runLater(()-> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
+                Platform.runLater(()-> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
                 while (waitingForMove) {
                     Thread.onSpinWait();
                 }
@@ -175,6 +178,12 @@ public class GUI extends Application {
                 waitingForMove=true;
             }
         });
+    }
+    public static GamePane shutDownServer(){//todo
+//        if (client!=null)
+            client.endGame();
+        waitingForMove=true;
+        return new MultiplayerLAN_Pane();
     }
     public static void sendMove(Move move){
         System.out.println(move.toString()+" should be sent");
@@ -239,29 +248,48 @@ public class GUI extends Application {
         //nextMenus
         currentMenu.nextSceneButton.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu();
-            root.getChildren().add(nextMenu);
-            root.getChildren().remove(currentMenu);
+            ROOT.getChildren().add(nextMenu);
+            ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu,BGM);
         });
         currentMenu.nextSceneButton2.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu2();
-            root.getChildren().add(nextMenu);
-            root.getChildren().remove(currentMenu);
+            ROOT.getChildren().add(nextMenu);
+            ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu,BGM);
         });
         currentMenu.nextSceneButton3.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu3();
-            root.getChildren().add(nextMenu);
-            root.getChildren().remove(currentMenu);
+            ROOT.getChildren().add(nextMenu);
+            ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu,BGM);
         });
 
         //previousMenu
         currentMenu.previousSceneButton.setOnAction(e->{
             GamePane previousMenu=  currentMenu.previousMenu();
-            root.getChildren().add(previousMenu);
-            root.getChildren().remove(currentMenu);
-            HandleSceneSwitch(previousMenu,BGM);
+            if(currentMenu instanceof MenuPane){
+                FadeTransition centerTransition= new FadeTransition(TRANSITION_DURATION,((MenuPane)currentMenu).MIDDLE_PANE);
+                centerTransition.setToValue(0);
+                centerTransition.setOnFinished(f->{
+                    ROOT.getChildren().add(previousMenu);
+                    ROOT.getChildren().remove(currentMenu);
+                    HandleSceneSwitch(previousMenu,BGM);
+                });
+                FadeTransition topTransition= new FadeTransition(TRANSITION_DURATION);
+                if(currentMenu instanceof PlayPane)
+                    topTransition.setNode(((MenuPane)currentMenu).UPPER_TEXT);
+                else
+                    topTransition.setNode(((MenuPane)currentMenu).UPPER_SUBTEXT);
+                topTransition.setToValue(0);
+
+                topTransition.play();
+                centerTransition.play();
+            }else{
+                ROOT.getChildren().add(previousMenu);
+                ROOT.getChildren().remove(currentMenu);
+                HandleSceneSwitch(previousMenu,BGM);
+            }
         });
         if(BGM.isMute())
             currentMenu.MUTE_BUTTON.setGraphic(new ImageView(getImage("Mute.png")));

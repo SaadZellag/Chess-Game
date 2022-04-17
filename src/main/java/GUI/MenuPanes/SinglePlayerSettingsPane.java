@@ -3,6 +3,7 @@ package GUI.MenuPanes;
 import GUI.CustomButton;
 import GUI.GamePane;
 import GUI.GameplayPanes.SingleplayerGamePane;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
@@ -11,13 +12,11 @@ import javafx.scene.text.Text;
 
 import java.util.Random;
 
-import static GUI.GUI.formatStandardText;
-import static GUI.GUI.glowEffect;
+import static GUI.GUI.*;
 
 public class SinglePlayerSettingsPane extends MenuPane {
     private boolean whiteIsBottom;
     private final Slider slider;
-    private long startingTime=10;//todo
 
     public SinglePlayerSettingsPane(){
         heightProperty().addListener(e-> MIDDLE_PANE.setSpacing(heightProperty().divide(42).doubleValue()));
@@ -84,7 +83,7 @@ public class SinglePlayerSettingsPane extends MenuPane {
     }
     @Override
     public GamePane nextMenu() {//Start
-        return new SingleplayerGamePane(whiteIsBottom,slider.getValue(),startingTime);
+        return new SingleplayerGamePane(whiteIsBottom,slider.getValue());
     }
 
     @Override
