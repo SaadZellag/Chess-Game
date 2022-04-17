@@ -5,7 +5,7 @@ import GUI.GamePane;
 
 public class MultiplayerLAN_Pane extends MenuPane {
 
-    MultiplayerLAN_Pane(){
+    public MultiplayerLAN_Pane(){
         heightProperty().addListener(e-> {
             MIDDLE_PANE.setSpacing(heightProperty().divide(18).doubleValue());
             MAIN_PANE.setSpacing(heightProperty().divide(15).doubleValue());

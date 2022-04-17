@@ -2,6 +2,7 @@ package GUI.MenuPanes;
 
 import GUI.CustomButton;
 import GUI.GamePane;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
@@ -9,6 +10,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
+import static GUI.GUI.TRANSITION_DURATION;
 import static GUI.GUI.formatStandardText;
 
 public class MenuPane extends GamePane {
@@ -16,7 +18,6 @@ public class MenuPane extends GamePane {
     public final Text UPPER_TEXT= new Text();
     public final Text UPPER_SUBTEXT= new Text();
     public final VBox MIDDLE_PANE = new VBox();
-
     MenuPane(){
         getChildren().add(MAIN_PANE);
 
@@ -44,5 +45,17 @@ public class MenuPane extends GamePane {
 
         bottomPane.getChildren().addAll(previousSceneButton, MUTE_BUTTON);
         MAIN_PANE.getChildren().addAll(topPane, MIDDLE_PANE, bottomPane);
+
+        FadeTransition centerTransition= new FadeTransition(TRANSITION_DURATION,MIDDLE_PANE);
+        centerTransition.setFromValue(0);
+        centerTransition.setToValue(1);
+
+
+        FadeTransition topTransition = new FadeTransition(TRANSITION_DURATION, UPPER_SUBTEXT);
+        topTransition.setFromValue(0);
+        topTransition.setToValue(1);
+
+        topTransition.play();
+        centerTransition.play();
     }
 }

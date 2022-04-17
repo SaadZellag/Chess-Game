@@ -24,8 +24,6 @@ public class JoinRoomPane extends MenuPane {
     private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE REFRESH");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
-
-    private long startingTime=10;//todo need to get this info from the server
     JoinRoomPane(){
         heightProperty().addListener(e->MIDDLE_PANE.setSpacing(heightProperty().divide(20).doubleValue()));
 
@@ -93,7 +91,7 @@ public class JoinRoomPane extends MenuPane {
     @Override
     public GamePane nextMenu() {//Create room
         joinServer(hostIp);
-        return new MultiplayerGamePane(false, GameMode.ONLINE,startingTime);
+        return new MultiplayerGamePane(false, GameMode.ONLINE);
     }
 
 
