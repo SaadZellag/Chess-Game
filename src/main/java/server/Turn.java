@@ -13,9 +13,7 @@ public class Turn implements Serializable {
         this.movesPlayed = mp;
     }
 
-    public Move getMove() {
-        return move;
-    }
+    public Move getMove() {return move;}
 
     public int getMovesPlayed() {
         return movesPlayed;

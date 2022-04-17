@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.*;
 
 public class MulticastServer extends Thread{
+
+    private MulticastSocket socket;
     @Override
     public void run() {
-        MulticastSocket socket = null;
+        socket = null;
         InetAddress mcastaddr;
 
         try {
@@ -29,12 +31,17 @@ public class MulticastServer extends Thread{
                 try {
                     sleep(1000);
                 } catch (InterruptedException e) {
+                    socket.close();
                     return;
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void close() {
+        socket.close();
     }
 
     public static void main(String[] args) {

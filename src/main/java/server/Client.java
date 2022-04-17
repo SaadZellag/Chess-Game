@@ -92,4 +92,15 @@ public class Client {
         }
         return null;
     }
+
+    public void close() {
+        try {
+            out.close();
+            in.close();
+            clientSocket.close();
+            System.out.println("Successfully closed client socket.");
+        } catch (IOException e) {
+            System.out.println("Exception in client close method.");
+        }
+    }
 }

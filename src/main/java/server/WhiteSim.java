@@ -24,6 +24,9 @@ public class WhiteSim {
                 System.out.println("PLAY:");
                 if (in.nextInt() == 1) {
                     a.sendMove(m);
+                } else {
+                    a.endGame();
+                    break;
                 }
                 moves++;
             }

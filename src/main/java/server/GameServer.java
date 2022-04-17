@@ -8,20 +8,21 @@ import game.Move;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
 public class GameServer {
 
     private final int PORT = 6969;
+    private final int TIMEOUT = 12000;
     private ServerSocket ss;
+    private Socket s;
     private int playersCon;
     // 0 = white's turn to play and 1 == black's turn
     int movesPlayed;
     private ServerSideConnection whiteConnection;
     private ServerSideConnection blackConnection;
     Thread beacon;
-
-    ArrayList<Thread> threadList = new ArrayList<>();
 
     public GameServer() {
         System.out.println("---Game Server---");
@@ -32,16 +33,24 @@ public class GameServer {
             beacon = new Thread(new MulticastServer());
             beacon.start();
             ss = new ServerSocket(PORT);
+            ss.setSoTimeout(TIMEOUT);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void accept() {
+    public int accept() {
         try {
             System.out.println("Waiting for connection...");
             while (playersCon < 2) {
-                Socket s = ss.accept();
+                try {
+                    s = ss.accept();
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Timeout reached. Closing socket and multicast server.");
+                    beacon.interrupt();
+                    ss.close();
+                    return 1;
+                }
                 playersCon++;
                 System.out.println("Player " + playersCon +" has connected.");
                 ServerSideConnection ssc = new ServerSideConnection(s, playersCon);
@@ -50,21 +59,21 @@ public class GameServer {
                 } else {
                     blackConnection = ssc;
                 }
-                threadList.add(new Thread(ssc));
-                //Thread t = new Thread(ssc);
-                //t.start();
-            }
-            for (Thread t : threadList) {
+                //threadList.add(new Thread(ssc));
+                Thread t = new Thread(ssc);
                 t.start();
             }
 
-            System.out.println("All players connected.");
+            if (playersCon == 2) {
+                System.out.println("All players connected.");
+            }
 
             beacon.interrupt();
-
+            System.out.println("SERVER: Shut down multicast server");
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return 0;
     }
 
     private class ServerSideConnection implements Runnable {
@@ -103,8 +112,10 @@ public class GameServer {
                         if (playerID == 1) {
                             Move whiteMove = (Move) in.readObject();
                             if (whiteMove == null) {
-                                System.out.println("Closing server.");
-                                blackConnection.sendBackTurn(null);
+                                System.out.println("Closing server on thread " + playerID );
+                                if (playersCon > 1) {
+                                    blackConnection.sendBackTurn(null);
+                                }
                                 break;
                             }
                             System.out.println("White played move " + movesPlayed + " | " + whiteMove);
@@ -116,7 +127,7 @@ public class GameServer {
                         } else {
                             Move blackMove = (Move) in.readObject();
                             if (blackMove == null) {
-                                System.out.println("Closing server.");
+                                System.out.println("Closing server on thread " + playerID);
                                 whiteConnection.sendBackTurn(null);
                                 break;
                             }
@@ -129,10 +140,12 @@ public class GameServer {
                     }
 
                     whiteConnection.closeConnection();
-                    blackConnection.closeConnection();
+                    if (playersCon > 1) {
+                        blackConnection.closeConnection();
+                    }
 
             } catch (IOException | ClassNotFoundException e) {
-                System.out.println("IO exception from run method.");
+                System.out.println("IO exception from run method. This is normal if recently shut down.");
             }
         }
 
@@ -160,6 +173,15 @@ public class GameServer {
                 System.out.println("IO exception from closeConnection method.");
             }
         }
+    }
+
+    public void closeSocket() {
+        try {
+        ss.close();
+        } catch (IOException e) {
+            System.out.println("IO exception in run method");
+        }
+
     }
 
     public static void main(String[] args) {

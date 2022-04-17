@@ -29,17 +29,19 @@ import server.Turn;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class GUI extends Application {
-    static public final long REFRESH_RATE = 90;
 
+    public static ExecutorService serverThread;
+    static public final long REFRESH_RATE = 90;
     public static void main(String[] args) {
         launch(args);
     }
     private static GameServer gameServer;
     private static Client client;
     private static volatile boolean waitingForMove =true;
-    private static StackPane root= new StackPane();
+    private static StackPane root = new StackPane();
     @Override
     public void start(Stage primaryStage) {
 
@@ -61,7 +63,7 @@ public class GUI extends Application {
         //BGM
         MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
-//        BGM.play();//todo make sure to uncomment this
+        //BGM.play();//todo make sure to uncomment this
         HandleSceneSwitch(initialPane,BGM);
 
 
@@ -73,7 +75,7 @@ public class GUI extends Application {
             }
         });
         primaryStage.setFullScreenExitHint("Press F11 to exit full screen");
-        primaryStage.setFullScreen(true);
+        primaryStage.setFullScreen(false); //I HAVE DISABLED AUTO FULLSCREEN - Alex
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
@@ -85,35 +87,72 @@ public class GUI extends Application {
         primaryStage.show();
     }
     private static Move sentMove;
+
+    /*
+    Timeout status
+    -1: waiting for second player to connect
+     0: all players connected, ready to go
+     1: timeout reached for the accept method in the GameServer class
+     */
+    private static int timeoutStatus;
     public static void launchServer(CreateRoomPane createRoomPane){
-        ExecutorService serverThread= Executors.newFixedThreadPool(2);
+        timeoutStatus = -1;
+        serverThread= Executors.newFixedThreadPool(2);
         serverThread.execute(()-> {
             gameServer= new GameServer();
-            gameServer.accept();
-            Platform.runLater(()->createRoomPane.nextSceneButton.fire());
+            timeoutStatus = gameServer.accept();
+            if (timeoutStatus == 0) {
+                Platform.runLater(() -> createRoomPane.nextSceneButton.fire());
+            } else if (timeoutStatus == 1) {
+                /*
+                Here you should display something to the host letting them know they
+                went "idle", with a button for them to restart the server. (call launch server once again)
+                 */
+                gameServer.closeSocket();
+            }
         });
         serverThread.execute(()-> {
+            //Sleep to avoid race condition
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted exception in server client thread.");
+            }
+
             client = new Client("localhost");
             int moves=0;
-            while(!serverThread.isShutdown()){
-                if(moves==0){
+
+            while(!serverThread.isShutdown()) {
+                // If not player connected in the timeout window, shutdown
+                if (timeoutStatus == 1) {
+                    client.close();
+                    serverThread.shutdownNow();
+                }
+                // If all players connected, continue as normal
+                if (timeoutStatus == 0) {
+                    if (moves == 0) {
+                        while (waitingForMove) {
+                            Thread.onSpinWait();
+                        }
+                        waitingForMove = true;
+                        client.sendMove(sentMove);
+                        System.out.println(sentMove.toString() + " was sent");
+                        moves++;
+                    }
+                    Turn turn = client.receiveTurn();
+                    if (turn == null) {
+                        System.out.println("Received end game signal.");
+                        serverThread.shutdown();
+                    }
+                    System.out.println(turn.getMove().toString() + " was received");
+                    Platform.runLater(() -> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
                     while (waitingForMove) {
                         Thread.onSpinWait();
                     }
-                    waitingForMove=true;
                     client.sendMove(sentMove);
-                    System.out.println(sentMove.toString()+" was sent");
-                    moves++;
+                    System.out.println(sentMove.toString() + " was sent");
+                    waitingForMove = true;
                 }
-                Turn turn = client.receiveTurn();
-                System.out.println(turn.getMove().toString()+" was received");
-                Platform.runLater(()-> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
-                while (waitingForMove) {
-                    Thread.onSpinWait();
-                }
-                client.sendMove(sentMove);
-                System.out.println(sentMove.toString()+" was sent");
-                waitingForMove=true;
             }
         });
     }
@@ -123,6 +162,10 @@ public class GUI extends Application {
             client = new Client(ip);
             while(!userThread.isShutdown()){
                 Turn turn = client.receiveTurn();
+                if (turn == null) {
+                    System.out.println("Received end game signal.");
+                    userThread.shutdown();
+                }
                 System.out.println(turn.getMove().toString()+" was received");
                 Platform.runLater(()-> ((MultiplayerGamePane) root.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
                 while (waitingForMove) {
@@ -138,8 +181,6 @@ public class GUI extends Application {
         sentMove=move;
         waitingForMove =false;
     }
-
-
 
     public static String getResource(String resourceName){
         return String.valueOf(GUI.class.getClassLoader().getResource("GUI/"+resourceName));
