@@ -443,11 +443,12 @@ public class ChessBoardPane extends StackPane{
     }
     public void endGame(boolean isCheckmate) {
         setBackground(dangerBackGround);
-        if(gameMode==SOLO)
-            Engine.cancelCurrentSearch();
+        if(gameMode==SOLO) {
+            engineIsPaused=true;
+            if(Engine.getCurrentSearch()!=null)
+                Engine.cancelCurrentSearch();
+        }
         grid.setMouseTransparent(true);
-
-
         if(isCheckmate){
             Piece[] pieces = internalBoard.getPieces();
             for (int i = 0; i < pieces.length; i++) {

@@ -60,8 +60,14 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
                         return;
                     }
                 }
-                Platform.runLater(()->chessBoardPane.animateMovePiece(bestMove.move));
-            } catch (ExecutionException | InterruptedException e) {
+                Platform.runLater(()-> {
+                    if(engineMove.isCancelled()) {
+                        engineThread.shutdownNow();
+                        return;
+                    }
+                    chessBoardPane.animateMovePiece(bestMove.move);
+                });
+            } catch (ExecutionException | InterruptedException e) {//todo can this be ignored too?
                 e.printStackTrace();
             }catch (CancellationException ignored){
             }
@@ -75,6 +81,8 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
     }
     @Override
     public GamePane previousMenu() {//Main Menu
+        chessBoardPane.engineIsPaused=true;
+        Engine.cancelCurrentSearch();
         return new MainMenuPane();
     }
 

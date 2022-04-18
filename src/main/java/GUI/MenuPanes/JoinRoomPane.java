@@ -21,9 +21,11 @@ import static GUI.GameMode.ONLINE;
 
 public class JoinRoomPane extends MenuPane {
     private final VBox LIST_OF_ROOMS= new VBox();
-    private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE REFRESH");
+    private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE SEARCH AGAIN");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
+
+    private final CustomButton RELOAD_BUTTON = new CustomButton(heightProperty(),"SEARCH AGAIN",15);
     JoinRoomPane(){
         heightProperty().addListener(e->MIDDLE_PANE.setSpacing(heightProperty().divide(20).doubleValue()));
 
@@ -33,7 +35,7 @@ public class JoinRoomPane extends MenuPane {
         nextSceneButton.setDisable(true);
 
         final ScrollPane SCROLL_PANE= new ScrollPane();
-        SCROLL_PANE.setStyle("-fx-background:transparent;-fx-background-color:rgba(0,0,255,0.5);");
+        SCROLL_PANE.setStyle("-fx-background:transparent;-fx-background-color:rgba(0,0,255,0.3);");
         SCROLL_PANE.prefHeightProperty().bind(heightProperty().divide(1.5));
         SCROLL_PANE.maxWidthProperty().bind(widthProperty().divide(1.3));
         SCROLL_PANE.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -42,22 +44,18 @@ public class JoinRoomPane extends MenuPane {
 
         SCROLL_PANE.setContent(LIST_OF_ROOMS);
         LIST_OF_ROOMS.setAlignment(Pos.CENTER);
-        LIST_OF_ROOMS.prefWidthProperty().bind(SCROLL_PANE.widthProperty());
+        LIST_OF_ROOMS.prefWidthProperty().bind(SCROLL_PANE.widthProperty().multiply(0.99));
 
         formatStandardText(NO_ROOMS_FOUND,heightProperty(),18);
         formatStandardText(LOOKING,heightProperty(),18);
 
         findOpenRooms();
 
-        final Text REFRESH_PROMPT= new Text("PRESS R TO REFRESH THE ROOM LIST");
-        formatStandardText(REFRESH_PROMPT,heightProperty(),23);
-        setOnKeyPressed(e->{
-            if(e.getCode()== KeyCode.R) {
-                findOpenRooms();
-            }
-        });
+        final Text HEADER= new Text("CLICK ON A ROOM TO JOIN");
+        formatStandardText(HEADER,heightProperty(),20);
+        RELOAD_BUTTON.setOnAction(e->findOpenRooms());
 
-        MIDDLE_PANE.getChildren().addAll(REFRESH_PROMPT,SCROLL_PANE, nextSceneButton);
+        MIDDLE_PANE.getChildren().addAll(HEADER,SCROLL_PANE, nextSceneButton);
     }
 
     private void findOpenRooms() {
@@ -70,7 +68,7 @@ public class JoinRoomPane extends MenuPane {
             Platform.runLater(()->{
                 LIST_OF_ROOMS.getChildren().clear();
                 if(ArrayList.size() == 0) {
-                    LIST_OF_ROOMS.getChildren().add(NO_ROOMS_FOUND);
+                    LIST_OF_ROOMS.getChildren().addAll(NO_ROOMS_FOUND,RELOAD_BUTTON);
                     nextSceneButton.setDisable(true);
                 }
                 else{

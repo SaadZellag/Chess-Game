@@ -66,18 +66,16 @@ public class SinglePlayerSettingsPane extends MenuPane {
             random.setEffect(null);
         });
 
-        slider= new Slider(0,1,0.7);
-        slider.setPrefHeight(30);
+        slider= new Slider(1e-10,1,0.7);
         slider.maxWidthProperty().bind(widthProperty().divide(1.2));
         slider.setEffect(glowEffect(Color.CYAN,Color.MAGENTA));
-//        slider.setMinorTickCount(10);
-//        slider.setShowTickLabels(true);
-//        slider.setShowTickMarks(true);
-//        slider.setMajorTickUnit(25);
+        slider.setMinorTickCount(5);
+        slider.setShowTickLabels(true);
+        slider.setShowTickMarks(true);
+        slider.setMajorTickUnit(0.1);
 
         final Text DIFFICULTY= new Text("ENGINE DIFFICULTY");
         formatStandardText(DIFFICULTY,heightProperty(),15);
-
         MIDDLE_PANE.getChildren().addAll(PLAYER_COLOR,startingColors,DIFFICULTY,slider,nextSceneButton);
         random.fire();
     }

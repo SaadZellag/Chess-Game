@@ -24,26 +24,26 @@ import static GUI.GUI.*;
 import static GUI.GameMode.ONLINE;
 
 public class MultiplayerGamePane extends GamePane {
-    public HBox mainPane = new HBox();
-    public VBox pauseMenu;
+    HBox mainPane = new HBox();
+    VBox pauseMenu;
 
     private final StackPane root = new StackPane();
 
     ObservableList<Move> moveHistoryList;
-    public MoveHistoryField moveHistory;
+    MoveHistoryField moveHistory;
     public static boolean whiteIsBottom;
     public ChessBoardPane chessBoardPane;
     private final VBox rightMostPane;
-    private static final long STARTING_TIME =10;
+    private final long STARTING_TIME =600000;
     private final Timer clockTimer= new Timer();
-    public static long whiteRemainingTime = TimeUnit.MINUTES.toMillis(STARTING_TIME);
-    public static long blackRemainingTime= TimeUnit.MINUTES.toMillis(STARTING_TIME);
+    static long whiteRemainingTime;
+    static long blackRemainingTime;
     private final GameMode gameMode;
     public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode) {
         this.gameMode=gameMode;
         MultiplayerGamePane.whiteIsBottom =whiteIsBottom;
-        whiteRemainingTime = TimeUnit.MINUTES.toMillis(STARTING_TIME);
-        blackRemainingTime= TimeUnit.MINUTES.toMillis(STARTING_TIME);
+        whiteRemainingTime = STARTING_TIME;
+        blackRemainingTime= STARTING_TIME;
 
         //parent inherited buttons
         nextSceneButton = new CustomButton(heightProperty(),"MAIN MENU",15);
@@ -119,8 +119,10 @@ public class MultiplayerGamePane extends GamePane {
 
 
     private void startTimers(Text upperTimer,Text lowerTimer) {
-        lowerTimer.setText(String.format("%d:%02d", STARTING_TIME,0));
-        upperTimer.setText(String.format("%d:%02d", STARTING_TIME,0));
+        long minutes=TimeUnit.MILLISECONDS.toMinutes(STARTING_TIME);
+        long millis =STARTING_TIME-TimeUnit.MINUTES.toMillis(minutes);
+        lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
+        upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
         clockTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -148,6 +150,8 @@ public class MultiplayerGamePane extends GamePane {
     }
 
     private void endGame(){
+        if(pauseMenu.getParent()!=null)
+           ((CustomButton) pauseMenu.getChildren().get(0)).fire();
         shutDownServer();//todo do something else if we want option for rematch
         clockTimer.cancel();
         pauseMenu.setViewOrder(1);

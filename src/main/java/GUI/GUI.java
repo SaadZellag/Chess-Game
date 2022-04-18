@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -68,6 +69,13 @@ public class GUI extends Application {
         //BGM.play();//todo make sure to uncomment this
         HandleSceneSwitch(initialPane,BGM);
 
+        //prevent spaceBar from activating scene buttons
+        primaryStage.addEventFilter(KeyEvent.KEY_PRESSED, k -> {
+            if ( k.getCode() == KeyCode.SPACE){
+                k.consume();
+            }
+        });
+
 
         //fullscreen command
         primaryStage.getScene().setOnKeyPressed(e -> {
@@ -82,6 +90,7 @@ public class GUI extends Application {
         primaryStage.setMinWidth(1050);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
+
         primaryStage.setOnCloseRequest(e->{
             shutDownServer();
             Platform.exit();

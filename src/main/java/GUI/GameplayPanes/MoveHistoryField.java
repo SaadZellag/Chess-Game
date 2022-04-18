@@ -55,47 +55,60 @@ public class MoveHistoryField extends VBox {
             displayMoves();
 
         });
+        textHolder.prefWidthProperty().bind(scrollPane.widthProperty().multiply(0.99));
     }
     private void displayMoves(){
         textHolder.getChildren().clear();
-        for (Move move:movesList) {
-            boolean isWhite=move.piece.isWhite;
+        GridPane currentRow = null;
+        for (Move move : movesList) {
+            boolean isWhite = move.piece.isWhite;
 
-            String pieceMoved=switch (move.piece.type){
-                case QUEEN ->isWhite?"♕":"♛";
-                case KING ->isWhite?"♔":"♚";
-                case ROOK ->isWhite?"♖":"♜";
-                case BISHOP ->isWhite?"♗":"♝";
-                case KNIGHT ->isWhite?"♘":"♞";
-                case PAWN ->isWhite?"♙":"♟";
+            String pieceMoved = switch (move.piece.type) {
+                case QUEEN -> isWhite ? "♕" : "♛";
+                case KING -> isWhite ? "♔" : "♚";
+                case ROOK -> isWhite ? "♖" : "♜";
+                case BISHOP -> isWhite ? "♗" : "♝";
+                case KNIGHT -> isWhite ? "♘" : "♞";
+                case PAWN -> isWhite ? "♙" : "♟";
             };
-            String promotion="";
-            if(move.promotionPiece!=null)
-                promotion=switch (move.promotionPiece){
-                    case QUEEN ->isWhite?"->♕":"->♛";
-                    case KING ->isWhite?"->♔":"->♚";
-                    case ROOK ->isWhite?"->♖":"->♜";
-                    case BISHOP ->isWhite?"->♗":"->♝";
-                    case KNIGHT ->isWhite?"->♘":"->♞";
-                    case PAWN ->isWhite?"->♙":"->♟";
-                };
-
-
-            Text piece= new Text(pieceMoved);
-            piece.setFont(Font.font("", FontWeight.BOLD, fontSize));
-
             String moveStr = ChessUtils.moveToUCI(move);
 
-            Text UCI= new Text(moveStr.substring(0, 2) + "-" + moveStr.substring(2, 4));
-            UCI.setFont(Font.loadFont(getResource("pixelatedFont.otf"),fontSize));
+            String promotion = "";
+            if (move.promotionPiece != null)
+                promotion = switch (move.promotionPiece) {
+                    case QUEEN -> isWhite ? "->♕" : "->♛";
+                    case KING -> isWhite ? "->♔" : "->♚";
+                    case ROOK -> isWhite ? "->♖" : "->♜";
+                    case BISHOP -> isWhite ? "->♗" : "->♝";
+                    case KNIGHT -> isWhite ? "->♘" : "->♞";
+                    case PAWN -> isWhite ? "->♙" : "->♟";
+                };
 
-            Text promotionPiece= new Text(promotion);
+            Text piece = new Text(pieceMoved);
+            Text UCI = new Text(moveStr.substring(0, 2) + "-" + moveStr.substring(2, 4));
+            Text promotionPiece = new Text(promotion);
+
+            piece.setFont(Font.font("", FontWeight.BOLD, fontSize));
+            UCI.setFont(Font.loadFont(getResource("pixelatedFont.otf"), fontSize));
             promotionPiece.setFont(Font.font("", FontWeight.BOLD, fontSize));
 
             TextFlow textFlow = new TextFlow();
-            textFlow.getChildren().addAll(piece,UCI,promotionPiece);
-            textFlow.setEffect(glowEffect(Color.CYAN,Color.GREEN));
-            textHolder.getChildren().add(textFlow);
+            textFlow.getChildren().addAll(piece, UCI, promotionPiece);
+            textFlow.setEffect(glowEffect(Color.CYAN, Color.GREEN));
+            textFlow.setTextAlignment(TextAlignment.LEFT);
+            if (isWhite) {
+                currentRow = new GridPane();
+                ColumnConstraints col1 = new ColumnConstraints();
+                col1.setPercentWidth(50);
+                ColumnConstraints col2 = new ColumnConstraints();
+                col2.setPercentWidth(50);
+                currentRow.getColumnConstraints().addAll(col1, col2);
+                currentRow.add(textFlow, 0, 0);
+                textHolder.getChildren().add(currentRow);
+            } else {
+                if(currentRow!=null)
+                    currentRow.add(textFlow, 1, 0);
+            }
         }
     }
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
