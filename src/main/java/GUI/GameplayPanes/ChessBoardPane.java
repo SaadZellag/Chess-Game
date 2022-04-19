@@ -10,9 +10,7 @@ import game.Move;
 import game.Piece;
 import game.PieceType;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -24,14 +22,10 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javafx.scene.paint.Color;
 
@@ -443,11 +437,6 @@ public class ChessBoardPane extends StackPane{
     }
     public void endGame(boolean isCheckmate) {
         setBackground(dangerBackGround);
-        if(gameMode==SOLO) {
-            engineIsPaused=true;
-            if(Engine.getCurrentSearch()!=null)
-                Engine.cancelCurrentSearch();
-        }
         grid.setMouseTransparent(true);
         if(isCheckmate){
             Piece[] pieces = internalBoard.getPieces();

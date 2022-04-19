@@ -107,6 +107,7 @@ public class GUI extends Application {
      1: timeout reached for the accept method in the GameServer class
      */
     private static int timeoutStatus;
+    //TODO bring back to main menu when connection is lost
     public static void launchServer(CreateRoomPane createRoomPane){
         timeoutStatus = -1;
         serverThread= Executors.newFixedThreadPool(2);
@@ -158,6 +159,7 @@ public class GUI extends Application {
                     if (turn == null) {
                         System.out.println("Received end game signal.");
                         serverThread.shutdown();
+                        break;
                     }
                     System.out.println(turn.getMove().toString() + " was received");
                     Platform.runLater(() -> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
@@ -180,6 +182,7 @@ public class GUI extends Application {
                 if (turn == null) {
                     System.out.println("Received end game signal.");
                     userThread.shutdown();
+                    break;
                 }
                 System.out.println(turn.getMove().toString()+" was received");
                 Platform.runLater(()-> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
@@ -194,6 +197,8 @@ public class GUI extends Application {
     public static void shutDownServer(){
         if(gameServer!=null)
             gameServer.closeSocket();
+        else if(client!=null)
+            client.endGame();
         waitingForMove=true;
     }
     public static void sendMove(Move move){

@@ -1,9 +1,10 @@
 package GUI.MenuPanes;
 
 import GUI.CustomButton;
-import GUI.GameMode;
 import GUI.GamePane;
 import GUI.GameplayPanes.MultiplayerGamePane;
+
+import static GUI.GameMode.*;
 
 public class PlayPane extends MenuPane {
     public PlayPane(){
@@ -25,7 +26,7 @@ public class PlayPane extends MenuPane {
 
     @Override
     public GamePane nextMenu2() {//Local Multiplayer
-        return new MultiplayerGamePane(true, GameMode.LOCAL);
+        return new MultiplayerGamePane(true, LOCAL);
     }
 
     @Override

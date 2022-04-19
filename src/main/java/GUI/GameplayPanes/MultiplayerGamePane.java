@@ -4,6 +4,7 @@ import GUI.CustomButton;
 import GUI.GameMode;
 import GUI.GamePane;
 import GUI.MenuPanes.MainMenuPane;
+import engine.Engine;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Move;
@@ -21,7 +22,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
-import static GUI.GameMode.ONLINE;
+import static GUI.GameMode.*;
 
 public class MultiplayerGamePane extends GamePane {
     HBox mainPane = new HBox();
@@ -152,7 +153,19 @@ public class MultiplayerGamePane extends GamePane {
     private void endGame(){
         if(pauseMenu.getParent()!=null)
            ((CustomButton) pauseMenu.getChildren().get(0)).fire();
-        shutDownServer();//todo do something else if we want option for rematch
+
+        switch (gameMode){
+            case ONLINE: {
+                shutDownServer();//todo do something else if we want option for rematch
+                break;
+            }
+            case SOLO:{
+                chessBoardPane.engineIsPaused=true;
+                if(Engine.getCurrentSearch()!=null)
+                    Engine.cancelCurrentSearch();
+            }
+            default:pauseMenu.getChildren().add(1,nextSceneButton2);
+        }
         clockTimer.cancel();
         pauseMenu.setViewOrder(1);
         Text endMessage;
@@ -167,20 +180,13 @@ public class MultiplayerGamePane extends GamePane {
             endMessage= new Text("DRAW");
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }
-
         pauseMenu.getChildren().remove(0);//removes resume button
         pauseMenu.getChildren().add(0,endMessage);
 
         pauseMenu.spacingProperty().bind(heightProperty().divide(8));
 
-
-
-        if(gameMode!=ONLINE)
-            pauseMenu.getChildren().add(1,nextSceneButton2);
-
         mainPane.getChildren().removeAll(moveHistory,rightMostPane);
         mainPane.getChildren().add(pauseMenu);
-
     }
 
     @Override

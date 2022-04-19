@@ -1,7 +1,6 @@
 package GUI.GameplayPanes;
 
 import GUI.CustomButton;
-import GUI.GameMode;
 import GUI.GamePane;
 import GUI.MenuPanes.MainMenuPane;
 import engine.Engine;
@@ -9,23 +8,22 @@ import engine.MoveResult;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
-
 import java.util.concurrent.*;
 
+import static GUI.GameMode.*;
+
 public class SingleplayerGamePane extends MultiplayerGamePane {
-    private final boolean WHITE_IS_BOTTOM;
     private final double difficulty;
 
-    public SingleplayerGamePane(boolean WHITE_IS_BOTTOM, double difficulty) {
-        super(WHITE_IS_BOTTOM, GameMode.SOLO);
-        this.WHITE_IS_BOTTOM = WHITE_IS_BOTTOM;
+    public SingleplayerGamePane(boolean whiteIsBottom, double difficulty) {
+        super(whiteIsBottom, SOLO);
         this.difficulty=difficulty;
         CustomButton undoButton= new CustomButton(heightProperty().divide(13),"UndoArrow.png");
 
         CustomButton redoButton= new CustomButton(heightProperty().divide(13),"RedoArrow.png");
         mainPane.setSpacing(9);
 
-        ConfidenceBar confidenceBar = new ConfidenceBar(heightProperty(), WHITE_IS_BOTTOM);
+        ConfidenceBar confidenceBar = new ConfidenceBar(heightProperty(), whiteIsBottom);
 
         mainPane.getChildren().add(0, confidenceBar);
 
@@ -77,7 +75,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
 
     @Override
     public GamePane nextMenu2() {//Rematch
-        return new SingleplayerGamePane(WHITE_IS_BOTTOM,difficulty);
+        return new SingleplayerGamePane(whiteIsBottom,difficulty);
     }
     @Override
     public GamePane previousMenu() {//Main Menu

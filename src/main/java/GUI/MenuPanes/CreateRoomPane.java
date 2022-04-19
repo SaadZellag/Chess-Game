@@ -1,17 +1,17 @@
 package GUI.MenuPanes;
 import GUI.CustomButton;
-import GUI.GameMode;
 import GUI.GamePane;
 import GUI.GameplayPanes.MultiplayerGamePane;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import server.IdGenerator;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static GUI.GUI.*;
+import static GUI.GameMode.*;
+
 public class CreateRoomPane extends MenuPane {
     private final IdGenerator GENERATOR = new IdGenerator();
     private final String ROOM_NAME=GENERATOR.ipToID(GENERATOR.getIp());
@@ -55,7 +55,7 @@ public class CreateRoomPane extends MenuPane {
     }
     @Override
     public GamePane nextMenu() {
-        return new MultiplayerGamePane(true, GameMode.ONLINE);
+        return new MultiplayerGamePane(true, ONLINE);
     }
 
     public boolean isPreviousMenuCall=false;

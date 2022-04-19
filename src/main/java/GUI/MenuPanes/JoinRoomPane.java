@@ -1,30 +1,25 @@
 package GUI.MenuPanes;
 
 import GUI.CustomButton;
-import GUI.GameMode;
 import GUI.GamePane;
 import GUI.GameplayPanes.MultiplayerGamePane;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import server.Client;
 import server.IdGenerator;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import static GUI.GUI.*;
-import static GUI.GameMode.ONLINE;
+import static GUI.GameMode.*;
 
 public class JoinRoomPane extends MenuPane {
     private final VBox LIST_OF_ROOMS= new VBox();
     private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE SEARCH AGAIN");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
-
+    //TODO can only reload if there are no open rooms, but not if you cannot find the room you need
     private final CustomButton RELOAD_BUTTON = new CustomButton(heightProperty(),"SEARCH AGAIN",15);
     JoinRoomPane(){
         heightProperty().addListener(e->MIDDLE_PANE.setSpacing(heightProperty().divide(20).doubleValue()));
@@ -89,13 +84,12 @@ public class JoinRoomPane extends MenuPane {
     @Override
     public GamePane nextMenu() {//Create room
         joinServer(hostIp);
-        return new MultiplayerGamePane(false, GameMode.ONLINE);
+        return new MultiplayerGamePane(false, ONLINE);
     }
-
 
     @Override
     public GamePane previousMenu() {//PlayPane
-        return new MultiplayerLAN_Pane();//todo need to close server when exiting
+        return new MultiplayerLAN_Pane();
     }
 
 }
