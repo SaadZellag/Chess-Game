@@ -2,7 +2,6 @@ package GUI.GameplayPanes;
 
 import GUI.CustomButton;
 import GUI.GamePane;
-import GUI.MenuPanes.MainMenuPane;
 import engine.Engine;
 import engine.MoveResult;
 import javafx.application.Platform;
@@ -14,6 +13,8 @@ import static GUI.GameMode.*;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final double difficulty;
+//    private static ExecutorService engineThread = Executors.newSingleThreadExecutor();
+    private static Thread engineThread;
 
     public SingleplayerGamePane(boolean whiteIsBottom, double difficulty) {
         super(whiteIsBottom, SOLO);
@@ -44,25 +45,23 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
     }
 
     public static void startEngine(ChessBoardPane chessBoardPane) {
-        ExecutorService engineThread = Executors.newSingleThreadExecutor();
-        engineThread.execute(()->{
-            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, whiteIsBottom?blackRemainingTime:whiteRemainingTime);
+        chessBoardPane.engineIsPaused=false;
+        engineThread=new Thread(()->{
+            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, topRemainingTime);
             MoveResult bestMove ;
             try {
+                if(engineThread.isInterrupted())
+                    return;
                 bestMove = engineMove.get();
                 ConfidenceBar.percentage=bestMove.confidence;
                 while (chessBoardPane.engineIsPaused) {
                     Thread.onSpinWait();
-                    if(engineMove.isCancelled()) {
-                        engineThread.shutdownNow();
+                    if(engineThread.isInterrupted())
                         return;
-                    }
                 }
                 Platform.runLater(()-> {
-                    if(engineMove.isCancelled()) {
-                        engineThread.shutdownNow();
+                    if(engineThread.isInterrupted())
                         return;
-                    }
                     chessBoardPane.animateMovePiece(bestMove.move);
                 });
             } catch (ExecutionException | InterruptedException e) {//todo can this be ignored too?
@@ -70,19 +69,20 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
             }catch (CancellationException ignored){
             }
         });
+        engineThread.start();
     }
-
-
-    @Override
-    public GamePane nextMenu2() {//Rematch
-        return new SingleplayerGamePane(whiteIsBottom,difficulty);
-    }
-    @Override
-    public GamePane previousMenu() {//Main Menu
+    public static void killEngine(ChessBoardPane chessBoardPane) {
         chessBoardPane.engineIsPaused=true;
         Engine.cancelCurrentSearch();
-        return new MainMenuPane();
+        if(engineThread!=null&&engineThread.isAlive())
+            engineThread.interrupt();
     }
+
+    @Override
+    public GamePane nextMenu2() {
+        return new SingleplayerGamePane(whiteIsBottom,difficulty);//Rematch
+    }
+
 
 
 }

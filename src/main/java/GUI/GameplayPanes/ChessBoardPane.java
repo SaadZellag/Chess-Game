@@ -2,7 +2,6 @@ package GUI.GameplayPanes;
 
 import GUI.CustomButton;
 import GUI.GameMode;
-import engine.Engine;
 import engine.internal.BitBoard;
 import engine.internal.MoveGen;
 import game.Board;
@@ -31,6 +30,9 @@ import javafx.scene.paint.Color;
 
 import static GUI.GUI.*;
 import static GUI.GameMode.*;
+import static GUI.GameplayPanes.MultiplayerGamePane.bottomRemainingTime;
+import static GUI.GameplayPanes.MultiplayerGamePane.topRemainingTime;
+import static GUI.GameplayPanes.SingleplayerGamePane.killEngine;
 
 public class ChessBoardPane extends StackPane{
 
@@ -55,6 +57,7 @@ public class ChessBoardPane extends StackPane{
     private ImageView cloneView;
 
     public ObservableList<Move> moveHistoryList = FXCollections.observableArrayList();
+
     public LinkedList<Board> boardHistory= new LinkedList<>();
 
     private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
@@ -316,12 +319,17 @@ public class ChessBoardPane extends StackPane{
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
         playedMovesCounter++;
 
+        if(mv.piece.isWhite)
+            topRemainingTime +=5000;
+        else
+            bottomRemainingTime +=5000;
+
         draggingSurface.getChildren().removeAll(cloneView);
         buttons[mv.initialLocation].setSelected(false);
 
-        //Remove moves from history if you had undone and tells engine that the board has changed
+        //Remove moves from history if you had undone and stops current engine search
         if(gameMode==SOLO&&(boardHistory.size()>playedMovesCounter)){
-            Engine.cancelCurrentSearch();
+            killEngine(this);
             while (boardHistory.size()>playedMovesCounter){
                 boardHistory.remove(playedMovesCounter).toFEN();
                 moveHistoryList.remove(playedMovesCounter-1);

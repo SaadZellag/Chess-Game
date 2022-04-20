@@ -79,7 +79,10 @@ public class Engine {
 
     public static boolean cancelCurrentSearch() {
         stopCurrentSearch();
-        return currentSearch.cancel(false);
+        if(currentSearch==null){
+            return false;
+        }
+        return currentSearch.cancel(true);
     }
 
     private static void checkSearchStatus() {
