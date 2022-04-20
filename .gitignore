@@ -104,3 +104,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Openings and endgames
+/src/main/resources/openings/*
+/src/main/resources/tablebases/*

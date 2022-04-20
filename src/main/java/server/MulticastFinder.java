@@ -2,13 +2,11 @@ package server;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
+import java.util.*;
 
 public class MulticastFinder {
     public ArrayList<String> multicast() {
-        ArrayList<String> ips = new ArrayList<>();
+        Set<String> ips = new HashSet<>();
         try {
             InetAddress mcastaddr = InetAddress.getByName("230.0.0.0");
 
@@ -37,7 +35,7 @@ public class MulticastFinder {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ips;
+        return new ArrayList<>(ips);
     }
 
 }
