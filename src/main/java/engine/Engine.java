@@ -7,6 +7,7 @@ import game.Move;
 import game.Piece;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +15,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Engine {
+
+    private static String getFullPath(String fileName) {
+        return Engine.class.getClassLoader().getResource(fileName).getPath();
+    }
 
     private static final double PERCENTAGE_USAGE = 0.04;
 
@@ -42,12 +47,17 @@ public class Engine {
         } else {
             throw new IllegalStateException("Unsupported OS: " + OS);
         }
-        String path = Engine.class.getClassLoader().getResource(fileName).getPath();
-        System.load(path);
+        System.load(getFullPath(fileName));
     }
 
     static {
         init();
+
+        // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
+        // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
+
+        setOpeningBook(getFullPath("openings/d-corbit-v02-superbook.abk"));
+        addEndGameTable(getFullPath("tablebases/3-4-5"));
     }
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -100,5 +110,9 @@ public class Engine {
     private static native String getBestMove(String FEN, long timeMs) throws IllegalArgumentException;
 
     private static native void stopCurrentSearch();
+
+    private static native void setOpeningBook(String path);
+
+    private static native void addEndGameTable(String path);
 
 }
