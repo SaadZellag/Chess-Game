@@ -57,8 +57,7 @@ public class ChessBoardPane extends StackPane{
     private ImageView cloneView;
 
     public ObservableList<Move> moveHistoryList = FXCollections.observableArrayList();
-
-    public LinkedList<Board> boardHistory= new LinkedList<>();
+    public LinkedList<Turn> turnHistory= new LinkedList<>();
 
     private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
 
@@ -90,8 +89,8 @@ public class ChessBoardPane extends StackPane{
         this.gameMode = gameMode;
         this.runOnGameOver=runOnGameOver;
 
-        boardHistory.add(new Board(BitBoard.STARTING_POSITION_FEN));
-        internalBoard=boardHistory.get(playedMovesCounter);
+        turnHistory.add(new Turn(new Board(BitBoard.STARTING_POSITION_FEN),topRemainingTime,bottomRemainingTime));
+        internalBoard=turnHistory.get(playedMovesCounter).board;
         draggingSurface.setMouseTransparent(true);
         try {
             grid= FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("GUI/Panes/BaseChessBoardPane.fxml")));
@@ -318,27 +317,26 @@ public class ChessBoardPane extends StackPane{
     }
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
         playedMovesCounter++;
-
-        if(mv.piece.isWhite)
-            topRemainingTime +=5000;
-        else
+        if(mv.piece.isWhite==whiteIsBottom)
             bottomRemainingTime +=5000;
+        else
+            topRemainingTime +=5000;
 
         draggingSurface.getChildren().removeAll(cloneView);
         buttons[mv.initialLocation].setSelected(false);
 
         //Remove moves from history if you had undone and stops current engine search
-        if(gameMode==SOLO&&(boardHistory.size()>playedMovesCounter)){
+        if(gameMode==SOLO&&(turnHistory.size()>playedMovesCounter)){
             killEngine(this);
-            while (boardHistory.size()>playedMovesCounter){
-                boardHistory.remove(playedMovesCounter).toFEN();
+            while (turnHistory.size()>playedMovesCounter){
+                turnHistory.remove(playedMovesCounter);
                 moveHistoryList.remove(playedMovesCounter-1);
             }
         }
+        //Store previous turn state so that you can undo
+        turnHistory.add(new Turn(internalBoard.clone(),topRemainingTime,bottomRemainingTime));
 
-        //Store previous board state so that you can undo
-        boardHistory.add(internalBoard.clone());
-        internalBoard=boardHistory.get(playedMovesCounter);
+        internalBoard=turnHistory.get(playedMovesCounter).board;
 
         moveHistoryList.add(mv);
         clearSelectedTiles();
@@ -591,7 +589,9 @@ public class ChessBoardPane extends StackPane{
         if(playedMovesCounter!=0){
             if(promotionMenu.getParent()!=null)
                 return;
-            internalBoard=boardHistory.get(--playedMovesCounter);
+            internalBoard=turnHistory.get(--playedMovesCounter).board;
+            topRemainingTime=turnHistory.get(playedMovesCounter).topTime;
+            bottomRemainingTime=turnHistory.get(playedMovesCounter).bottomTime;
             possibleMoves=internalBoard.generatePossibleMoves();
             engineIsPaused=true;
             placePieces();
@@ -601,15 +601,18 @@ public class ChessBoardPane extends StackPane{
 
     }
     public void redo() {
-        if(boardHistory.size()-1>playedMovesCounter){
-            internalBoard=boardHistory.get(++playedMovesCounter);
+        if(turnHistory.size()-1>playedMovesCounter){
+            internalBoard=turnHistory.get(++playedMovesCounter).board;
+            topRemainingTime=turnHistory.get(playedMovesCounter).topTime;
+            bottomRemainingTime=turnHistory.get(playedMovesCounter).bottomTime;
             possibleMoves=internalBoard.generatePossibleMoves();
             placePieces();
             isInCheck();
             clearSelectedTiles();
-            if(playedMovesCounter>=boardHistory.size()-1) {
+            if(playedMovesCounter>=turnHistory.size()-1) {
                 engineIsPaused=false;
             }
         }
     }
+    private record Turn (Board board, long topTime, long bottomTime){}
 }

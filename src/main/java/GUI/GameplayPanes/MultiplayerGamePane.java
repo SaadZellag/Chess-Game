@@ -120,28 +120,33 @@ public class MultiplayerGamePane extends GamePane {
 
 
     private void startTimers(Text upperTimer,Text lowerTimer) {
-        long minutes=TimeUnit.MILLISECONDS.toMinutes(STARTING_TIME);
-        long millis =STARTING_TIME-TimeUnit.MINUTES.toMillis(minutes);
-        lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
-        upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis)));
+        lowerTimer.setText(formatTimeText(STARTING_TIME));
+        upperTimer.setText(formatTimeText(STARTING_TIME));
         clockTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(topRemainingTime -=1000);
-                    long millis = topRemainingTime -TimeUnit.MINUTES.toMillis(minutes);//
-                    Platform.runLater(()->lowerTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
+                    Platform.runLater(()-> {
+                        lowerTimer.setText(formatTimeText(bottomRemainingTime -= 1000/REFRESH_RATE));
+                        upperTimer.setText(formatTimeText(topRemainingTime));
+                    } );
                 }else{
-                    long minutes=TimeUnit.MILLISECONDS.toMinutes(bottomRemainingTime -=1000);
-                    long millis = bottomRemainingTime -TimeUnit.MINUTES.toMillis(minutes);//
-                    Platform.runLater(()->upperTimer.setText(String.format("%d:%02d", minutes,TimeUnit.MILLISECONDS.toSeconds(millis))));
+                    Platform.runLater(()-> {
+                        upperTimer.setText(formatTimeText(topRemainingTime -= 1000/REFRESH_RATE));
+                        lowerTimer.setText(formatTimeText(bottomRemainingTime));
+                    } );
                 }
                 if(bottomRemainingTime ==0|| topRemainingTime ==0){
                     cancel();
                     Platform.runLater(()->chessBoardPane.endGame(true));
                 }
             }
-        },0, 1000L);
+        },0, 1000L/REFRESH_RATE);
+    }
+    private String formatTimeText(long time){
+        long minutes=TimeUnit.MILLISECONDS.toMinutes(time);
+        long millis = time -TimeUnit.MINUTES.toMillis(minutes);//
+        return String.format("%d:%02d", minutes, TimeUnit.MILLISECONDS.toSeconds(millis));
     }
 
     private void showPauseMenu(){
