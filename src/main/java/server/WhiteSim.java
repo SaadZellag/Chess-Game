@@ -1,6 +1,8 @@
 package server;
 import game.Move;
 import game.Piece;
+
+import java.net.SocketException;
 import java.util.Scanner;
 import static game.PieceType.PAWN;
 /*
@@ -31,7 +33,11 @@ public class WhiteSim {
                 moves++;
             }
 
-            rt = a.receiveTurn();
+            try {
+                rt = a.receiveTurn();
+            } catch (SocketException e) {
+                throw new RuntimeException(e);
+            }
 
             //null turn means end game, shutdown handled in the client class
             if (rt == null) {

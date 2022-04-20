@@ -13,7 +13,6 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
@@ -28,6 +27,7 @@ import server.Client;
 import server.GameServer;
 import server.Turn;
 
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,19 +36,18 @@ public class GUI extends Application {
 
     public static ExecutorService serverThread;
     static public final long REFRESH_RATE = 90;
-    public static final Duration TRANSITION_DURATION=Duration.seconds(0.3);
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+    public static final Duration TRANSITION_DURATION=Duration.seconds(0.4);
     private static GameServer gameServer;
     private static Client client;
     private static volatile boolean waitingForMove =true;
     private static final StackPane ROOT = new StackPane();
+    private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
+
+    public static void main(String[] args) {
+        launch(args);
+    }
     @Override
     public void start(Stage primaryStage) {
-
-        //Initial scene
 
         ROOT.setBackground(getBackgroundImage("Main Background.png", ROOT,true));
         GamePane initialPane= new MainMenuPane();
@@ -64,10 +63,10 @@ public class GUI extends Application {
         });
 
         //BGM
-        MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
+
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
         //BGM.play();//todo make sure to uncomment this
-        HandleSceneSwitch(initialPane,BGM);
+        HandleSceneSwitch(initialPane);
 
         //prevent spaceBar from activating scene buttons
         primaryStage.addEventFilter(KeyEvent.KEY_PRESSED, k -> {
@@ -84,11 +83,11 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
-//        primaryStage.setFullScreenExitHint("Press F11 to exit full screen");//todo make sure to uncomment this
+//        primaryStage.setFullScreenExitHint("Press F11 to toggle full screen");//todo make sure to uncomment this
 //        primaryStage.setFullScreen(false); //I HAVE DISABLED AUTO FULLSCREEN - Alex
+
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
-        primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setTitle("Chess");
 
         primaryStage.setOnCloseRequest(e->{
@@ -97,6 +96,7 @@ public class GUI extends Application {
             System.exit(0);
         });
         primaryStage.show();
+
     }
     private static Move sentMove;
 
@@ -107,20 +107,20 @@ public class GUI extends Application {
      1: timeout reached for the accept method in the GameServer class
      */
     private static int timeoutStatus;
-    //TODO bring back to main menu when connection is lost
+    //TODO bring back to main menu when connection is lost (Doesn't work when the user that's not in control leaves)
     public static void launchServer(CreateRoomPane createRoomPane){
         timeoutStatus = -1;
         serverThread= Executors.newFixedThreadPool(2);
         serverThread.execute(()-> {
             gameServer= new GameServer();
             timeoutStatus = gameServer.accept();
-            
+
             if (timeoutStatus == 0) {
                 Platform.runLater(() -> createRoomPane.nextSceneButton.fire());
             } else if (timeoutStatus == 1) {
                 shutDownServer();
                 Platform.runLater(()->{
-                    if(!createRoomPane.isPreviousMenuCall){
+                    if(!createRoomPane.pressedPreviousMenuButton){//to avoid displaying timeout when backing out from menu
                         createRoomPane.MIDDLE_PANE.getChildren().clear();
                         createRoomPane.MIDDLE_PANE.getChildren().addAll(createRoomPane.TIME_OUT,createRoomPane.RELOAD_BUTTON);
                     }
@@ -136,68 +136,99 @@ public class GUI extends Application {
             }
 
             client = new Client("localhost");
-            int moves=0;
+            boolean isFirstMove=true;
 
-            while(!serverThread.isShutdown()) {
-                // If not player connected in the timeout window, shutdown
-                if (timeoutStatus == 1) {
-                    client.close();
-                    serverThread.shutdownNow();
-                }
-                // If all players connected, continue as normal
-                if (timeoutStatus == 0) {
-                    if (moves == 0) {
+            serverLoop:while(!serverThread.isShutdown()) {
+                try{
+                    // If not player connected in the timeout window, shutdown
+                    if (timeoutStatus == 1) {
+                        client.close();
+                        serverThread.shutdownNow();
+                    }
+                    // If all players connected, continue as normal
+                    if (timeoutStatus == 0) {
+                        if (isFirstMove) {
+                            while (waitingForMove) {
+                                Thread.onSpinWait();
+                                if(serverThread.isShutdown()){
+                                    break serverLoop;
+                                }
+                            }
+                            waitingForMove = true;
+                            client.sendMove(sentMove);
+                            System.out.println(sentMove.toString() + " was sent");
+                            isFirstMove=false;
+                        }
+                        Turn turn;
+                        turn = client.receiveTurn();
+
+                        if (turn == null) {
+                            System.out.println("ServerHost: "+(gameServer==null)+"\nReceived end game signal.");
+                            serverThread.shutdown();
+                            break;
+                        }
+                        System.out.println(turn.getMove().toString() + " was received");
+                        Turn finalTurn = turn;
+                        Platform.runLater(() -> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove()));
                         while (waitingForMove) {
                             Thread.onSpinWait();
+                            if(serverThread.isShutdown()){
+                                break serverLoop;
+                            }
                         }
                         waitingForMove = true;
                         client.sendMove(sentMove);
                         System.out.println(sentMove.toString() + " was sent");
-                        moves++;
                     }
-                    Turn turn = client.receiveTurn();
-                    if (turn == null) {
-                        System.out.println("Received end game signal.");
-                        serverThread.shutdown();
-                        break;
-                    }
-                    System.out.println(turn.getMove().toString() + " was received");
-                    Platform.runLater(() -> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
-                    while (waitingForMove) {
-                        Thread.onSpinWait();
-                    }
-                    client.sendMove(sentMove);
-                    System.out.println(sentMove.toString() + " was sent");
-                    waitingForMove = true;
+                } catch (SocketException e) {
+                    break;
                 }
             }
+            serverThread.shutdown();
+            Platform.runLater(()-> {//send back to main menu if the match connection was severed mid-game
+                if((ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
+                    ((MultiplayerGamePane) ROOT.getChildren().get(0)).nextSceneButton.fire();
+            });
         });
     }
     public static void joinServer(String ip){
         ExecutorService userThread= Executors.newSingleThreadExecutor();
         userThread.execute(()-> {
             client = new Client(ip);
-            while(!userThread.isShutdown()){
-                Turn turn = client.receiveTurn();
-                if (turn == null) {
-                    System.out.println("Received end game signal.");
-                    userThread.shutdown();
+            userLoop:while(!userThread.isShutdown()){
+                Turn turn;
+                try {
+                    turn = client.receiveTurn();
+                    if (turn == null) {
+                        System.out.println("Received end game signal.");
+                        break;
+                    }
+                    System.out.println(turn.getMove().toString()+" was received");
+                    Turn finalTurn = turn;
+                    Platform.runLater(()-> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove()));
+                    while (waitingForMove) {
+                        Thread.onSpinWait();
+                        if(userThread.isShutdown()){
+                            break userLoop;
+                        }
+                    }
+                    client.sendMove(sentMove);
+                    waitingForMove=true;
+                } catch (SocketException e) {
                     break;
                 }
-                System.out.println(turn.getMove().toString()+" was received");
-                Platform.runLater(()-> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(turn.getMove()));
-                while (waitingForMove) {
-                    Thread.onSpinWait();
-                }
-                client.sendMove(sentMove);
-                waitingForMove=true;
             }
+            userThread.shutdown();
+            Platform.runLater(()-> {//send back to main menu if the match connection was severed mid-game
+                if((ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
+                    ((MultiplayerGamePane) ROOT.getChildren().get(0)).nextSceneButton.fire();
+            });
         });
     }
     public static void shutDownServer(){
         if(gameServer!=null)
             gameServer.closeSocket();
-        else if(client!=null)
+        if(client!=null)
             client.endGame();
         waitingForMove=true;
     }
@@ -250,7 +281,7 @@ public class GUI extends Application {
         return new Background(bImage);
     }
 
-    public void HandleSceneSwitch(GamePane currentMenu,MediaPlayer BGM){
+    public void HandleSceneSwitch(GamePane currentMenu){
         //mute controller
         currentMenu.MUTE_BUTTON.setOnAction(e->BGM.setMute(!BGM.isMute()));
         currentMenu.MUTE_BUTTON.setOnMouseReleased(e->{
@@ -266,19 +297,19 @@ public class GUI extends Application {
             GamePane nextMenu=  currentMenu.nextMenu();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
-            HandleSceneSwitch(nextMenu,BGM);
+            HandleSceneSwitch(nextMenu);
         });
         currentMenu.nextSceneButton2.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu2();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
-            HandleSceneSwitch(nextMenu,BGM);
+            HandleSceneSwitch(nextMenu);
         });
         currentMenu.nextSceneButton3.setOnAction(e->{
             GamePane nextMenu=  currentMenu.nextMenu3();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
-            HandleSceneSwitch(nextMenu,BGM);
+            HandleSceneSwitch(nextMenu);
         });
         //previousMenu
         currentMenu.previousSceneButton.setOnAction(e->{
@@ -289,7 +320,7 @@ public class GUI extends Application {
                 centerTransition.setOnFinished(f->{
                     ROOT.getChildren().add(previousMenu);
                     ROOT.getChildren().remove(currentMenu);
-                    HandleSceneSwitch(previousMenu,BGM);
+                    HandleSceneSwitch(previousMenu);
                 });
                 FadeTransition topTransition= new FadeTransition(TRANSITION_DURATION);
                 if(currentMenu instanceof PlayPane)
@@ -303,7 +334,7 @@ public class GUI extends Application {
             }else{
                 ROOT.getChildren().add(previousMenu);
                 ROOT.getChildren().remove(currentMenu);
-                HandleSceneSwitch(previousMenu,BGM);
+                HandleSceneSwitch(previousMenu);
             }
         });
         if(BGM.isMute())

@@ -73,7 +73,7 @@ public class Client {
         }
     }
 
-    public Turn receiveTurn() {
+    public Turn receiveTurn() throws SocketException{
         try {
             Turn rt = (Turn) in.readObject();
 
@@ -87,8 +87,8 @@ public class Client {
 
             System.out.println("Player " + playerID + " received " + rt.getMove() + " | Total turns: " + rt.getMovesPlayed());
             return rt;
-        } catch(IOException | ClassNotFoundException e){
-            e.printStackTrace();
+        }catch(IOException | ClassNotFoundException ignore){
+//            e.printStackTrace();
         }
         return null;
     }

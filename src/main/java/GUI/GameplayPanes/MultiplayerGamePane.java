@@ -205,6 +205,6 @@ public class MultiplayerGamePane extends GamePane {
 
     @Override
     public GamePane nextMenu2() {
-        return new MultiplayerGamePane(whiteIsBottom,gameMode);//rematch
+        return new MultiplayerGamePane(whiteIsBottom,gameMode);//rematch (button is removed for online matches)
     }
 }

@@ -58,10 +58,10 @@ public class CreateRoomPane extends MenuPane {
         return new MultiplayerGamePane(true, ONLINE);
     }
 
-    public boolean isPreviousMenuCall=false;
+    public boolean pressedPreviousMenuButton =false;
     @Override
     public GamePane previousMenu() {
-        isPreviousMenuCall=true;
+        pressedPreviousMenuButton =true;
         shutDownServer();
         return new MultiplayerLAN_Pane();
     }

@@ -46,8 +46,9 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
 
     public static void startEngine(ChessBoardPane chessBoardPane) {
         chessBoardPane.engineIsPaused=false;
+        long engineTime=topRemainingTime;
         engineThread=new Thread(()->{
-            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, topRemainingTime);
+            Future<MoveResult> engineMove = Engine.getBestMove(chessBoardPane.internalBoard, engineTime);
             MoveResult bestMove ;
             try {
                 if(engineThread.isInterrupted())
@@ -80,6 +81,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
 
     @Override
     public GamePane nextMenu2() {
+        killEngine(chessBoardPane);
         return new SingleplayerGamePane(whiteIsBottom,difficulty);//Rematch
     }
 

@@ -441,10 +441,12 @@ public class ChessBoardPane extends StackPane{
             }
         },0,1000/REFRESH_RATE);
     }
-    public void endGame(boolean isCheckmate) {
+    public boolean gameEnded=false;
+    public void endGame(boolean isNotStalemate) {
+        gameEnded=true;
         setBackground(dangerBackGround);
         grid.setMouseTransparent(true);
-        if(isCheckmate){
+        if(isNotStalemate){
             Piece[] pieces = internalBoard.getPieces();
             for (int i = 0; i < pieces.length; i++) {
                 if (pieces[i] == null)
