@@ -68,8 +68,8 @@ public class Client {
             out.close();
             clientSocket.close();
             System.out.println("Sent end signal to server.");
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignore) {
+//            e.printStackTrace();
         }
     }
 

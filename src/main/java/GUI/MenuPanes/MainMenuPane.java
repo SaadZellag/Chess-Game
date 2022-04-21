@@ -18,9 +18,6 @@ public class MainMenuPane extends MenuPane {
         nextSceneButton2 = new CustomButton(heightProperty(),"TIPS",10);
 
         MIDDLE_PANE.getChildren().addAll(CHESS,nextSceneButton,nextSceneButton2);
-//        bottomPane.getChildren().remove(previousSceneButton);
-
-        //Todo quit game button
     }
     @Override
     public GamePane nextMenu() {//Play
@@ -29,6 +26,6 @@ public class MainMenuPane extends MenuPane {
 
     @Override
     public GamePane nextMenu2() {//Tips menu
-        return null;//todo
+        return new TipsPane();
     }
 }

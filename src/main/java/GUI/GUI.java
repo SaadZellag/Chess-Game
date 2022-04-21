@@ -21,6 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import server.Client;
@@ -43,6 +44,7 @@ public class GUI extends Application {
     private static final StackPane ROOT = new StackPane();
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
 
+    public static WebView webView= new WebView();
     public static void main(String[] args) {
         launch(args);
     }
@@ -83,8 +85,8 @@ public class GUI extends Application {
                 primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
             }
         });
-//        primaryStage.setFullScreenExitHint("Press F11 to toggle full screen");//todo make sure to uncomment this
-//        primaryStage.setFullScreen(false); //I HAVE DISABLED AUTO FULLSCREEN - Alex
+        primaryStage.setFullScreenExitHint("Press F11 to toggle full screen");
+//        primaryStage.setFullScreen(true);//todo make sure to uncomment this
 
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
@@ -294,18 +296,21 @@ public class GUI extends Application {
 
         //nextMenus
         currentMenu.nextSceneButton.setOnAction(e->{
+            currentMenu.setMouseTransparent(true);
             GamePane nextMenu=  currentMenu.nextMenu();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu);
         });
         currentMenu.nextSceneButton2.setOnAction(e->{
+            currentMenu.setMouseTransparent(true);
             GamePane nextMenu=  currentMenu.nextMenu2();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
             HandleSceneSwitch(nextMenu);
         });
         currentMenu.nextSceneButton3.setOnAction(e->{
+            currentMenu.setMouseTransparent(true);
             GamePane nextMenu=  currentMenu.nextMenu3();
             ROOT.getChildren().add(nextMenu);
             ROOT.getChildren().remove(currentMenu);
@@ -313,6 +318,7 @@ public class GUI extends Application {
         });
         //previousMenu
         currentMenu.previousSceneButton.setOnAction(e->{
+            currentMenu.setMouseTransparent(true);
             GamePane previousMenu=  currentMenu.previousMenu();
             if(currentMenu instanceof MenuPane){
                 FadeTransition centerTransition= new FadeTransition(TRANSITION_DURATION,((MenuPane)currentMenu).MIDDLE_PANE);
@@ -323,7 +329,7 @@ public class GUI extends Application {
                     HandleSceneSwitch(previousMenu);
                 });
                 FadeTransition topTransition= new FadeTransition(TRANSITION_DURATION);
-                if(currentMenu instanceof PlayPane)
+                if((currentMenu instanceof PlayPane)||(currentMenu instanceof TipsPane))
                     topTransition.setNode(((MenuPane)currentMenu).UPPER_TEXT);
                 else
                     topTransition.setNode(((MenuPane)currentMenu).UPPER_SUBTEXT);

@@ -18,6 +18,8 @@ public class MenuPane extends GamePane {
     public final Text UPPER_TEXT= new Text();
     public final Text UPPER_SUBTEXT= new Text();
     public final VBox MIDDLE_PANE = new VBox();
+    public FadeTransition centerTransition= new FadeTransition(TRANSITION_DURATION,MIDDLE_PANE);
+    public FadeTransition topTransition = new FadeTransition(TRANSITION_DURATION, UPPER_SUBTEXT);
     MenuPane(){
         getChildren().add(MAIN_PANE);
 
@@ -25,33 +27,34 @@ public class MenuPane extends GamePane {
         MAIN_PANE.prefHeightProperty().bind(heightProperty());
         MAIN_PANE.setAlignment(Pos.TOP_CENTER);
 
-        MIDDLE_PANE.prefWidthProperty().bind(widthProperty());
+        MIDDLE_PANE.maxWidthProperty().bind(widthProperty().divide(1.01));
         MIDDLE_PANE.setAlignment(Pos.CENTER);
 
         formatStandardText(UPPER_TEXT,heightProperty(),10);
         formatStandardText(UPPER_SUBTEXT,heightProperty(),30);
 
-        VBox topPane= new VBox(UPPER_TEXT,UPPER_SUBTEXT);
-        topPane.setAlignment(Pos.TOP_LEFT);
-        topPane.setSpacing(0);
-        topPane.setPadding(new Insets(40,0,0,40));
 
-        HBox bottomPane = new HBox();
-        bottomPane.setAlignment(Pos.BOTTOM_LEFT);
-        bottomPane.setPadding(new Insets(0,0,5,40));
-        VBox.setVgrow(bottomPane, Priority.ALWAYS);
+        VBox TOP_PANE = new VBox(UPPER_TEXT, UPPER_SUBTEXT);
+        TOP_PANE.setAlignment(Pos.TOP_LEFT);
+        TOP_PANE.setSpacing(0);
+        TOP_PANE.setPadding(new Insets(20,0,0,40));
+
+
+        HBox BOTTOM_PANE = new HBox();
+        BOTTOM_PANE.setAlignment(Pos.BOTTOM_LEFT);
+        BOTTOM_PANE.setPadding(new Insets(0,0,5,40));
+        VBox.setVgrow(BOTTOM_PANE, Priority.ALWAYS);
 
         previousSceneButton = new CustomButton(heightProperty().divide(10),"UndoArrow.png");
 
-        bottomPane.getChildren().addAll(previousSceneButton, MUTE_BUTTON);
-        MAIN_PANE.getChildren().addAll(topPane, MIDDLE_PANE, bottomPane);
-
-        FadeTransition centerTransition= new FadeTransition(TRANSITION_DURATION,MIDDLE_PANE);
+        BOTTOM_PANE.getChildren().addAll(previousSceneButton, MUTE_BUTTON);
+        MAIN_PANE.getChildren().addAll(TOP_PANE, MIDDLE_PANE, BOTTOM_PANE);
+        playTransitions();
+    }
+    public void playTransitions(){
         centerTransition.setFromValue(0);
         centerTransition.setToValue(1);
 
-
-        FadeTransition topTransition = new FadeTransition(TRANSITION_DURATION, UPPER_SUBTEXT);
         topTransition.setFromValue(0);
         topTransition.setToValue(1);
 

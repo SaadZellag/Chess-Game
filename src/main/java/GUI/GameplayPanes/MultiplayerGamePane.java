@@ -136,7 +136,7 @@ public class MultiplayerGamePane extends GamePane {
                         lowerTimer.setText(formatTimeText(bottomRemainingTime));
                     } );
                 }
-                if(bottomRemainingTime ==0|| topRemainingTime ==0){
+                if(bottomRemainingTime <=0|| topRemainingTime <=0){
                     cancel();
                     Platform.runLater(()->chessBoardPane.endGame(true));
                 }
