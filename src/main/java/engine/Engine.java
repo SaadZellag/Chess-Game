@@ -16,8 +16,8 @@ import java.util.concurrent.Future;
 
 public class Engine {
 
-    private static String getFullPath(String fileName) {
-        return Engine.class.getClassLoader().getResource(fileName).getPath();
+    private static URL getResource(String fileName) {
+        return Engine.class.getClassLoader().getResource(fileName);
     }
 
     private static final double PERCENTAGE_USAGE = 0.04;
@@ -47,7 +47,7 @@ public class Engine {
         } else {
             throw new IllegalStateException("Unsupported OS: " + OS);
         }
-        System.load(getFullPath(fileName));
+        System.load(getResource(fileName).getPath());
     }
 
     static {
@@ -56,8 +56,16 @@ public class Engine {
         // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
-        setOpeningBook(getFullPath("openings/d-corbit-v02-superbook.abk"));
-        addEndGameTable(getFullPath("tablebases/3-4-5"));
+        URL openings = getResource("openings/d-corbit-v02-superbook.abk");
+        if (openings != null) {
+            setOpeningBook(openings.getPath());
+        }
+
+        URL endgames = getResource("tablebases/3-4-5");
+        if (endgames != null) {
+            addEndGameTable(endgames.getPath());
+        }
+
     }
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
