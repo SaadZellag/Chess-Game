@@ -41,7 +41,9 @@ public class GUI extends Application {
     private static GameServer gameServer;
     private static Client client;
     private static volatile boolean waitingForMove =true;
-    private static final StackPane ROOT = new StackPane();
+    public static final StackPane ROOT = new StackPane();
+
+    public static final long STARTING_TIME =600000;
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
     public static void main(String[] args) {
         Engine.getCurrentSearch(); // Used to init the engine and to avoid GUI delays
@@ -108,14 +110,13 @@ public class GUI extends Application {
      1: timeout reached for the accept method in the GameServer class
      */
     private static int timeoutStatus;
-    //TODO bring back to main menu when connection is lost (Doesn't work when the user that's not in control leaves)
     public static void launchServer(CreateRoomPane createRoomPane){
         timeoutStatus = -1;
         serverThread= Executors.newFixedThreadPool(2);
         serverThread.execute(()-> {
             //TODO: Dynamically assign game duration for server
             //Game duration is in milliseconds
-            gameServer= new GameServer(6000, 5000);
+            gameServer= new GameServer(STARTING_TIME, 5000);
             timeoutStatus = gameServer.accept();
 
             if (timeoutStatus == 0) {

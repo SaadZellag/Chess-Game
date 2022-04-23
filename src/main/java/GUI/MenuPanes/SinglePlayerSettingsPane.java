@@ -3,7 +3,6 @@ package GUI.MenuPanes;
 import GUI.CustomButton;
 import GUI.GamePane;
 import GUI.GameplayPanes.SingleplayerGamePane;
-import javafx.animation.FadeTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;

@@ -4,7 +4,10 @@ package server;
      input from two clients
 */
 
+import GUI.GameplayPanes.MultiplayerGamePane;
 import game.Move;
+import javafx.application.Platform;
+
 import java.io.*;
 import java.net.*;
 import java.time.Duration;
@@ -181,7 +184,6 @@ public class GameServer {
 
         public void sendBackTurn(Turn turn) {
             try {
-
                 if (turn == null) {
                     out.writeObject(null);
                     out.flush();
@@ -192,7 +194,12 @@ public class GameServer {
                 out.writeObject(turn);
                 out.flush();
             } catch (IOException e) {
-                System.out.println("IOException in sendBackTurn method. This is normal if opponent quit mid-game.");
+                Platform.runLater(()-> {//send back to main menu if the match connection was severed mid-game
+                    if((GUI.GUI.ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) GUI.GUI.ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
+                        ((MultiplayerGamePane) GUI.GUI.ROOT.getChildren().get(0)).nextSceneButton.fire();
+                    else
+                        e.printStackTrace();
+                });
             }
         }
         public void closeConnection() {

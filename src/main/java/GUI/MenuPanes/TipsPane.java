@@ -18,21 +18,23 @@ import static GUI.GUI.formatStandardText;
 
 public class TipsPane extends MenuPane {
     public VBox chessSide;
-    TipsPane(){//TODO the current layout is garbage, might remake it by using a MenuPane, rather than extending it
+    TipsPane(){
         UPPER_TEXT.setText("TIPS");
 
-        final Label CLICK_ON_PIECE= new Label("PLAY WITH THE WHITE PIECES TO SEE HOW THEY MOVE\n(PRESS R TO RESET THE BOARD)");
-        formatStandardText(CLICK_ON_PIECE,heightProperty(),25);
+        final Label INSTRUCTIONS= new Label("PLAY WITH THE WHITE PIECES TO SEE HOW THEY MOVE");
+        final Label INSTRUCTIONS2= new Label("(PRESS R TO RESET THE BOARD)");
+        formatStandardText(INSTRUCTIONS,heightProperty(),25);
+        formatStandardText(INSTRUCTIONS2,heightProperty(),35);
         TipsChessBoardPane chessBoardPane= new TipsChessBoardPane(heightProperty().divide(1.2));
 
-        chessSide= new VBox(CLICK_ON_PIECE,chessBoardPane);
-        chessSide.setSpacing(30);
+        chessSide= new VBox(INSTRUCTIONS,INSTRUCTIONS2,chessBoardPane);
+        chessSide.setSpacing(10);
         chessSide.setPadding(new Insets(0,50,0,0));
         chessSide.setAlignment(Pos.CENTER);
         GridPane.setHgrow(chessSide,Priority.ALWAYS);
         setOnKeyPressed(e -> {
             if(e.getCode()== KeyCode.R){
-                chessSide.getChildren().remove(1);
+                chessSide.getChildren().remove(2);
                 chessSide.getChildren().add(new TipsChessBoardPane(heightProperty().divide(1.2)));
             }
         });
