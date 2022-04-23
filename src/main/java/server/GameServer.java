@@ -11,8 +11,6 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class GameServer {
-
-    private String whiteTurnStart, blackTurnStart;
     private final int PORT = 6969;
     private final int TIMEOUT = 60000;
     private ServerSocket ss;
@@ -20,12 +18,14 @@ public class GameServer {
     private int playersCon;
     // 0 = white's turn to play and 1 == black's turn
     protected int movesPlayed;
-    private long whiteTimeLeft, blackTimeLeft;
+    //In milliseconds
+    private long whiteTimeLeft, blackTimeLeft, increment;
     private ServerSideConnection whiteConnection, blackConnection;
     private Thread beacon;
 
     //Game duration in millisecond
-    public GameServer(long gameDuration) {
+    public GameServer(long gameDuration, long increment) {
+        this.increment = increment;
         whiteTimeLeft = gameDuration;
         blackTimeLeft = gameDuration;
         System.out.println("---Game Server---");
@@ -126,7 +126,7 @@ public class GameServer {
                             Instant end = Instant.now();
                             long turnTime = Duration.between(start, end).toMillis();
                             if (movesPlayed != 0) {
-                                whiteTimeLeft -= turnTime;
+                                whiteTimeLeft -= (turnTime - increment);
                             }
                             if (whiteMove == null) {
                                 System.out.println("Closing server on thread " + playerID );
@@ -135,14 +135,13 @@ public class GameServer {
                                 }
                                 break;
                             }
-                            System.out.println("White played move " + movesPlayed + " | " + whiteMove + " in " + turnTime / 1000 + "." + turnTime % 1000 + " seconds.");
-                            System.out.println("Remaining time: " + whiteTimeLeft/ 60 + " (m) " + whiteTimeLeft % 60 + " (s) " + whiteTimeLeft % 1000 + " (ms) ");
+
+                            System.out.println("White played move " + movesPlayed + " --> " + whiteMove + " | in " + turnTime / 60000 + ":" + (turnTime / 1000) % 60 + "." + turnTime % 1000);
+                            System.out.println("Remaining time: " + whiteTimeLeft / 60000 + ":" + (whiteTimeLeft / 1000) % 60 + "." + whiteTimeLeft % 1000);
                             System.out.println();
                             movesPlayed++;
                             turn = new Turn(whiteMove, movesPlayed, whiteTimeLeft);
                             blackConnection.sendBackTurn(turn);
-                            //System.out.println("Sent " + whiteMove + " | " + movesPlayed);
-
                         } else {
                             while (movesPlayed % 2 == 0) {
                                 try {
@@ -155,19 +154,18 @@ public class GameServer {
                             Move blackMove = (Move) in.readObject();
                             Instant end = Instant.now();
                             long turnTime = Duration.between(start, end).toMillis();
-                            blackTimeLeft -= turnTime;
+                            blackTimeLeft -= (turnTime - increment);
                             if (blackMove == null) {
                                 System.out.println("Closing server on thread " + playerID);
                                 whiteConnection.sendBackTurn(null);
                                 break;
                             }
-                            System.out.println("Black played move " + movesPlayed + " | " + blackMove + " in " + turnTime / 1000 + "." + turnTime % 1000 + " seconds.");
-                            System.out.println("Remaining time: " + blackTimeLeft / 60 + " (m) " + blackTimeLeft % 60 + " (s) " + blackTimeLeft % 1000 + " (ms) ");
+                            System.out.println("Black played move " + movesPlayed + " --> " + blackMove + " | in " + turnTime / 60000 + ":" + (turnTime / 1000) % 60 + "." + turnTime % 1000);
+                            System.out.println("Remaining time: " + blackTimeLeft / 60000 + ":" + (blackTimeLeft / 1000) % 60 + "." + blackTimeLeft % 1000);
                             System.out.println();
                             movesPlayed++;
                             turn = new Turn(blackMove, movesPlayed, blackTimeLeft);
                             whiteConnection.sendBackTurn(turn);
-                            //System.out.println("Sent: " + blackMove + " | " + movesPlayed);
                         }
                     }
 
@@ -194,7 +192,7 @@ public class GameServer {
                 out.writeObject(turn);
                 out.flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("IOException in sendBackTurn method. This is normal if opponent quit mid-game.");
             }
         }
         public void closeConnection() {
@@ -216,7 +214,7 @@ public class GameServer {
     }
 
     public static void main(String[] args) {
-        GameServer gs = new GameServer(6000);
+        GameServer gs = new GameServer(600000, 5000);
         gs.accept();
     }
 }

@@ -115,7 +115,7 @@ public class GUI extends Application {
         serverThread.execute(()-> {
             //TODO: Dynamically assign game duration for server
             //Game duration is in milliseconds
-            gameServer= new GameServer(6000);
+            gameServer= new GameServer(6000, 5000);
             timeoutStatus = gameServer.accept();
 
             if (timeoutStatus == 0) {
