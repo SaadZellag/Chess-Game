@@ -13,9 +13,9 @@ public class PlayPane extends MenuPane {
 
         nextSceneButton = new CustomButton(heightProperty(),"SINGLE PLAYER",10);
 
-        nextSceneButton2 = new CustomButton(heightProperty(),"LOCAL MULTIPLAYER",10);
+        nextSceneButton2 = new CustomButton(heightProperty(),"OVER THE BOARD",10);
 
-        nextSceneButton3 = new CustomButton(heightProperty(),"LAN PLAY",10);
+        nextSceneButton3 = new CustomButton(heightProperty(),"MULTIPLAYER",10);
 
         MIDDLE_PANE.getChildren().addAll(nextSceneButton,nextSceneButton2,nextSceneButton3);
     }
