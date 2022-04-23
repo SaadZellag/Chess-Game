@@ -169,7 +169,8 @@ public class GUI extends Application {
                         Turn finalTurn = turn;
                         Platform.runLater(() -> {
                             ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
-                            MultiplayerGamePane.topRemainingTime=finalTurn.getTimeLeft();//FIXME this is not working
+                            MultiplayerGamePane.topRemainingTime=finalTurn.getBlackTimeLeft();
+                            MultiplayerGamePane.bottomRemainingTime=finalTurn.getWhiteTimeLeft();//FIXME this is not working
                         });
                         while (waitingForMove) {
                             Thread.onSpinWait();
@@ -206,7 +207,8 @@ public class GUI extends Application {
                     Turn finalTurn = turn;
                     Platform.runLater(()-> {
                         ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
-                       MultiplayerGamePane.topRemainingTime=finalTurn.getTimeLeft();//FIXME this is not working
+                        MultiplayerGamePane.topRemainingTime=finalTurn.getWhiteTimeLeft();//FIXME this is not working
+                        MultiplayerGamePane.bottomRemainingTime=finalTurn.getBlackTimeLeft();
                     });
                     while (waitingForMove) {
                         Thread.onSpinWait();
