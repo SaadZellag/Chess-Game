@@ -319,7 +319,7 @@ public class ChessBoardPane extends StackPane{
         playedMovesCounter++;
         if(mv.piece.isWhite==whiteIsBottom)
             bottomRemainingTime +=5000;
-        else
+        else if(gameMode!=ONLINE)//FIXME this might be breaking the time sync
             topRemainingTime +=5000;
 
         draggingSurface.getChildren().removeAll(cloneView);

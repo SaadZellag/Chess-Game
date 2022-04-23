@@ -18,7 +18,6 @@ import javafx.scene.text.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
 import static GUI.GameMode.*;
@@ -36,8 +35,8 @@ public class MultiplayerGamePane extends GamePane {
     public ChessBoardPane chessBoardPane;
     private final VBox rightMostPane;
     private final Timer clockTimer= new Timer();
-    static long topRemainingTime;
-    static long bottomRemainingTime;
+    public static long topRemainingTime;
+    public static long bottomRemainingTime;
     private final GameMode gameMode;
     public MultiplayerGamePane(boolean whiteIsBottom, GameMode gameMode) {
         this.gameMode=gameMode;
@@ -143,9 +142,7 @@ public class MultiplayerGamePane extends GamePane {
         },0, 1000L/REFRESH_RATE);
     }
     private String formatTimeText(long time){
-        long minutes=TimeUnit.MILLISECONDS.toMinutes(time);
-        long millis = time -TimeUnit.MINUTES.toMillis(minutes);//
-        return String.format("%d:%02d", minutes, TimeUnit.MILLISECONDS.toSeconds(millis));
+        return String.format("%d:%02d.%02d", time / 60000, (time/1000) % 60,(time % 1000)/10);
     }
 
     private void showPauseMenu(){

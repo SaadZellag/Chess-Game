@@ -3,16 +3,16 @@ package GUI.MenuPanes;
 import GUI.CustomButton;
 import GUI.GamePane;
 
-public class MultiplayerLAN_Pane extends MenuPane {
+public class OnlinePlayPane extends MenuPane {
 
-    public MultiplayerLAN_Pane(){
+    public OnlinePlayPane(){
         heightProperty().addListener(e-> {
             MIDDLE_PANE.setSpacing(heightProperty().divide(18).doubleValue());
             MAIN_PANE.setSpacing(heightProperty().divide(8).doubleValue());
         });
 
         UPPER_TEXT.setText("PLAY");
-        UPPER_SUBTEXT.setText(" LAN PLAY");
+        UPPER_SUBTEXT.setText(" ONLINE PLAY");
 
         nextSceneButton = new CustomButton(heightProperty(),"CREATE ROOM",10);
         nextSceneButton2 = new CustomButton(heightProperty(),"JOIN ROOM",10);

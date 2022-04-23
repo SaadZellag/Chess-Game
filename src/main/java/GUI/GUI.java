@@ -2,7 +2,6 @@ package GUI;
 
 import GUI.GameplayPanes.MultiplayerGamePane;
 import GUI.MenuPanes.*;
-import engine.Engine;
 import game.Move;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -36,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class GUI extends Application {
 
     public static ExecutorService serverThread;
-    static public final long REFRESH_RATE = 90;
+    static public final long REFRESH_RATE = 200;
     public static final Duration TRANSITION_DURATION=Duration.seconds(0.4);
     private static GameServer gameServer;
     private static Client client;
@@ -158,20 +157,20 @@ public class GUI extends Application {
                             }
                             waitingForMove = true;
                             client.sendMove(sentMove);
-                            System.out.println(sentMove.toString() + " was sent");
                             isFirstMove=false;
                         }
                         Turn turn;
                         turn = client.receiveTurn();
 
                         if (turn == null) {
-                            System.out.println("ServerHost: "+(gameServer==null)+"\nReceived end game signal.");
                             serverThread.shutdown();
                             break;
                         }
-                        System.out.println(turn.getMove().toString() + " was received");
                         Turn finalTurn = turn;
-                        Platform.runLater(() -> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove()));
+                        Platform.runLater(() -> {
+                            ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
+                            MultiplayerGamePane.topRemainingTime=finalTurn.getTimeLeft();//FIXME this is not working
+                        });
                         while (waitingForMove) {
                             Thread.onSpinWait();
                             if(serverThread.isShutdown()){
@@ -180,7 +179,6 @@ public class GUI extends Application {
                         }
                         waitingForMove = true;
                         client.sendMove(sentMove);
-                        System.out.println(sentMove.toString() + " was sent");
                     }
                 } catch (SocketException e) {
                     break;
@@ -205,9 +203,11 @@ public class GUI extends Application {
                         System.out.println("Received end game signal.");
                         break;
                     }
-                    System.out.println(turn.getMove().toString()+" was received");
                     Turn finalTurn = turn;
-                    Platform.runLater(()-> ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove()));
+                    Platform.runLater(()-> {
+                        ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
+                       MultiplayerGamePane.topRemainingTime=finalTurn.getTimeLeft();//FIXME this is not working
+                    });
                     while (waitingForMove) {
                         Thread.onSpinWait();
                         if(userThread.isShutdown()){
@@ -216,7 +216,7 @@ public class GUI extends Application {
                     }
                     client.sendMove(sentMove);
                     waitingForMove=true;
-                } catch (SocketException e) {
+                } catch (SocketException | NullPointerException e) {
                     break;
                 }
             }
@@ -235,7 +235,6 @@ public class GUI extends Application {
         waitingForMove=true;
     }
     public static void sendMove(Move move){
-        System.out.println(move.toString()+" should be sent");
         sentMove=move;
         waitingForMove =false;
     }

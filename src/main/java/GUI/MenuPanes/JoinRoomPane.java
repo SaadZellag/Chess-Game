@@ -93,13 +93,13 @@ public class JoinRoomPane extends MenuPane {
 
     @Override
     public GamePane nextMenu() {//Create room
-        joinServer(hostIp);//TODO joining a room that has timed out breaks stuff
+        joinServer(hostIp);
         return new MultiplayerGamePane(false, ONLINE);
     }
 
     @Override
     public GamePane previousMenu() {//PlayPane
-        return new MultiplayerLAN_Pane();
+        return new OnlinePlayPane();
     }
 
 }

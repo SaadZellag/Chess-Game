@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class Turn implements Serializable {
     public Move move;
     public int movesPlayed;
-    public long timeLeft;
+    private long timeLeft;
 
     public Turn(Move move, int movesPlayed, long timeLeft) {
         this.move = move;

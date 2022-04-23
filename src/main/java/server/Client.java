@@ -1,14 +1,8 @@
 package server;
-
-import engine.internal.pieces.Pawn;
 import game.Move;
-import game.Piece;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
-import static game.PieceType.PAWN;
 
 public class Client {
     private static final int PORT = 6969;
@@ -44,8 +38,8 @@ public class Client {
             in = new ObjectInputStream(inputStream);
             playerID = in.readInt();
             System.out.println("Connected as player " + playerID);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignore) {
+            System.out.println("joined non existent room");
         }
     }
 
@@ -68,7 +62,7 @@ public class Client {
             out.close();
             clientSocket.close();
             System.out.println("Sent end signal to server.");
-        } catch (IOException ignore) {
+        } catch (IOException | NullPointerException ignore) {
 //            e.printStackTrace();
         }
     }

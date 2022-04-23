@@ -65,7 +65,7 @@ public class SingleplayerGamePane extends MultiplayerGamePane {
                         return;
                     chessBoardPane.animateMovePiece(bestMove.move);
                 });
-            } catch (ExecutionException | InterruptedException e) {//todo can this be ignored too?
+            } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }catch (CancellationException ignored){
             }

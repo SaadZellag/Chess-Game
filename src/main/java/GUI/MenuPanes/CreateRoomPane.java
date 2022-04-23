@@ -63,7 +63,7 @@ public class CreateRoomPane extends MenuPane {
     public GamePane previousMenu() {
         pressedPreviousMenuButton =true;
         shutDownServer();
-        return new MultiplayerLAN_Pane();
+        return new OnlinePlayPane();
     }
 
 }
