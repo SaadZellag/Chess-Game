@@ -7,12 +7,13 @@ import java.io.Serializable;
 public class Turn implements Serializable {
     public Move move;
     public int movesPlayed;
-    private long timeLeft;
+    private long whiteTimeLeft, blackTimeLeft;
 
-    public Turn(Move move, int movesPlayed, long timeLeft) {
+    public Turn(Move move, int movesPlayed, long whiteTimeLeft, long blackTimeLeft) {
         this.move = move;
         this.movesPlayed = movesPlayed;
-        this.timeLeft = timeLeft;
+        this.whiteTimeLeft = whiteTimeLeft;
+        this.blackTimeLeft = blackTimeLeft;
     }
 
     public Move getMove() {return move;}
@@ -22,20 +23,21 @@ public class Turn implements Serializable {
     }
 
     //How much time left in milliseconds
-    public long getTimeLeft() {return timeLeft;}
+    public long getWhiteTimeLeft() {return whiteTimeLeft;}
+    public long getBlackTimeLeft() {return blackTimeLeft;}
 
     //How many minutes left, disregarding the seconds and milliseconds
-    public long getMinutesLeft() {
-        return timeLeft / 60000;
+    public static long millisToMinutesLeft(long millis) {
+        return millis / 60000;
     }
 
     //How many seconds left, disregarding the minutes and milliseconds
-    public long getSecondsLeft() {
-        return (timeLeft / 1000) % 60;
+    public static long millisToSecondsLeft(long millis) {
+        return (millis / 1000) % 60;
     }
 
     //How many milliseconds left, disregarding the minutes and seconds
-    public long getMillisLeft() {
-        return timeLeft % 1000;
+    public static long millisLeft(long millis) {
+        return millis % 1000;
     }
 }

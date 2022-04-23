@@ -143,7 +143,7 @@ public class GameServer {
                             System.out.println("Remaining time: " + whiteTimeLeft / 60000 + ":" + (whiteTimeLeft / 1000) % 60 + "." + whiteTimeLeft % 1000);
                             System.out.println();
                             movesPlayed++;
-                            turn = new Turn(whiteMove, movesPlayed, whiteTimeLeft);
+                            turn = new Turn(whiteMove, movesPlayed, whiteTimeLeft, blackTimeLeft);
                             blackConnection.sendBackTurn(turn);
                         } else {
                             while (movesPlayed % 2 == 0) {
@@ -167,7 +167,7 @@ public class GameServer {
                             System.out.println("Remaining time: " + blackTimeLeft / 60000 + ":" + (blackTimeLeft / 1000) % 60 + "." + blackTimeLeft % 1000);
                             System.out.println();
                             movesPlayed++;
-                            turn = new Turn(blackMove, movesPlayed, blackTimeLeft);
+                            turn = new Turn(blackMove, movesPlayed, whiteTimeLeft, blackTimeLeft);
                             whiteConnection.sendBackTurn(turn);
                         }
                     }

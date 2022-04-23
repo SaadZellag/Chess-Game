@@ -20,6 +20,10 @@ public class BlackSim {
         while (true) {
             try {
                 rt = a.receiveTurn();
+                long wt = rt.getWhiteTimeLeft();
+                long bt = rt.getBlackTimeLeft();
+                System.out.println(Turn.millisToMinutesLeft(wt) + ":" + Turn.millisToSecondsLeft(wt) + "." + Turn.millisLeft(wt));
+                System.out.println(Turn.millisToMinutesLeft(bt) + ":" + Turn.millisToSecondsLeft(bt) + "." + Turn.millisLeft(bt));
             } catch (SocketException e) {
                 throw new RuntimeException(e);
             }
