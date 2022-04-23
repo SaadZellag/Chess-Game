@@ -6,25 +6,28 @@ package server;
 
 import game.Move;
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
+import java.net.*;
+import java.time.Duration;
+import java.time.Instant;
 
 public class GameServer {
 
+    private String whiteTurnStart, blackTurnStart;
     private final int PORT = 6969;
     private final int TIMEOUT = 60000;
     private ServerSocket ss;
     private Socket s;
     private int playersCon;
     // 0 = white's turn to play and 1 == black's turn
-    int movesPlayed;
-    private ServerSideConnection whiteConnection;
-    private ServerSideConnection blackConnection;
-    Thread beacon;
+    protected int movesPlayed;
+    private long whiteTimeLeft, blackTimeLeft;
+    private ServerSideConnection whiteConnection, blackConnection;
+    private Thread beacon;
 
-    public GameServer() {
+    //Game duration in millisecond
+    public GameServer(long gameDuration) {
+        whiteTimeLeft = gameDuration;
+        blackTimeLeft = gameDuration;
         System.out.println("---Game Server---");
         playersCon = 0;
         movesPlayed = 0;
@@ -111,7 +114,20 @@ public class GameServer {
                         Turn turn;
 
                         if (playerID == 1) {
+                            while (movesPlayed % 2 == 1) {
+                                try {
+                                    Thread.sleep(1);
+                                } catch (InterruptedException e) {
+                                    System.out.println("Player 1 sleep exception");
+                                }
+                            }
+                            Instant start = Instant.now();
                             Move whiteMove = (Move) in.readObject();
+                            Instant end = Instant.now();
+                            long turnTime = Duration.between(start, end).toMillis();
+                            if (movesPlayed != 0) {
+                                whiteTimeLeft -= turnTime;
+                            }
                             if (whiteMove == null) {
                                 System.out.println("Closing server on thread " + playerID );
                                 if (playersCon > 1) {
@@ -119,24 +135,39 @@ public class GameServer {
                                 }
                                 break;
                             }
-                            System.out.println("White played move " + movesPlayed + " | " + whiteMove);
+                            System.out.println("White played move " + movesPlayed + " | " + whiteMove + " in " + turnTime / 1000 + "." + turnTime % 1000 + " seconds.");
+                            System.out.println("Remaining time: " + whiteTimeLeft/ 60 + " (m) " + whiteTimeLeft % 60 + " (s) " + whiteTimeLeft % 1000 + " (ms) ");
+                            System.out.println();
                             movesPlayed++;
-                            turn = new Turn(whiteMove, movesPlayed);
+                            turn = new Turn(whiteMove, movesPlayed, whiteTimeLeft);
                             blackConnection.sendBackTurn(turn);
-                            System.out.println("Sent " + whiteMove + " | " + movesPlayed);
+                            //System.out.println("Sent " + whiteMove + " | " + movesPlayed);
 
                         } else {
+                            while (movesPlayed % 2 == 0) {
+                                try {
+                                    Thread.sleep(1);
+                                } catch (InterruptedException e) {
+                                    System.out.println("Player 2 sleep exception");
+                                }
+                            }
+                            Instant start = Instant.now();
                             Move blackMove = (Move) in.readObject();
+                            Instant end = Instant.now();
+                            long turnTime = Duration.between(start, end).toMillis();
+                            blackTimeLeft -= turnTime;
                             if (blackMove == null) {
                                 System.out.println("Closing server on thread " + playerID);
                                 whiteConnection.sendBackTurn(null);
                                 break;
                             }
-                            System.out.println("Black played move " + movesPlayed + " | " + blackMove);
+                            System.out.println("Black played move " + movesPlayed + " | " + blackMove + " in " + turnTime / 1000 + "." + turnTime % 1000 + " seconds.");
+                            System.out.println("Remaining time: " + blackTimeLeft / 60 + " (m) " + blackTimeLeft % 60 + " (s) " + blackTimeLeft % 1000 + " (ms) ");
+                            System.out.println();
                             movesPlayed++;
-                            turn = new Turn(blackMove, movesPlayed);
+                            turn = new Turn(blackMove, movesPlayed, blackTimeLeft);
                             whiteConnection.sendBackTurn(turn);
-                            System.out.println("Sent: " + blackMove + " | " + movesPlayed);
+                            //System.out.println("Sent: " + blackMove + " | " + movesPlayed);
                         }
                     }
 
@@ -162,7 +193,6 @@ public class GameServer {
 
                 out.writeObject(turn);
                 out.flush();
-                System.out.println("This was the move sent: " + turn.getMove());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -186,7 +216,7 @@ public class GameServer {
     }
 
     public static void main(String[] args) {
-        GameServer gs = new GameServer();
+        GameServer gs = new GameServer(6000);
         gs.accept();
     }
 }
