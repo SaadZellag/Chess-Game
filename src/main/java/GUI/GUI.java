@@ -209,6 +209,7 @@ public class GUI extends Application {
                         ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
                         MultiplayerGamePane.topRemainingTime=finalTurn.getWhiteTimeLeft();//FIXME this is not working
                         MultiplayerGamePane.bottomRemainingTime=finalTurn.getBlackTimeLeft();
+
                     });
                     while (waitingForMove) {
                         Thread.onSpinWait();
