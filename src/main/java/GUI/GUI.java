@@ -2,6 +2,7 @@ package GUI;
 
 import GUI.GameplayPanes.MultiplayerGamePane;
 import GUI.MenuPanes.*;
+import engine.Engine;
 import game.Move;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -43,6 +44,7 @@ public class GUI extends Application {
     private static final StackPane ROOT = new StackPane();
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
     public static void main(String[] args) {
+        Engine.getCurrentSearch(); // Used to init the engine and to avoid GUI delays
         launch(args);
     }
     @Override
