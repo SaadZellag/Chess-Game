@@ -25,7 +25,6 @@ import java.util.*;
 import javafx.scene.paint.Color;
 
 import static GUI.GUI.*;
-import static GUI.GameMode.LOCAL;
 
 public class TipsChessBoardPane extends StackPane{
 
@@ -64,7 +63,7 @@ public class TipsChessBoardPane extends StackPane{
     private final Background dangerBackGround = getBackgroundImage("Board-modified.jpg",this,true);
 
     public TipsChessBoardPane(DoubleBinding binding){
-        internalBoard=new Board("3kq3/1pp2pp1/3pp3/8/8/8/2B2P2/Q2NK2R w K - 0 1");
+        internalBoard=new Board("3qk3/1pp2pp1/3pp3/8/8/8/2B2P2/Q2NK2R w K - 0 1");
         draggingSurface.setMouseTransparent(true);
         try {
             grid= FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("GUI/Panes/BaseChessBoardPane.fxml")));
@@ -290,7 +289,7 @@ public class TipsChessBoardPane extends StackPane{
         isDragging=false;
         internalBoard.playMove(mv);
         placePieces();
-        if(!isInCheck()){
+        if(!isInCheck()||internalBoard.isWhiteTurn()){
             String fen=internalBoard.toFEN().replace(" b "," w ");
             internalBoard= new Board(fen);
         }else{
@@ -314,7 +313,7 @@ public class TipsChessBoardPane extends StackPane{
             for(int i=0;i<pieces.length;i++){
                 if(buttons[i].getGraphic()==null||pieces[i]==null)
                     continue;
-                if(pieces[i].type==PieceType.KING&& !pieces[i].isWhite){
+                if(pieces[i].type==PieceType.KING&&pieces[i].isWhite==internalBoard.isWhiteTurn()){
                     buttons[i].getGraphic().setEffect(glowEffect(Color.RED,Color.color(0,0,0,0.5)));
                     break;
                 }
