@@ -21,7 +21,7 @@ test {
 }
 javafx {
     version = '17.0.1'
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media','javafx.web']
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media']
 }
 run{
     standardInput = System.in
