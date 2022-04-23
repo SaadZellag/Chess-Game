@@ -55,7 +55,7 @@ public class Client {
             out.flush();
             System.out.println("Sent move " + move.toString() + " to server.");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Sent move to closed server. OK if opponent quit mid-game.");
         }
         //return in.readUTF();
     }
