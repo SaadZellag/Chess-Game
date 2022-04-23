@@ -46,7 +46,7 @@ public class GUI extends Application {
     public static final long STARTING_TIME =600000;
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
     public static void main(String[] args) {
-        Engine.getCurrentSearch(); // Used to init the engine and to avoid GUI delays
+        //Engine.getCurrentSearch();
         launch(args);
     }
     @Override
@@ -66,7 +66,6 @@ public class GUI extends Application {
         });
 
         //BGM
-
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
         //BGM.play();//todo make sure to uncomment this
         HandleSceneSwitch(initialPane);
@@ -114,7 +113,6 @@ public class GUI extends Application {
         timeoutStatus = -1;
         serverThread= Executors.newFixedThreadPool(2);
         serverThread.execute(()-> {
-            //TODO: Dynamically assign game duration for server
             //Game duration is in milliseconds
             gameServer= new GameServer(STARTING_TIME, 5000);
             timeoutStatus = gameServer.accept();
