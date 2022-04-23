@@ -6,8 +6,11 @@ import GUI.GameplayPanes.MultiplayerGamePane;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import server.Client;
 import server.IdGenerator;
 import java.util.ArrayList;
@@ -19,7 +22,6 @@ public class JoinRoomPane extends MenuPane {
     private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE SEARCH AGAIN");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
-    //TODO can only reload if there are no open rooms, but not if you cannot find the room you need
     private final CustomButton RELOAD_BUTTON = new CustomButton(heightProperty(),"SEARCH AGAIN",15);
     JoinRoomPane(){
         heightProperty().addListener(e->MIDDLE_PANE.setSpacing(heightProperty().divide(20).doubleValue()));
@@ -46,9 +48,17 @@ public class JoinRoomPane extends MenuPane {
 
         findOpenRooms();
 
-        final Text HEADER= new Text("CLICK ON A ROOM TO JOIN");
-        formatStandardText(HEADER,heightProperty(),20);
+        final Text CLICK= new Text("CLICK ON A ROOM TO JOIN");
+        final Text REFRESH=new Text("\n(PRESS R TO REFRESH THE ROOM LIST)");
+        formatStandardText(CLICK,heightProperty(),18);
+        formatStandardText(REFRESH,heightProperty(),30);
+        final TextFlow HEADER= new TextFlow(CLICK,REFRESH);
+        HEADER.setTextAlignment(TextAlignment.CENTER);
         RELOAD_BUTTON.setOnAction(e->findOpenRooms());
+        setOnKeyPressed(e->{
+            if(e.getCode()== KeyCode.R)
+                findOpenRooms();
+        });
 
         MIDDLE_PANE.getChildren().addAll(HEADER,SCROLL_PANE, nextSceneButton);
     }
@@ -83,7 +93,7 @@ public class JoinRoomPane extends MenuPane {
 
     @Override
     public GamePane nextMenu() {//Create room
-        joinServer(hostIp);
+        joinServer(hostIp);//TODO joining a room that has timed out breaks stuff
         return new MultiplayerGamePane(false, ONLINE);
     }
 

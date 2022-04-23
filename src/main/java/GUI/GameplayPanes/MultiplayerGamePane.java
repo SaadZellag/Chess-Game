@@ -35,7 +35,6 @@ public class MultiplayerGamePane extends GamePane {
     public static boolean whiteIsBottom;
     public ChessBoardPane chessBoardPane;
     private final VBox rightMostPane;
-    private final long STARTING_TIME =600000;
     private final Timer clockTimer= new Timer();
     static long topRemainingTime;
     static long bottomRemainingTime;
@@ -161,7 +160,7 @@ public class MultiplayerGamePane extends GamePane {
 
         switch (gameMode){
             case ONLINE: {
-                shutDownServer();//todo do something else if we want option for rematch
+                shutDownServer();
                 break;
             }
             case SOLO:{
