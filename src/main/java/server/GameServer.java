@@ -198,7 +198,7 @@ public class GameServer {
                     if((GUI.GUI.ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) GUI.GUI.ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
                         ((MultiplayerGamePane) GUI.GUI.ROOT.getChildren().get(0)).nextSceneButton.fire();
                     else
-                        e.printStackTrace();
+                        System.out.println("Exception in sendBackTurn method. OK if opponent quit mid-game.");
                 });
             }
         }
