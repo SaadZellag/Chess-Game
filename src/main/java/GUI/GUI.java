@@ -21,7 +21,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import server.Client;
@@ -43,8 +42,6 @@ public class GUI extends Application {
     private static volatile boolean waitingForMove =true;
     private static final StackPane ROOT = new StackPane();
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
-
-    public static WebView webView= new WebView();
     public static void main(String[] args) {
         launch(args);
     }
@@ -334,6 +331,12 @@ public class GUI extends Application {
                 else
                     topTransition.setNode(((MenuPane)currentMenu).UPPER_SUBTEXT);
                 topTransition.setToValue(0);
+
+                if(currentMenu instanceof TipsPane){
+                    FadeTransition chessTransition= new FadeTransition(TRANSITION_DURATION,((TipsPane)currentMenu).chessSide);
+                    chessTransition.setToValue(0);
+                    chessTransition.play();
+                }
 
                 topTransition.play();
                 centerTransition.play();

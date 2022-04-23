@@ -1,4 +1,4 @@
-h1|How to play chess for beginners: setup, moves and basic rules explained
+h1|How to play chess for beginners
 p|Players: 2
 p|Rules complexity: Low
 p|Strategic depth: Very high
@@ -14,28 +14,22 @@ p|Except for the knight, which may jump over pieces, pieces cannot move through 
 h3|How to capture pieces
 p|If a piece lands on a space with an opponent's piece, that piece is captured and removed from the board. Pieces cannot be placed on the same square as a piece of the same colour. When a piece captures an opponent's piece, it must finish its current move action and end the player's turn.
 h3|How to move chess pieces
-p|strong
- Pawn
+p|Pawn
 p|Pawns move one square forward in a straight line. They cannot move horizontally, diagonally or backwards.
 p|An exception to this is if a pawn is yet to be moved during the game. If a pawn has not yet moved, it may be moved two squares forward as a single move. Both squares must be empty. The player can also choose to move the piece a single square.
 p|The only time a pawn may move diagonally is when capturing an opponent's piece. Pawns may capture an opponent's piece on either of the diagonal spaces to the left or right ahead of the piece. As part of capturing the piece, the pawn will move diagonally to replace the captured piece. A pawn cannot capture an adjacent piece on any other square, or move diagonally without capturing.
-p|strong
- Rook (Castle)
+p|Rook (Castle)
 p|The rook, sometimes called the castle, can move any number of squares horizontally along its current row (rank) or column (file). It cannot pass through pieces of the same colour, and can capture pieces of the opposite colour by moving onto an occupied space. It cannot move diagonally for any reason.
-p|strong
- Knight
+p|Knight
 p|Knights are the only chess piece that may be moved 'through' other pieces by 'jumping' over them. It captures pieces as normal by landing on a space occupied by a piece of the opposite colour and cannot move to a square occupied by a piece of the same colour, but may move over pieces of either colour during its move.
 p|Knights move in a fixed 'L' pattern: two squares forward, backward, left or right, then one square horizontally or vertically, or vice versa - one square forward, backward, left or right, followed by two squares horizontally or vertically to complete the 'L' shape.
 p|This means that the knight can always move to the closest square that is not on its current row (rank), column (file) or directly adjacent diagonally.
 p|The knight must move the full distance - it cannot move just two squares in a straight line without also moving one to the side, for instance.
-p|strong
- Bishop
+p|Bishop
 p|The bishop can move any number of squares diagonally - this means it always moves along the diagonal line of squares matching the current colour of its square. This means that each player begins the game with one bishop that can move on each colour. A bishop cannot move horizontally or vertically for any reason. It cannot move through pieces of the same colour, and captures a piece of the opposite colour by moving onto its square.
-p|strong
- Queen
+p|Queen
 p|The queen may move any number of squares horizontally, vertically or diagonally. These movements must be made in a single straight line during a single turn. (In other words, you can't move three squares diagonally, followed by three spaces vertically.) The queen cannot move through pieces of the same colour, and captures a piece of the opposite colour by moving onto its square.
-p|strong
- King
+p|King
 p|The king moves a single space horizontally, vertically or diagonally. The king cannot move into a space that would grant a check or checkmate to the opponent player.
 p|As an exception to all other chess pieces, the king is never captured - a player loses the match when the king is placed into checkmate, which would lead to an unavoidable capture on the opponent's next turn.
 h2|What is check and checkmate?

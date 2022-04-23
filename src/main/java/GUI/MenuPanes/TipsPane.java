@@ -2,11 +2,11 @@ package GUI.MenuPanes;
 
 import GUI.CustomButton;
 import GUI.GamePane;
-import game.Piece;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -17,79 +17,51 @@ import static GUI.GUI.TRANSITION_DURATION;
 import static GUI.GUI.formatStandardText;
 
 public class TipsPane extends MenuPane {
+    public VBox chessSide;
     TipsPane(){//TODO the current layout is garbage, might remake it by using a MenuPane, rather than extending it
         UPPER_TEXT.setText("TIPS");
 
-        final Label CLICK_ON_PIECE= new Label("CLICK ON A PIECE TO VIEW HOW IT MOVES");
-        formatStandardText(CLICK_ON_PIECE,heightProperty(),30);
-        TipsChessBoardPane chessBoardPane= new TipsChessBoardPane(heightProperty().divide(1.5));
+        final Label CLICK_ON_PIECE= new Label("PLAY WITH THE WHITE PIECES TO SEE HOW THEY MOVE\n(PRESS R TO RESET THE BOARD)");
+        formatStandardText(CLICK_ON_PIECE,heightProperty(),25);
+        TipsChessBoardPane chessBoardPane= new TipsChessBoardPane(heightProperty().divide(1.2));
 
-        ToggleButton[] b=chessBoardPane.buttons;
-        Piece[] p = chessBoardPane.internalBoard.getPieces();
-
-
-        for(int i=0;i<b.length;i++){
-            if(p[i]!=null){
-                int finalI = i;
-                b[i].setOnAction(e->{
-                    for(ToggleButton button:b){
-                        button.setSelected(false);
-                    }
-                    b[finalI].setSelected(true);
-                    boolean isWhite=p[finalI].isWhite;
-
-                    switch (p[finalI].type) {//todo
-                        case PAWN -> {
-                            System.out.println("pawn" + isWhite);
-                        }
-                        case BISHOP -> {
-                            System.out.println("bishop"+ isWhite);
-                        }
-                        case KNIGHT -> {
-                            System.out.println("KNIGHT"+ isWhite);
-                        }
-                        case ROOK -> {
-                            System.out.println("Rook"+ isWhite);
-                        }
-                        case QUEEN -> {
-                            System.out.println("queen"+ isWhite);
-                        }
-                        case KING -> {
-                            System.out.println("king"+ isWhite);
-                        }
-                    }
-                });
+        chessSide= new VBox(CLICK_ON_PIECE,chessBoardPane);
+        chessSide.setSpacing(30);
+        chessSide.setPadding(new Insets(0,50,0,0));
+        chessSide.setAlignment(Pos.CENTER);
+        GridPane.setHgrow(chessSide,Priority.ALWAYS);
+        setOnKeyPressed(e -> {
+            if(e.getCode()== KeyCode.R){
+                chessSide.getChildren().remove(1);
+                chessSide.getChildren().add(new TipsChessBoardPane(heightProperty().divide(1.2)));
             }
-        }
+        });
 
+        nextSceneButton = new CustomButton(heightProperty(),"RULES",10);
+        nextSceneButton2 = new CustomButton(heightProperty(),"BEGINNER\n     TIPS",10);
 
-        nextSceneButton = new CustomButton(heightProperty(),"RULES",12);
-        nextSceneButton2 = new CustomButton(heightProperty(),"BEGINNER\n     TIPS",12);
-
-        VBox buttonsPane= new VBox(nextSceneButton,nextSceneButton2);
-        buttonsPane.setAlignment(Pos.CENTER);
-        GridPane.setHgrow(buttonsPane,Priority.ALWAYS);
+        MIDDLE_PANE.getChildren().addAll(nextSceneButton,nextSceneButton2);
 
         GridPane grid = new GridPane();
-//        grid.setGridLinesVisible(true);
+        grid.maxWidthProperty().bind(widthProperty().divide(1.001));
 
         ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(45);
-        col1.setHalignment(HPos.LEFT);
+        col1.setPercentWidth(50);
+        col1.setHalignment(HPos.CENTER);
 
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(55);
+        col2.setPercentWidth(50);
         col2.setHalignment(HPos.CENTER);
 
         grid.getColumnConstraints().addAll(col1, col2);
 
-        grid.add(buttonsPane,0,1);
-        grid.addColumn(1,CLICK_ON_PIECE,chessBoardPane);
-
-        MIDDLE_PANE.getChildren().add(grid);
+        grid.addRow(0,MAIN_PANE,chessSide);
+        getChildren().clear();
+        getChildren().add(grid);
 
         heightProperty().addListener(e-> {
-            buttonsPane.setSpacing(heightProperty().divide(23).doubleValue());
+            MIDDLE_PANE.setPadding(new Insets(heightProperty().divide(8).doubleValue(),0,0,0));
+            MIDDLE_PANE.setSpacing(heightProperty().divide(15).doubleValue());
         });
     }
     @Override
@@ -108,12 +80,12 @@ public class TipsPane extends MenuPane {
 
     @Override
     public GamePane nextMenu() {//Rules Pane
-        return new BrowserPane("RULES","Rules.htm");
+        return new FileReadingPane("RULES","RulesParsed.txt");
     }
 
     @Override
     public GamePane nextMenu2() {//BEGINNER TIPS
-        return new BrowserPane("BEGINNER TIPS","ChessTips.htm");
+        return new FileReadingPane("BEGINNER TIPS","ChessTipsParsed.txt");
     }
 
     @Override
