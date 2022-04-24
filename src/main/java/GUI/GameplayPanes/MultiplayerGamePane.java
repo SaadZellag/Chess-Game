@@ -18,7 +18,6 @@ import javafx.scene.text.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
 import static GUI.GameMode.*;
@@ -145,7 +144,7 @@ public class MultiplayerGamePane extends GamePane {
         },0, 1000L/10);
     }
     private String formatTimeText(long time){
-        return String.format("%d:%02d.%02d", time / 60000, (time/1000) % 60,(time % 1000)/10);
+        return String.format("%d:%02d", time / 60000, (time/1000) % 60);
     }
 
     private void showPauseMenu(){

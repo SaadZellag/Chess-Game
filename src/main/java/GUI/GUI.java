@@ -5,6 +5,7 @@ import GUI.MenuPanes.*;
 import engine.Engine;
 import game.Move;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -154,7 +155,6 @@ public class GUI extends Application {
                     if (timeoutStatus == 0) {
                         if (isFirstMove) {
                             while (waitingForMove) {
-                                Thread.onSpinWait();
                                 if(serverThread.isShutdown()){
                                     break serverLoop;
                                 }
@@ -173,11 +173,12 @@ public class GUI extends Application {
                         Turn finalTurn = turn;
                         Platform.runLater(() -> {
                             ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
+                            PauseTransition pause = new PauseTransition(Duration.millis(500));
+                            pause.setOnFinished(e-> MultiplayerGamePane.topRemainingTime=finalTurn.getBlackTimeLeft());
+                            pause.play();
                         });
-                        MultiplayerGamePane.topRemainingTime=finalTurn.getBlackTimeLeft();
                         MultiplayerGamePane.bottomRemainingTime=finalTurn.getWhiteTimeLeft();
                         while (waitingForMove) {
-                            Thread.onSpinWait();
                             if(serverThread.isShutdown()){
                                 break serverLoop;
                             }
@@ -211,11 +212,12 @@ public class GUI extends Application {
                     Turn finalTurn = turn;
                     Platform.runLater(()-> {
                         ((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.animateMovePiece(finalTurn.getMove());
+                        PauseTransition pause = new PauseTransition(Duration.millis(500));
+                        pause.setOnFinished(e-> MultiplayerGamePane.topRemainingTime=finalTurn.getWhiteTimeLeft());
+                        pause.play();
                     });
                     MultiplayerGamePane.bottomRemainingTime=finalTurn.getBlackTimeLeft();
-                    MultiplayerGamePane.topRemainingTime=finalTurn.getWhiteTimeLeft();
                     while (waitingForMove) {
-                        Thread.onSpinWait();
                         if(userThread.isShutdown()){
                             break userLoop;
                         }

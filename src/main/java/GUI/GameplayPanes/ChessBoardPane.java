@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -21,6 +22,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import java.io.IOException;
@@ -287,6 +289,7 @@ public class ChessBoardPane extends StackPane{
         }
     }
     private void createDraggablePiece(int index) {
+        draggingSurface.getChildren().clear();
         buttons[index].setSelected(true);
         buttons[index].getGraphic().setVisible(false);
         Image cloneImage= ((ImageView) buttons[index].getGraphic()).getImage();
@@ -409,6 +412,13 @@ public class ChessBoardPane extends StackPane{
         },0,1000/REFRESH_RATE);
     }
     public void animateMovePiece(Move mv) {//this method is to animate moves not done by the user
+
+        //to avoid glitches if the user is dragging a piece while a move is being animated
+        if((buttons[selectedPieceIndex].getGraphic()!=null)&&(!buttons[selectedPieceIndex].getGraphic().isVisible())){
+            Event.fireEvent(buttons[selectedPieceIndex], new MouseEvent(MouseEvent.MOUSE_RELEASED,
+                    buttons[selectedPieceIndex].getLayoutX(), buttons[selectedPieceIndex].getLayoutY(), buttons[selectedPieceIndex].getLayoutX(), buttons[selectedPieceIndex].getLayoutY(), MouseButton.PRIMARY, 1,
+                    false, false, false, false, false, false, false, false, false, false, null));
+        }
         draggingSurface.getChildren().clear();
         createDraggablePiece(mv.initialLocation);
         buttons[mv.initialLocation].setSelected(false);
