@@ -39,15 +39,17 @@ public class Engine {
     }
 
     static {
-        String fileName;
-        if (isWindows()) {
-            fileName = "jnilib.dll";
-        } else if (isUnix()) {
-            fileName = "libjnilib.so";
-        } else {
-            throw new IllegalStateException("Unsupported OS: " + OS);
+        if (!isMac()) {
+            String fileName;
+            if (isWindows()) {
+                fileName = "jnilib.dll";
+            } else if (isUnix()) {
+                fileName = "libjnilib.so";
+            } else {
+                throw new IllegalStateException("Unsupported OS: " + OS);
+            }
+            System.load(getResource(fileName).getPath());
         }
-        System.load(getResource(fileName).getPath());
     }
 
     static {
