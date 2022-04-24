@@ -46,7 +46,10 @@ public class GUI extends Application {
     public static final long STARTING_TIME =600000;
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
     public static void main(String[] args) {
-        Engine.getCurrentSearch();
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (!OS.contains("mac")) {
+            Engine.getCurrentSearch();
+        }
         launch(args);
     }
     @Override
