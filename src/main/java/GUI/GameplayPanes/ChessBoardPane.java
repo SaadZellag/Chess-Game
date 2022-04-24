@@ -42,7 +42,7 @@ public class ChessBoardPane extends StackPane{
     private final Timer moveAnimationThread = new Timer(true);
 
     public Board internalBoard;
-    private int playedMovesCounter=0;
+    public int playedMovesCounter=0;
     private int selectedPieceIndex;
 
     private List<Move> possibleMoves;
@@ -316,27 +316,27 @@ public class ChessBoardPane extends StackPane{
 
     }
     private void finalizeMovePlay(Move mv) {//play move both internally and for user
-        playedMovesCounter++;
-        if(mv.piece.isWhite==whiteIsBottom)
-            bottomRemainingTime +=5000;
-        else if(gameMode!=ONLINE)//FIXME this might be breaking the time sync
-            topRemainingTime +=5000;
-
+        if(playedMovesCounter!=0&&(gameMode!=ONLINE||internalBoard.isWhiteTurn()==whiteIsBottom)){
+            if (mv.piece.isWhite == whiteIsBottom)
+                bottomRemainingTime += 5000;
+            else
+                topRemainingTime += 5000;
+        }
         draggingSurface.getChildren().removeAll(cloneView);
         buttons[mv.initialLocation].setSelected(false);
 
         //Remove moves from history if you had undone and stops current engine search
-        if(gameMode==SOLO&&(turnHistory.size()>playedMovesCounter)){
+        if(gameMode==SOLO&&(turnHistory.size()>playedMovesCounter+1)){
             killEngine(this);
-            while (turnHistory.size()>playedMovesCounter){
-                turnHistory.remove(playedMovesCounter);
-                moveHistoryList.remove(playedMovesCounter-1);
+            while (turnHistory.size()>playedMovesCounter+1){
+                turnHistory.remove(playedMovesCounter+1);
+                moveHistoryList.remove(playedMovesCounter);
             }
         }
         //Store previous turn state so that you can undo
         turnHistory.add(new Turn(internalBoard.clone(),topRemainingTime,bottomRemainingTime));
 
-        internalBoard=turnHistory.get(playedMovesCounter).board;
+        internalBoard=turnHistory.get(playedMovesCounter+1).board;
 
         moveHistoryList.add(mv);
         clearSelectedTiles();
@@ -348,6 +348,7 @@ public class ChessBoardPane extends StackPane{
 
         placePieces();
         possibleMoves=internalBoard.generatePossibleMoves();
+        playedMovesCounter++;
 
         if(possibleMoves.size()==0) {
             endGame(MoveGen.isInCheck(BitBoard.fromFEN(internalBoard.toFEN())));

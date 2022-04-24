@@ -18,6 +18,7 @@ import javafx.scene.text.Text;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import static GUI.GUI.*;
 import static GUI.GameMode.*;
@@ -123,23 +124,25 @@ public class MultiplayerGamePane extends GamePane {
         clockTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(chessBoardPane.internalBoard.isWhiteTurn()==whiteIsBottom){
-                    Platform.runLater(()-> {
-                        lowerTimer.setText(formatTimeText(bottomRemainingTime -= 1000/REFRESH_RATE));
-                        upperTimer.setText(formatTimeText(topRemainingTime));
-                    } );
-                }else{
-                    Platform.runLater(()-> {
-                        upperTimer.setText(formatTimeText(topRemainingTime -= 1000/REFRESH_RATE));
-                        lowerTimer.setText(formatTimeText(bottomRemainingTime));
-                    } );
+                if(chessBoardPane.playedMovesCounter!=0){
+                    if (chessBoardPane.internalBoard.isWhiteTurn() == whiteIsBottom) {
+                        Platform.runLater(() -> {
+                            lowerTimer.setText(formatTimeText(bottomRemainingTime -= (1000 / 10)));
+                            upperTimer.setText(formatTimeText(topRemainingTime));
+                        });
+                    } else {
+                        Platform.runLater(() -> {
+                            upperTimer.setText(formatTimeText(topRemainingTime -= (1000 / 10)));
+                            lowerTimer.setText(formatTimeText(bottomRemainingTime));
+                        });
+                    }
                 }
                 if(bottomRemainingTime <=0|| topRemainingTime <=0){
                     cancel();
                     Platform.runLater(()->chessBoardPane.endGame(true));
                 }
             }
-        },0, 1000L/REFRESH_RATE);
+        },0, 1000L/10);
     }
     private String formatTimeText(long time){
         return String.format("%d:%02d.%02d", time / 60000, (time/1000) % 60,(time % 1000)/10);
