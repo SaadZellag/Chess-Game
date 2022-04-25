@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 
 public class GameServer {
     private final int PORT = 6969;
@@ -22,9 +23,11 @@ public class GameServer {
     // 0 = white's turn to play and 1 == black's turn
     protected int movesPlayed;
     //In milliseconds
-    private long whiteTimeLeft, blackTimeLeft, increment;
+    private long whiteTimeLeft;
+    private long blackTimeLeft;
+    private final long increment;
     private ServerSideConnection whiteConnection, blackConnection;
-    private Thread beacon;
+    private Thread beacon, p1Thread, p2Thread;
 
     //Game duration in millisecond
     public GameServer(long gameDuration, long increment) {
@@ -62,14 +65,15 @@ public class GameServer {
                 ServerSideConnection ssc = new ServerSideConnection(s, playersCon);
                 if (playersCon == 1) {
                     whiteConnection = ssc;
+                    p1Thread = new Thread(ssc);
+                    p1Thread.start();
                 } else {
                     blackConnection = ssc;
+                    p2Thread = new Thread(ssc);
+                    p2Thread.start();
                 }
-                //threadList.add(new Thread(ssc));
-                Thread t = new Thread(ssc);
-                t.start();
-            }
 
+            }
             if (playersCon == 2) {
                 System.out.println("All players connected.");
             }
@@ -218,6 +222,10 @@ public class GameServer {
         } catch (IOException e) {
             System.out.println("IO exception in run method");
         }
+    }
+
+    public static InputStream getResourceStream(String path) {
+        return GameServer.class.getClassLoader().getResourceAsStream(path);
     }
 
     public static void main(String[] args) {

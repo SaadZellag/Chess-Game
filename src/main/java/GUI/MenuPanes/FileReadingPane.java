@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import server.GameServer;
 
 import java.io.*;
 import java.util.Objects;
@@ -28,7 +29,8 @@ public class FileReadingPane extends MenuPane{
         TEXT_HOLDER.setAlignment(Pos.TOP_LEFT);
         TEXT_HOLDER.prefWidthProperty().bind(SCROLL_PANE.widthProperty().multiply(0.99));
         TEXT_HOLDER.setSpacing(15);
-        try (BufferedReader reader = new BufferedReader (new FileReader(Objects.requireNonNull(GUI.class.getClassLoader().getResource("GUI/" + fileName)).getFile()))) {
+
+        try (BufferedReader reader = new BufferedReader (new InputStreamReader(GameServer.getResourceStream("GUI/" + fileName)))) {
             String line;
             int HEADER_SCALE_1 = 15;
             int HEADER_SCALE_2 = 20;

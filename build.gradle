@@ -1,10 +1,14 @@
+import org.panteleyev.jpackage.ImageType
+
 plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin'  version '0.0.11'
+    id "org.panteleyev.jpackageplugin" version "1.3.1"
 }
+
 group 'org.example'
-version '1.0-SNAPSHOT'
+version 'ALPHA_JEFFREY'
 
 repositories {
     mavenCentral()
@@ -19,6 +23,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
 javafx {
     version = '17.0.1'
     modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media']
@@ -26,4 +31,33 @@ javafx {
 run{
     standardInput = System.in
 }
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'GUI.GUI'
+        )
+    }
+}
+
+jpackage {
+    input = "build/libs"
+    appName = "Jeffrey"
+    appVersion = "1.0"
+    appDescription = "Fully functional chess app including a mighty engine and local multiplayer."
+    mainJar = "Chess-Game-ALPHA_JEFFREY.jar"
+    //appImage = "src/main/resources/Package/W_King.ico"
+    icon = "src/main/resources/Package/Icon.icns"
+
+    mac {
+        type = ImageType.DMG
+    }
+    linux {
+        type = ImageType.DEB
+    }
+    windows {
+        type = ImageType.EXE
+    }
+}
+
 mainClassName = 'GUI.GUI'
