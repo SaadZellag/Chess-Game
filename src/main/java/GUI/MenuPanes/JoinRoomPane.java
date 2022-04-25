@@ -19,7 +19,7 @@ import static GUI.GameMode.*;
 
 public class JoinRoomPane extends MenuPane {
     private final VBox LIST_OF_ROOMS= new VBox();
-    private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND, PLEASE SEARCH AGAIN");
+    private final Text NO_ROOMS_FOUND= new Text("NO ROOMS FOUND");
     private final Text LOOKING= new Text("LOOKING FOR ROOMS...");
     private String hostIp;
     private final CustomButton RELOAD_BUTTON = new CustomButton(heightProperty(),"SEARCH AGAIN",15);
