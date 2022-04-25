@@ -10,7 +10,7 @@ public class MainMenuPane extends MenuPane {
     public MainMenuPane(){
         heightProperty().addListener(e-> MIDDLE_PANE.setSpacing(heightProperty().divide(30).doubleValue()));
 
-        final Text CHESS= new Text("CHESS");
+        final Text CHESS= new Text("JEFFREY");
         formatStandardText(CHESS,heightProperty(),5);
 
 

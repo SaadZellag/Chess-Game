@@ -94,7 +94,7 @@ public class GUI extends Application {
 
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
-        primaryStage.setTitle("Chess");
+        primaryStage.setTitle("Jeffrey");
 
         primaryStage.setOnCloseRequest(e->{
             shutDownServer();
@@ -155,7 +155,8 @@ public class GUI extends Application {
                     if (timeoutStatus == 0) {
                         if (isFirstMove) {
                             while (waitingForMove) {
-                                if(serverThread.isShutdown()){
+                                if(gameServer==null||client==null){
+                                    System.out.println("GameServer is null");
                                     break serverLoop;
                                 }
                             }
@@ -179,7 +180,8 @@ public class GUI extends Application {
                         });
                         MultiplayerGamePane.bottomRemainingTime=finalTurn.getWhiteTimeLeft();
                         while (waitingForMove) {
-                            if(serverThread.isShutdown()){
+                            if(gameServer==null||client==null){
+                                System.out.println("GameServer is null");
                                 break serverLoop;
                             }
                         }
@@ -190,7 +192,7 @@ public class GUI extends Application {
                     break;
                 }
             }
-            serverThread.shutdown();
+            serverThread.shutdownNow();
             Platform.runLater(()-> {//send back to main menu if the match connection was severed mid-game
                 if((ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
                     ((MultiplayerGamePane) ROOT.getChildren().get(0)).nextSceneButton.fire();
@@ -218,7 +220,7 @@ public class GUI extends Application {
                     });
                     MultiplayerGamePane.bottomRemainingTime=finalTurn.getBlackTimeLeft();
                     while (waitingForMove) {
-                        if(userThread.isShutdown()){
+                        if(client==null){
                             break userLoop;
                         }
                     }
@@ -228,7 +230,7 @@ public class GUI extends Application {
                     break;
                 }
             }
-            userThread.shutdown();
+            userThread.shutdownNow();
             Platform.runLater(()-> {//send back to main menu if the match connection was severed mid-game
                 if((ROOT.getChildren().get(0) instanceof MultiplayerGamePane)&&(!((MultiplayerGamePane) ROOT.getChildren().get(0)).chessBoardPane.gameEnded))
                     ((MultiplayerGamePane) ROOT.getChildren().get(0)).nextSceneButton.fire();
@@ -236,11 +238,15 @@ public class GUI extends Application {
         });
     }
     public static void shutDownServer(){
-        if(gameServer!=null)
+        if(gameServer!=null) {
             gameServer.closeSocket();
-        if(client!=null)
+            client.close();
+        }
+        else if(client!=null)
             client.endGame();
         waitingForMove=true;
+        client=null;
+        gameServer=null;
     }
     public static void sendMove(Move move){
         sentMove=move;
