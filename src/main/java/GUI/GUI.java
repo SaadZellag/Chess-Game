@@ -153,8 +153,12 @@ public class GUI extends Application {
                 try{
                     // If not player connected in the timeout window, shutdown
                     if (timeoutStatus == 1) {
-                        client.close();
-                        serverThread.shutdownNow();
+
+                        /*
+                        Removed a client.close() call here
+                        */
+
+                        gameServer.closeSocket();
                     }
                     // If all players connected, continue as normal
                     if (timeoutStatus == 0) {
