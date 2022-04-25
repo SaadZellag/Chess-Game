@@ -32,6 +32,7 @@ public class IdGenerator {
             Socket s = new Socket("www.google.com", 80);
             ip = s.getLocalAddress().getHostAddress();
             s.close();
+            wordList.close();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
