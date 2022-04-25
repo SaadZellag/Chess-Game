@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 public class GameServer {
     private final int PORT = 6969;
@@ -218,6 +219,10 @@ public class GameServer {
         } catch (IOException e) {
             System.out.println("IO exception in run method");
         }
+    }
+
+    public static InputStream getResourceStream(String path) {
+        return GameServer.class.getClassLoader().getResourceAsStream(path);
     }
 
     public static void main(String[] args) {

@@ -3,8 +3,9 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin'  version '0.0.11'
 }
+
 group 'org.example'
-version '1.0-SNAPSHOT'
+version 'ALPHA_JEFFREY'
 
 repositories {
     mavenCentral()
@@ -19,6 +20,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
 javafx {
     version = '17.0.1'
     modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.media']
@@ -26,4 +28,13 @@ javafx {
 run{
     standardInput = System.in
 }
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'GUI.GUI'
+        )
+    }
+}
+
 mainClassName = 'GUI.GUI'

@@ -1,8 +1,6 @@
 package server;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -22,7 +20,7 @@ public class IdGenerator {
 
     public IdGenerator() {
         try {
-            File wordList = new File("src/main/resources/server/words.txt");
+            BufferedReader wordList = new BufferedReader(new InputStreamReader(GameServer.getResourceStream("server/words.txt")));
             Scanner reader = new Scanner(wordList);
             StringBuilder sb = new StringBuilder();
             while (reader.hasNext()) {
