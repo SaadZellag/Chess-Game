@@ -1,7 +1,10 @@
+import org.panteleyev.jpackage.ImageType
+
 plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin'  version '0.0.11'
+    id "org.panteleyev.jpackageplugin" version "1.3.1"
 }
 
 group 'org.example'
@@ -34,6 +37,26 @@ jar {
         attributes(
                 'Main-Class': 'GUI.GUI'
         )
+    }
+}
+
+jpackage {
+    input = "build/libs"
+    appName = "Jeffrey"
+    appVersion = "1.0"
+    appDescription = "Fully functional chess app including a mighty engine and local multiplayer."
+    mainJar = "Chess-Game-ALPHA_JEFFREY.jar"
+    //appImage = "/home/alex/IdeaProjects/Chess-Game/src/main/resources/GUI/Pieces/W_King.png"
+    icon = "/home/alex/IdeaProjects/Chess-Game/src/main/resources/GUI/Pieces/W_King.png"
+
+    mac {
+        type = ImageType.DMG
+    }
+    linux {
+        type = ImageType.DEB
+    }
+    windows {
+        type = ImageType.EXE
     }
 }
 
