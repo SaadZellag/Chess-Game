@@ -6,7 +6,7 @@ import game.ChessUtils;
 import game.Move;
 import game.Piece;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +18,27 @@ public class Engine {
 
     private static URL getResource(String fileName) {
         return Engine.class.getClassLoader().getResource(fileName);
+    }
+
+    /*
+    * Since the loading of libraires (such as the jeffrey binary) is handled by the system
+    * libjnilib can't remain inside of the jar as OS will not look into a jar. This method
+    * writes out the dll to a temp folder and loads it from there.
+    */
+    private static void loadJarDll(String name) throws IOException {
+        InputStream in = Engine.class.getClassLoader().getResourceAsStream(name);
+        byte[] buffer = new byte[1024];
+        int read = -1;
+        File temp = new File(System.getProperty("java.io.tmpdir"), name);
+        FileOutputStream fos = new FileOutputStream(temp);
+
+        while((read = in.read(buffer)) != -1) {
+            fos.write(buffer, 0, read);
+        }
+        fos.close();
+        in.close();
+
+        System.load(temp.getAbsolutePath());
     }
 
     private static final double PERCENTAGE_USAGE = 0.04;
@@ -48,7 +69,12 @@ public class Engine {
             } else {
                 throw new IllegalStateException("Unsupported OS: " + OS);
             }
-            System.load(getResource(fileName).getPath());
+            try {
+                loadJarDll(fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Could not load unpacked engine from filesystem.");
+            }
         }
     }
 

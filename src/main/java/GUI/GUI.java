@@ -45,7 +45,7 @@ public class GUI extends Application {
     public static final StackPane ROOT = new StackPane();
 
     public static final long STARTING_TIME =600000;
-    private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM.mp3")));
+    private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM2.mp3")));
     public static void main(String[] args) {
         String OS = System.getProperty("os.name").toLowerCase();
         if (!OS.contains("mac")) {
@@ -71,7 +71,7 @@ public class GUI extends Application {
 
         //BGM
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
-        //BGM.play();//todo make sure to uncomment this
+        BGM.play();//todo make sure to uncomment this
         HandleSceneSwitch(initialPane);
 
         //prevent spaceBar from activating scene buttons
