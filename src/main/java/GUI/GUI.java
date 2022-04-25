@@ -29,6 +29,7 @@ import server.Client;
 import server.GameServer;
 import server.Turn;
 
+import java.awt.*;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,6 +50,7 @@ public class GUI extends Application {
     public static void main(String[] args) {
         String OS = System.getProperty("os.name").toLowerCase();
         if (!OS.contains("mac")) {
+            //noinspection ResultOfMethodCallIgnored
             Engine.getCurrentSearch();
         }
         launch(args);
@@ -62,16 +64,19 @@ public class GUI extends Application {
         Scene mainScene= new Scene(ROOT,950,510);
         primaryStage.setScene(mainScene);
 
-        //Aspect ratio
+        Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
+        double aspectRatio=screenSize.getWidth()/screenSize.getHeight();
+
+        //Maintain aspect ratio
         primaryStage.heightProperty().addListener(e-> {
-            if(primaryStage.getWidth()<=primaryStage.getHeight() * 16.0 / 9.0)
-                primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
-            primaryStage.setMinWidth(primaryStage.getHeight() * 16.0 / 9.0);
+            if(primaryStage.getWidth()<=primaryStage.getHeight() * aspectRatio)
+                primaryStage.setWidth(primaryStage.getHeight() * aspectRatio);
+            primaryStage.setMinWidth(primaryStage.getHeight() * aspectRatio);
         });
 
         //BGM
         BGM.setCycleCount(MediaPlayer.INDEFINITE);
-        //BGM.play();//todo make sure to uncomment this
+        BGM.play();
         HandleSceneSwitch(initialPane);
 
         //prevent spaceBar from activating scene buttons
@@ -86,7 +91,7 @@ public class GUI extends Application {
         primaryStage.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F11) {
                 primaryStage.setFullScreen(!primaryStage.isFullScreen());
-                primaryStage.setWidth(primaryStage.getHeight() * 16.0 / 9.0);
+                primaryStage.setWidth(primaryStage.getHeight() * aspectRatio);
             }
         });
         primaryStage.setFullScreenExitHint("Press F11 to toggle full screen");

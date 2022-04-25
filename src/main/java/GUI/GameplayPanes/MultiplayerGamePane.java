@@ -126,7 +126,9 @@ public class MultiplayerGamePane extends GamePane {
                 if(chessBoardPane.playedMovesCounter!=0){
                     if (chessBoardPane.internalBoard.isWhiteTurn() == whiteIsBottom) {
                         Platform.runLater(() -> {
-                            lowerTimer.setText(formatTimeText(bottomRemainingTime -= (1000 / 10)));
+                            if(gameMode != SOLO || (pauseMenu.getParent() == null)){
+                                lowerTimer.setText(formatTimeText(bottomRemainingTime -= (1000 / 10)));
+                            }
                             upperTimer.setText(formatTimeText(topRemainingTime));
                         });
                     } else {
@@ -154,7 +156,7 @@ public class MultiplayerGamePane extends GamePane {
     }
 
     private void endGame(){
-        if(pauseMenu.getParent()!=null)
+        if(pauseMenu.getParent()!=null)//remove pause menu if game ends while paused
            ((CustomButton) pauseMenu.getChildren().get(0)).fire();
 
         switch (gameMode){
@@ -177,7 +179,7 @@ public class MultiplayerGamePane extends GamePane {
             endMessage= new Text("WHITE WON");
             formatText(endMessage,heightProperty(),15,Color.WHITE,glowEffect(Color.CYAN,Color.GOLD));
         }
-        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN()))&& bottomRemainingTime !=0&& topRemainingTime !=0){
+        if(!MoveGen.isInCheck(BitBoard.fromFEN(chessBoardPane.internalBoard.toFEN())) && !(bottomRemainingTime <=0)&& !(topRemainingTime <=0)){
             endMessage= new Text("DRAW");
             formatText(endMessage,heightProperty(),15,Color.BROWN,glowEffect(Color.RED,Color.CYAN));
         }
