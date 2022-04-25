@@ -46,8 +46,8 @@ jpackage {
     appVersion = "1.0"
     appDescription = "Fully functional chess app including a mighty engine and local multiplayer."
     mainJar = "Chess-Game-ALPHA_JEFFREY.jar"
-    //appImage = "/home/alex/IdeaProjects/Chess-Game/src/main/resources/GUI/Pieces/W_King.png"
-    icon = "/home/alex/IdeaProjects/Chess-Game/src/main/resources/GUI/Pieces/W_King.png"
+    //appImage = "src/main/resources/GUI/Pieces/W_King.png"
+    icon = "src/main/resources/GUI/Pieces/W_King.png"
 
     mac {
         type = ImageType.DMG
