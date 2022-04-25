@@ -50,8 +50,7 @@ public class GUI extends Application {
     public static void main(String[] args) {
         String OS = System.getProperty("os.name").toLowerCase();
         if (!OS.contains("mac")) {
-            //noinspection ResultOfMethodCallIgnored
-            Engine.getCurrentSearch();
+//            Engine.getCurrentSearch();//FIXME can't run twice if this is uncommented
         }
         launch(args);
     }
@@ -100,14 +99,13 @@ public class GUI extends Application {
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
         primaryStage.setTitle("Jeffrey");
-
+        primaryStage.getIcons().add(new Image(String.valueOf(GUI.class.getClassLoader().getResource("Package/Icon.png"))));
         primaryStage.setOnCloseRequest(e->{
             shutDownServer();
             Platform.exit();
             System.exit(0);
         });
         primaryStage.show();
-
     }
     private static Move sentMove;
 
