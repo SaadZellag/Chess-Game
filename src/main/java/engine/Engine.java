@@ -60,12 +60,22 @@ public class Engine {
 
         URL openings = getResource("openings/d-corbit-v02-superbook.abk");
         if (openings != null) {
-            setOpeningBook(openings.getPath());
+            String path = openings.getPath();
+            if (path.startsWith("/") && isWindows()) {
+                // Weird bug for windows where it starts with /C:/...
+                path = path.substring(1);
+            }
+            setOpeningBook(path);
         }
 
         URL endgames = getResource("tablebases/3-4-5");
         if (endgames != null) {
-            addEndGameTable(endgames.getPath());
+            String path = endgames.getPath();
+            if (path.startsWith("/") && isWindows()) {
+                // Weird bug for windows where it starts with /C:/...
+                path = path.substring(1);
+            }
+            addEndGameTable(path);
         }
 
     }
