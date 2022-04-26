@@ -52,7 +52,7 @@ public class GUI extends Application {
         Engine.getCurrentSearch();
         String OS = System.getProperty("os.name").toLowerCase();
         if (OS.contains("mac")) {
-            //Set to 200 if !MacOS
+            //Set to 90 if MacOS
             REFRESH_RATE = 90;
         }
         launch(args);
