@@ -59,6 +59,7 @@ public class Engine {
     }
 
     static {
+        System.out.println("[INFO]: Loading engine...");
         String fileName;
         if (isWindows()) {
             fileName = "jnilib.dll";
@@ -75,6 +76,7 @@ public class Engine {
             e.printStackTrace();
             System.out.println("Could not load unpacked engine from filesystem.");
         }
+        System.out.println("[INFO]: Engine has finished loading");
     }
 
     static {

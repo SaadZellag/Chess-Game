@@ -49,14 +49,6 @@ public class GUI extends Application {
     public static final long STARTING_TIME =600000;
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM2.mp3")));
     public static void main(String[] args) {
-        String OS = System.getProperty("os.name").toLowerCase();
-        if (!OS.contains("mac")) {
-            Engine.getCurrentSearch();//FIXME can't run twice if this is uncommented
-            //noinspection ResultOfMethodCallIgnored
-            //Set to 200 if !MacOS
-            REFRESH_RATE = 200;
-            Engine.getCurrentSearch();
-        }
         launch(args);
     }
     @Override

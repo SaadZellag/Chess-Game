@@ -3,6 +3,7 @@ package GUI.MenuPanes;
 import GUI.CustomButton;
 import GUI.GamePane;
 import GUI.GameplayPanes.SingleplayerGamePane;
+import engine.Engine;
 import javafx.geometry.Pos;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
@@ -14,6 +15,12 @@ import java.util.Random;
 import static GUI.GUI.*;
 
 public class SinglePlayerSettingsPane extends MenuPane {
+    {
+        // Initializing the engine in parallel when the user is in the settings pane
+        // It uses the properties of the JVM class loader
+        new Thread(Engine::getCurrentSearch).start();
+    }
+
     private boolean whiteIsBottom;
     private final Slider slider;
 
