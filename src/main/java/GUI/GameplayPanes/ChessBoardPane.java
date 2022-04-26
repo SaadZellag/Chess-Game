@@ -65,7 +65,6 @@ public class ChessBoardPane extends StackPane{
 
     private final String SELECTED_COLOR = "rgba(255, 29, 255, 0.5)";
     private final String UNSELECTED_COLOR = "transparent";
-//    final String UNSELECTED_COLOR="rgba(0, 0, 255, 0.5)";
 
     private final Image W_PAWN=getImage("Pieces/W_Pawn.png");
     private final Image W_ROOK=getImage("Pieces/W_Rook.png");
@@ -84,6 +83,7 @@ public class ChessBoardPane extends StackPane{
     private final Runnable runOnGameOver;
 
     private final GameMode gameMode;
+
 
 
 
@@ -150,7 +150,7 @@ public class ChessBoardPane extends StackPane{
         for (int i = 0; i < pieces.length; i++) {
             if (pieces[i] == null) {
                 buttons[i].setGraphic(null);
-                buttons[i].setDisable(true);
+                buttons[i].setMouseTransparent(true);
                 continue;
             }
             Piece p = pieces[i];
@@ -167,7 +167,7 @@ public class ChessBoardPane extends StackPane{
             formatPieceImageView(p.isWhite,individualPiece);
 
             buttons[i].setGraphic(individualPiece);
-            buttons[i].setDisable(false);
+            buttons[i].setMouseTransparent(false);
             isInCheck();
 
         }
@@ -274,7 +274,7 @@ public class ChessBoardPane extends StackPane{
 
         for(Move move:possibleMoves){
             if(index==move.initialLocation){
-                buttons[move.finalLocation].setDisable(false);
+                buttons[move.finalLocation].setMouseTransparent(false);
                 buttons[move.finalLocation].setSelected(true);
             }
         }
@@ -283,10 +283,11 @@ public class ChessBoardPane extends StackPane{
         for (ToggleButton button: buttons){
             button.setSelected(false);
             if (button.getGraphic()==null){
-                button.setDisable(true);
+                button.setMouseTransparent(true);
             }
-
+            button.setStyle("-fx-background-color:" + UNSELECTED_COLOR);
         }
+        highlightPlayedMove();
     }
     private void createDraggablePiece(int index) {
         draggingSurface.getChildren().clear();
@@ -336,6 +337,7 @@ public class ChessBoardPane extends StackPane{
                 moveHistoryList.remove(playedMovesCounter);
             }
         }
+
         //Store previous turn state so that you can undo
         turnHistory.add(new Turn(internalBoard.clone(),topRemainingTime,bottomRemainingTime));
 
@@ -361,6 +363,15 @@ public class ChessBoardPane extends StackPane{
             engineIsPaused=false;
             SingleplayerGamePane.startEngine(this);
         }
+    }
+
+    private void highlightPlayedMove() {
+        if(moveHistoryList.isEmpty()) {
+            return;
+        }
+        Move mv = moveHistoryList.get(moveHistoryList.size() - 1);
+        buttons[mv.finalLocation].setStyle("-fx-background-color:rgba(255, 0, 0, 0.5)");
+        buttons[mv.initialLocation].setStyle("-fx-background-color:rgba(255, 0, 0, 0.5)");
     }
 
     volatile boolean engineIsPaused=false;

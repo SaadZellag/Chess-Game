@@ -60,6 +60,7 @@ public class GUI extends Application {
         Scene mainScene= new Scene(ROOT,950,510);
         primaryStage.setScene(mainScene);
 
+        //Menus were designed with 16:9 in mind, different aspect ratio might break things
         Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
         double aspectRatio=screenSize.getWidth()/screenSize.getHeight();
 
@@ -153,7 +154,10 @@ public class GUI extends Application {
                         Removed a client.close() call here
                         */
 
-                        gameServer.closeSocket();
+                        if(gameServer!=null){
+                            gameServer.closeSocket();
+                        }
+                        break;
                     }
                     // If all players connected, continue as normal
                     if (timeoutStatus == 0) {
