@@ -39,7 +39,7 @@ public class GUI extends Application {
 
     public static ExecutorService serverThread;
     //90 seems to be a sweetspot for MacOS
-    static public long REFRESH_RATE = 90;
+    static public long REFRESH_RATE = 200;
     public static final Duration TRANSITION_DURATION=Duration.seconds(0.4);
     private static GameServer gameServer;
     private static Client client;
@@ -49,6 +49,12 @@ public class GUI extends Application {
     public static final long STARTING_TIME =600000;
     private final MediaPlayer BGM = new MediaPlayer(new Media(getResource("BGM2.mp3")));
     public static void main(String[] args) {
+        Engine.getCurrentSearch();
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.contains("mac")) {
+            //Set to 200 if !MacOS
+            REFRESH_RATE = 90;
+        }
         launch(args);
     }
     @Override
@@ -145,7 +151,7 @@ public class GUI extends Application {
             client = new Client("localhost");
             boolean isFirstMove=true;
 
-            serverLoop:while(!serverThread.isShutdown()) {
+            serverLoop:while(!serverThread.isShutdown() && (gameServer != null)) {
                 try{
                     // If not player connected in the timeout window, shutdown
                     if (timeoutStatus == 1) {
@@ -154,9 +160,7 @@ public class GUI extends Application {
                         Removed a client.close() call here
                         */
 
-                        if(gameServer!=null){
-                            gameServer.closeSocket();
-                        }
+                        gameServer.closeSocket();
                         break;
                     }
                     // If all players connected, continue as normal
