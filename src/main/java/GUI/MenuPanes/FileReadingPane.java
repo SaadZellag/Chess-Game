@@ -41,12 +41,12 @@ public class FileReadingPane extends MenuPane{
                 Label text= new Label(split[1]);
                 if(split[0].contains("h")){//Is a header
                     switch (split[0].charAt(split[0].length()-1)){
-                        case '1'->formatStandardText(text,heightProperty(), HEADER_SCALE_1);
-                        case '2'->formatStandardText(text,heightProperty(), HEADER_SCALE_2);
-                        case '3'->formatStandardText(text,heightProperty(), HEADER_SCALE_3);
+                        case '1'->formatTipsText(text,heightProperty(), HEADER_SCALE_1);
+                        case '2'->formatTipsText(text,heightProperty(), HEADER_SCALE_2);
+                        case '3'->formatTipsText(text,heightProperty(), HEADER_SCALE_3);
                     }
                 }else{
-                    formatStandardText(text,heightProperty(), PARAGRAPH_SCALE);
+                    formatTipsText(text,heightProperty(), PARAGRAPH_SCALE);
                 }
 //                text.setEffect(glowEffect(Color.BLACK,Color.BLACK));
                 text.setTextAlignment(TextAlignment.LEFT);

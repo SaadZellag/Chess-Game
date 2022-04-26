@@ -298,6 +298,14 @@ public class GUI extends Application {
         text.setTextAlignment(TextAlignment.CENTER);
     }
 
+    public static void formatTipsText(Label text, ReadOnlyDoubleProperty propertyToListen, double fontScale){
+        text.setTextFill(Color.rgb(240,240,240));
+        text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale));
+        propertyToListen.addListener(e->text.setFont(Font.loadFont(getResource("standardFont.ttf"),propertyToListen.get()/fontScale)));
+        text.setWrapText(true);
+        text.setTextAlignment(TextAlignment.CENTER);
+    }
+
     public static Background getBackgroundImage(String imageName,Region region,boolean cover){
         BackgroundImage bImage = new BackgroundImage(
                 getImage(imageName),
