@@ -21,8 +21,8 @@ public class Engine {
     }
 
     /*
-    * Since the loading of libraires (such as the jeffrey binary) is handled by the system
-    * libjnilib can't remain inside of the jar as OS will not look into a jar. This method
+    * Since the loading of libraries (such as the jeffrey binary) is handled by the system
+    * libjnilib can't remain inside the jar as OS will not look into it. This method
     * writes out the dll to a temp folder and loads it from there.
     */
     private static void loadJarDll(String name) throws IOException {
@@ -37,7 +37,6 @@ public class Engine {
         }
         fos.close();
         in.close();
-
         System.load(temp.getAbsolutePath());
     }
 
@@ -60,21 +59,21 @@ public class Engine {
     }
 
     static {
-        if (!isMac()) {
-            String fileName;
-            if (isWindows()) {
-                fileName = "jnilib.dll";
-            } else if (isUnix()) {
-                fileName = "libjnilib.so";
-            } else {
-                throw new IllegalStateException("Unsupported OS: " + OS);
-            }
-            try {
-                loadJarDll(fileName);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Could not load unpacked engine from filesystem.");
-            }
+        String fileName;
+        if (isWindows()) {
+            fileName = "jnilib.dll";
+        } else if (isUnix()) {
+            fileName = "libjnilib.so";
+        } else if (isMac()) {
+            fileName = "libjnilib.dylib";
+        } else {
+            throw new IllegalStateException("Unsupported OS: " + OS);
+        }
+        try {
+            loadJarDll(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Could not load unpacked engine from filesystem.");
         }
     }
 

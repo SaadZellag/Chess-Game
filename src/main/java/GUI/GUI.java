@@ -38,7 +38,8 @@ import java.util.concurrent.TimeUnit;
 public class GUI extends Application {
 
     public static ExecutorService serverThread;
-    static public final long REFRESH_RATE = 200;
+    //90 seems to be a sweetspot for MacOS
+    static public long REFRESH_RATE = 90;
     public static final Duration TRANSITION_DURATION=Duration.seconds(0.4);
     private static GameServer gameServer;
     private static Client client;
@@ -50,7 +51,11 @@ public class GUI extends Application {
     public static void main(String[] args) {
         String OS = System.getProperty("os.name").toLowerCase();
         if (!OS.contains("mac")) {
-//            Engine.getCurrentSearch();//FIXME can't run twice if this is uncommented
+            Engine.getCurrentSearch();//FIXME can't run twice if this is uncommented
+            //noinspection ResultOfMethodCallIgnored
+            //Set to 200 if !MacOS
+            REFRESH_RATE = 200;
+            Engine.getCurrentSearch();
         }
         launch(args);
     }
