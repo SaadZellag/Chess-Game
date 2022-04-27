@@ -1,20 +1,19 @@
 package engine;
 
-import GUI.GUI;
 import game.Board;
 import game.ChessUtils;
-import game.Move;
 import game.Piece;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Engine {
+
 
     private static URL getResource(String fileName) {
         return Engine.class.getClassLoader().getResource(fileName);
@@ -26,19 +25,25 @@ public class Engine {
     * writes out the dll to a temp folder and loads it from there.
     */
     private static void loadJarDll(String name) throws IOException {
-        InputStream in = Engine.class.getClassLoader().getResourceAsStream(name);
-        byte[] buffer = new byte[1024];
-        int read = -1;
-        File temp = new File(System.getProperty("java.io.tmpdir"), name);
-        FileOutputStream fos = new FileOutputStream(temp);
-
-        while((read = in.read(buffer)) != -1) {
-            fos.write(buffer, 0, read);
-        }
-        fos.close();
-        in.close();
-        System.load(temp.getAbsolutePath());
+        File origin = new File(Engine.class.getClassLoader().getResource(name).getFile());
+        File destination = new File(System.getProperty("java.io.tmpdir") + "/" + name);
+        FileUtils.copyFile(origin, destination);
+        System.load(destination.getAbsolutePath());
     }
+
+    //0 means filename does not represent a dir, 1 means it does
+    private static String loadDatabases(String name, boolean isDirectory) throws IOException {
+        File origin = new File(Engine.class.getClassLoader().getResource(name).getFile());
+        String destination = System.getProperty("java.io.tmpdir") + "/" + name;
+        File dest = new File(destination);
+        if (isDirectory) {
+            FileUtils.copyDirectory(origin, dest);
+            return dest.getAbsolutePath();
+        }
+        FileUtils.copyFile(origin, dest);
+        return dest.getAbsolutePath();
+    }
+
 
     private static final double PERCENTAGE_USAGE = 0.04;
 
@@ -85,26 +90,28 @@ public class Engine {
         // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
-        URL openings = getResource("openings/d-corbit-v02-superbook.abk");
-        if (openings != null) {
-            String path = openings.getPath();
+        String path = null;
+        try {
+            path = loadDatabases("d-corbit-v02-superbook.abk", false);
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
             }
             setOpeningBook(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        URL endgames = getResource("tablebases/3-4-5");
-        if (endgames != null) {
-            String path = endgames.getPath();
+        try {
+            path = loadDatabases("tablebases/3-4-5", true);
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
             }
             addEndGameTable(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
     }
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
