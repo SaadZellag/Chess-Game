@@ -1,22 +1,77 @@
 package engine;
 
+import GUI.GUI;
 import game.Board;
 import game.ChessUtils;
+import game.Move;
 import game.Piece;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Engine {
 
-
     private static URL getResource(String fileName) {
         return Engine.class.getClassLoader().getResource(fileName);
+    }
+
+    private static void writeStreamToFile(InputStream inputStream, File ouputFile) throws IOException {
+        Files.copy(inputStream, ouputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    public static void copyFile(File from, File to) throws IOException {
+        Files.copy(from.toPath(), to.toPath());
+    }
+
+    //Thanks to kayz1
+    // https://stackoverflow.com/a/26214647
+    private static void copyFolder(File source, File destination){
+        if (source.isDirectory()) {
+            if (!destination.exists()) {
+                destination.mkdirs();
+            }
+
+            String files[] = source.list();
+
+            for (String file : files) {
+                File srcFile = new File(source, file);
+                File destFile = new File(destination, file);
+                copyFolder(srcFile, destFile);
+            }
+        } else {
+            InputStream in = null;
+            OutputStream out = null;
+
+            try {
+                in = new FileInputStream(source);
+                out = new FileOutputStream(destination);
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+                while ((length = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, length);
+                }
+            } catch (Exception e) {
+                try {
+                    in.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                try {
+                    out.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
     }
 
     /*
@@ -25,31 +80,22 @@ public class Engine {
     * writes out the dll to a temp folder and loads it from there.
     */
     private static void loadJarDll(String name) throws IOException {
-        File origin = new File(name);
-        FileUtils.copyInputStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), origin);
-        File destination = new File(System.getProperty("java.io.tmpdir") + "/" + name);
-        FileUtils.copyFile(origin, destination);
-        System.load(destination.getAbsolutePath());
+        InputStream in = Engine.class.getClassLoader().getResourceAsStream(name);
+        File temp = new File(System.getProperty("java.io.tmpdir"), name);
+        writeStreamToFile(in, temp);
+        System.load(temp.getAbsolutePath());
     }
 
-    //0 means filename does not represent a dir, 1 means it does
     private static String loadDatabases(String name, boolean isDirectory) throws IOException {
         File origin = new File(name);
-        FileUtils.copyInputStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), origin);
-        String destination = System.getProperty("java.io.tmpdir") + "/" + name;
-        File dest = new File(destination);
+        File dest = new File(System.getProperty("java.io.tmpdir") + "/" + name);
         if (isDirectory) {
-            /*
-            * This next line throws this;
-            * IllegalArgumentException: Parameter 'srcDir' is not a directory: 'tablebases/3-4-5
-            */
-            FileUtils.copyDirectory(origin, dest);
+            copyFolder(origin, dest);
             return dest.getAbsolutePath();
         }
-        FileUtils.copyFile(origin, dest);
+        writeStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), dest);
         return dest.getAbsolutePath();
-    }
-
+        }
 
     private static final double PERCENTAGE_USAGE = 0.04;
 
@@ -96,28 +142,36 @@ public class Engine {
         // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
-        String path = null;
-        try {
-            path = loadDatabases("openings/d-corbit-v02-superbook.abk", false);
+        String openings = "openings/d-corbit-v02-superbook.abk";
+        if (openings != null) {
+            String path = null;
+            try {
+                path = loadDatabases(openings, false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
             }
             setOpeningBook(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
 
-        try {
-            path = loadDatabases("tablebases/3-4-5.zip", false);
+        String endgames = "tablebases/3-4-5.zip";
+        if (endgames != null) {
+            String path = null;
+            try {
+                path = loadDatabases(endgames, false);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
             }
             addEndGameTable(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+
     }
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -175,13 +229,4 @@ public class Engine {
 
     private static native void addEndGameTable(String path);
 
-    public static void main(String[] args) {
-        System.out.println("t");
-        try {
-            String path = loadDatabases("tablebases/3-4-5", true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
-
