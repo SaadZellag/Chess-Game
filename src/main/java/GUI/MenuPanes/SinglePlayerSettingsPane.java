@@ -15,12 +15,6 @@ import java.util.Random;
 import static GUI.GUI.*;
 
 public class SinglePlayerSettingsPane extends MenuPane {
-    {
-        // Initializing the engine in parallel when the user is in the settings pane
-        // It uses the properties of the JVM class loader
-        new Thread(Engine::getCurrentSearch).start();
-    }
-
     private boolean whiteIsBottom;
     private final Slider slider;
 
