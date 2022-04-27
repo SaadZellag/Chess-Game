@@ -109,7 +109,7 @@ public class Engine {
         }
 
         try {
-            path = loadDatabases("tablebases/3-4-5", true);
+            path = loadDatabases("tablebases/3-4-5.zip", false);
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
