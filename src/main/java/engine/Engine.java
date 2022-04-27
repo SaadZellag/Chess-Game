@@ -22,8 +22,13 @@ public class Engine {
         return Engine.class.getClassLoader().getResource(fileName);
     }
 
-    private static void writeStreamToFile(InputStream inputStream, File ouputFile) throws IOException {
-        Files.copy(inputStream, ouputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    private static void writeStreamToFile(InputStream inputStream, File outputFile) throws IOException {
+        try {
+            Files.copy(inputStream, outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+            inputStream.close();
+        }
     }
 
     public static void copyFile(File from, File to) throws IOException {
@@ -84,16 +89,18 @@ public class Engine {
         File temp = new File(System.getProperty("java.io.tmpdir"), name);
         writeStreamToFile(in, temp);
         System.load(temp.getAbsolutePath());
+        in.close();
     }
 
     private static String loadDatabases(String name, boolean isDirectory) throws IOException {
-        File origin = new File(name);
+        InputStream in = Engine.class.getClassLoader().getResourceAsStream(name);
         File dest = new File(System.getProperty("java.io.tmpdir") + "/" + name);
-        if (isDirectory) {
-            copyFolder(origin, dest);
-            return dest.getAbsolutePath();
+        if (!dest.canRead()) {
+            dest.getParentFile().mkdirs();
+            dest.createNewFile();
         }
-        writeStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), dest);
+        writeStreamToFile(in, dest);
+        in.close();
         return dest.getAbsolutePath();
         }
 
@@ -148,7 +155,8 @@ public class Engine {
             try {
                 path = loadDatabases(openings, false);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Failed loading openings.");
+                e.printStackTrace();
             }
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
@@ -163,7 +171,8 @@ public class Engine {
             try {
                 path = loadDatabases(endgames, false);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Failed loading endgames.");
+                e.printStackTrace();
             }
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
@@ -228,5 +237,13 @@ public class Engine {
     private static native void setOpeningBook(String path);
 
     private static native void addEndGameTable(String path);
+
+    public static void main(String[] args) {
+        try {
+            loadDatabases("openings/d-corbit-v02-superbook.abk", false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
