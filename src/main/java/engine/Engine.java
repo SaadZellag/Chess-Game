@@ -25,7 +25,8 @@ public class Engine {
     * writes out the dll to a temp folder and loads it from there.
     */
     private static void loadJarDll(String name) throws IOException {
-        File origin = new File(Engine.class.getClassLoader().getResource(name).getFile());
+        File origin = new File(name);
+        FileUtils.copyInputStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), origin);
         File destination = new File(System.getProperty("java.io.tmpdir") + "/" + name);
         FileUtils.copyFile(origin, destination);
         System.load(destination.getAbsolutePath());
@@ -33,10 +34,16 @@ public class Engine {
 
     //0 means filename does not represent a dir, 1 means it does
     private static String loadDatabases(String name, boolean isDirectory) throws IOException {
-        File origin = new File(Engine.class.getClassLoader().getResource(name).getFile());
+        File origin = new File(name);
+        FileUtils.copyInputStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), origin);
+        System.out.println(origin);
         String destination = System.getProperty("java.io.tmpdir") + "/" + name;
         File dest = new File(destination);
         if (isDirectory) {
+            /*
+            * This next line throws this;
+            * IllegalArgumentException: Parameter 'srcDir' is not a directory: 'tablebases/3-4-5
+            */
             FileUtils.copyDirectory(origin, dest);
             return dest.getAbsolutePath();
         }
@@ -169,4 +176,13 @@ public class Engine {
 
     private static native void addEndGameTable(String path);
 
+    public static void main(String[] args) {
+        System.out.println("t");
+        try {
+            String path = loadDatabases("tablebases/3-4-5", true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
