@@ -36,7 +36,6 @@ public class Engine {
     private static String loadDatabases(String name, boolean isDirectory) throws IOException {
         File origin = new File(name);
         FileUtils.copyInputStreamToFile(Engine.class.getClassLoader().getResourceAsStream(name), origin);
-        System.out.println(origin);
         String destination = System.getProperty("java.io.tmpdir") + "/" + name;
         File dest = new File(destination);
         if (isDirectory) {
@@ -99,7 +98,7 @@ public class Engine {
 
         String path = null;
         try {
-            path = loadDatabases("d-corbit-v02-superbook.abk", false);
+            path = loadDatabases("openings/d-corbit-v02-superbook.abk", false);
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
