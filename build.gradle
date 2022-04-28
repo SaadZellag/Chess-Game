@@ -49,16 +49,19 @@ jpackage {
     appDescription = "Fully functional chess app including a mighty engine and local multiplayer."
     mainJar = "Chess-Game-ALPHA_JEFFREY.jar"
     //appImage = "src/main/resources/Package/W_King.ico"
-    icon = "src/main/resources/Package/Icon.icns"
+
 
     mac {
         type = ImageType.DMG
+        icon = "src/main/resources/Package/Icon.icns"
     }
     linux {
         type = ImageType.DEB
+        icon = "src/main/resources/Package/Icon.png"
     }
     windows {
         type = ImageType.EXE
+        icon = "src/main/resources/Package/Icon.ico"
     }
 }
 
