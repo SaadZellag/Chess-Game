@@ -60,7 +60,7 @@ jpackage {
         icon = "src/main/resources/Package/Icon.png"
     }
     windows {
-        type = ImageType.EXE
+        type = ImageType.MSI
         icon = "src/main/resources/Package/Icon.ico"
     }
 }
