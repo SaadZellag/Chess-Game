@@ -49,6 +49,7 @@ jpackage {
     appDescription = "Fully functional chess app including a mighty engine and local multiplayer."
     mainJar = "Chess-Game-ALPHA_JEFFREY.jar"
     //appImage = "src/main/resources/Package/W_King.ico"
+    vendor = "ASA Development"
 
 
     mac {
@@ -60,8 +61,13 @@ jpackage {
         icon = "src/main/resources/Package/Icon.png"
     }
     windows {
-        type = ImageType.EXE
+        type = ImageType.MSI
         icon = "src/main/resources/Package/Icon.ico"
+        resourceDir = "src/main/resources/Package/Wix"
+        winDirChooser = true
+        winMenu = true
+        winShortcut = true
+        verbose = true
     }
 }
 
