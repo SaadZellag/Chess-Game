@@ -13,7 +13,6 @@ import static GUI.GameMode.*;
 
 public class SingleplayerGamePane extends MultiplayerGamePane {
     private final double difficulty;
-//    private static ExecutorService engineThread = Executors.newSingleThreadExecutor();
     private static Thread engineThread;
 
     public SingleplayerGamePane(boolean whiteIsBottom, double difficulty) {

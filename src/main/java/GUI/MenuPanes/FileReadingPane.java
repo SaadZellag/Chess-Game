@@ -1,6 +1,5 @@
 package GUI.MenuPanes;
 
-import GUI.GUI;
 import GUI.GamePane;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -10,7 +9,6 @@ import javafx.scene.text.TextAlignment;
 import server.GameServer;
 
 import java.io.*;
-import java.util.Objects;
 
 import static GUI.GUI.*;
 

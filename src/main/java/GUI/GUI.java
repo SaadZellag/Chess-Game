@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class GUI extends Application {
 
     public static ExecutorService serverThread;
-    //90 seems to be a sweetspot for MacOS
+    //90 seems to be a sweet spot for macOS
     static public long REFRESH_RATE = 200;
     public static final Duration TRANSITION_DURATION=Duration.seconds(0.4);
     private static GameServer gameServer;
@@ -52,7 +52,7 @@ public class GUI extends Application {
         new Thread(Engine::getCurrentSearch).start();
         String OS = System.getProperty("os.name").toLowerCase();
         if (OS.contains("mac")) {
-            //Set to 90 if MacOS
+            //Set to 90 if macOS
             REFRESH_RATE = 90;
         }
         launch(args);
@@ -98,7 +98,7 @@ public class GUI extends Application {
             }
         });
         primaryStage.setFullScreenExitHint("Press F11 to toggle full screen");
-//        primaryStage.setFullScreen(true);//todo make sure to uncomment this
+        primaryStage.setFullScreen(true);
 
         primaryStage.setMinHeight(591);
         primaryStage.setMinWidth(1050);
@@ -167,7 +167,7 @@ public class GUI extends Application {
                     if (timeoutStatus == 0) {
                         if (isFirstMove) {
                             while (waitingForMove) {
-                                if(gameServer==null||client==null){
+                                if(client == null){
                                     System.out.println("GameServer is null");
                                     break serverLoop;
                                 }

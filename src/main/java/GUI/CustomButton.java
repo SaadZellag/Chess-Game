@@ -72,10 +72,5 @@ public class CustomButton extends Button {
     public void setHoveredGlowEffect(Color color1, Color color2){
         hoveredGlowEffect=glowEffect(color1, color2);
     }
-    public void setFill(Color fill){
-        this.fill=fill;
-        if(graphic instanceof Text)
-            ((Text) graphic).setFill(fill);
-    }
 
 }
