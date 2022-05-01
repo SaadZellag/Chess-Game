@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 import server.GameServer;
 
 import java.io.*;
@@ -57,6 +58,19 @@ public class FileReadingPane extends MenuPane{
         UPPER_TEXT.setText("TIPS");
         UPPER_SUBTEXT.setText("  "+subtext);
         MIDDLE_PANE.getChildren().add(SCROLL_PANE);
+    }
+    @Override
+    public void playTransitions(){
+        centerTransition.setDuration(TRANSITION_DURATION.add(Duration.seconds(2)));
+        centerTransition.setFromValue(0);
+        centerTransition.setToValue(1);
+
+        topTransition.setDuration(TRANSITION_DURATION.add(Duration.seconds(2)));
+        topTransition.setFromValue(0);
+        topTransition.setToValue(1);
+
+        topTransition.play();
+        centerTransition.play();
     }
     @Override
     public GamePane previousMenu(){

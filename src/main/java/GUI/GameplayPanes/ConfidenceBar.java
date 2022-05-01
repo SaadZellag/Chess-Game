@@ -51,7 +51,7 @@ public class ConfidenceBar extends GridPane {
                 double slope = (percentage - currentPercentage) / REFRESH_RATE * Math.abs(1 / GROWTH_DELAY);
                 Platform.runLater(() -> top.heightProperty().bind(bottom.heightProperty().multiply(currentPercentage+slope)));
             }
-        }, 4000, 1000 / REFRESH_RATE);
+        }, 10000, 1000 / REFRESH_RATE);
 
     }
     public void prefSizePropertyBind (ReadOnlyDoubleProperty binding){
