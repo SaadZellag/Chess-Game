@@ -82,11 +82,12 @@ public class JoinRoomPane extends MenuPane {
 
             Platform.runLater(()->{
                 LIST_OF_ROOMS.getChildren().clear();
-                if(ArrayList.size() == 0||!ArrayList.contains(hostIp)) {
+                if(ArrayList.size() == 0||(hostIp!=null&&!ArrayList.contains(hostIp))) {
                     if(isJoinRoom)
                         LIST_OF_ROOMS.getChildren().addAll(ROOM_UNAVAILABLE,RELOAD_BUTTON);
                     else
                         LIST_OF_ROOMS.getChildren().addAll(NO_ROOMS_FOUND,RELOAD_BUTTON);
+                    hostIp=null;
                     JOIN_ROOM.setDisable(true);
                 }
                 else if (!isJoinRoom){
