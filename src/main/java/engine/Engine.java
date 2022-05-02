@@ -143,9 +143,7 @@ public class Engine {
         System.out.println("[INFO]: Engine has finished loading");
     }
 
-    static {
-        init();
-
+    private static void loadData() {
         // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
@@ -180,7 +178,11 @@ public class Engine {
             }
             addEndGameTable(path);
         }
+    }
 
+    static {
+        init();
+        new Thread(Engine::loadData).start();
     }
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
