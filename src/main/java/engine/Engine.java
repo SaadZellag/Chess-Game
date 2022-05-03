@@ -144,7 +144,7 @@ public class Engine {
     }
 
     private static void loadData() {
-        // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
+        // Download openings from https://www.hiarcs.com/book-downloads/HIARCSBookRef2550Lite-abk.zip
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
         String openings = "openings/HiarcsBookRef2550Lite.abk";
@@ -240,13 +240,5 @@ public class Engine {
     private static native void setOpeningBook(String path);
 
     private static native void addEndGameTable(String path);
-
-    public static void main(String[] args) {
-        try {
-            loadDatabases("openings/d-corbit-v02-superbook.abk", false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 }
