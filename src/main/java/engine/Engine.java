@@ -144,10 +144,10 @@ public class Engine {
     }
 
     private static void loadData() {
-        // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
+        // Download openings from https://www.hiarcs.com/book-downloads/HIARCSBookRef2550Lite-abk.zip
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
-        String openings = "openings/d-corbit-v02-superbook.abk";
+        String openings = "openings/HiarcsBookRef2550Lite.abk";
         String path = null;
         try {
             path = loadDatabases(openings, false);
