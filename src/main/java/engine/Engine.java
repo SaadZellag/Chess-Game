@@ -147,7 +147,7 @@ public class Engine {
         // Download openings from https://www.mediafire.com/file/123ctlm16x1v51w/d-corbit-v02-superbook.abk.rar/file
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
-        String openings = "openings/d-corbit-v02-superbook.abk";
+        String openings = "openings/HiarcsBookRef2550Lite.abk";
         String path = null;
         try {
             path = loadDatabases(openings, false);

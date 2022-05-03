@@ -30,7 +30,6 @@ public class Client {
                 hostIP = host;
             }
             clientSocket = new Socket(hostIP, PORT);
-
             InputStream inputStream = clientSocket.getInputStream();
             OutputStream outputStream = clientSocket.getOutputStream();
 
