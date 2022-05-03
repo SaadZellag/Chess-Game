@@ -241,12 +241,4 @@ public class Engine {
 
     private static native void addEndGameTable(String path);
 
-    public static void main(String[] args) {
-        try {
-            loadDatabases("openings/d-corbit-v02-superbook.abk", false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }
