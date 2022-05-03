@@ -148,14 +148,14 @@ public class Engine {
         // Download endgames from https://chess.massimilianogoi.com/download/tablebases/
 
         String openings = "openings/d-corbit-v02-superbook.abk";
-        if (openings != null) {
-            String path = null;
-            try {
-                path = loadDatabases(openings, false);
-            } catch (IOException e) {
-                System.out.println("Failed loading openings.");
-                e.printStackTrace();
-            }
+        String path = null;
+        try {
+            path = loadDatabases(openings, false);
+        } catch (IOException e) {
+            System.out.println("Failed loading openings.");
+            e.printStackTrace();
+        }
+        if (path != null) {
             if (path.startsWith("/") && isWindows()) {
                 // Weird bug for windows where it starts with /C:/...
                 path = path.substring(1);
@@ -163,21 +163,22 @@ public class Engine {
             setOpeningBook(path);
         }
 
-        String endgames = "tablebases/3-4-5.zip";
-        if (endgames != null) {
-            String path = null;
-            try {
-                path = loadDatabases(endgames, false);
-            } catch (IOException e) {
-                System.out.println("Failed loading endgames.");
-                e.printStackTrace();
-            }
-            if (path.startsWith("/") && isWindows()) {
-                // Weird bug for windows where it starts with /C:/...
-                path = path.substring(1);
-            }
-            addEndGameTable(path);
-        }
+
+//        String endgames = "tablebases/3-4-5.zip";
+//        if (endgames != null) {
+//            String path = null;
+//            try {
+//                path = loadDatabases(endgames, false);
+//            } catch (IOException e) {
+//                System.out.println("Failed loading endgames.");
+//                e.printStackTrace();
+//            }
+//            if (path.startsWith("/") && isWindows()) {
+//                // Weird bug for windows where it starts with /C:/...
+//                path = path.substring(1);
+//            }
+//            addEndGameTable(path);
+//        }
     }
 
     static {
